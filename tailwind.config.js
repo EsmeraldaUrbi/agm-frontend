@@ -1,0 +1,66 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/**/*.{html,ts}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        "background": "#f8f9fa",
+        "outline-variant": "#c2c7ce",
+        "on-tertiary-fixed-variant": "#693c10",
+        "surface-bright": "#f8f9fa",
+        "on-secondary-fixed": "#001f29",
+        "on-secondary-fixed-variant": "#004d62",
+        "secondary-fixed": "#baeaff",
+        "on-error-container": "#93000a",
+        "outline": "#72787e",
+        "error-container": "#ffdad6",
+        "on-primary-fixed-variant": "#1a4a6c",
+        "on-primary-fixed": "#001d31",
+        "primary-fixed-dim": "#a0cbf3",
+        "surface-tint": "#366285",
+        "inverse-surface": "#2e3132",
+        "on-tertiary-fixed": "#2f1500",
+        "primary-fixed": "#cce5ff",
+        "on-surface": "#191c1d",
+        "inverse-primary": "#a0cbf3",
+        "surface-dim": "#d9dadb",
+        "surface-container-high": "#e7e8e9",
+        "surface-container-low": "#f3f4f5",
+        "on-secondary-container": "#00566d",
+        "on-tertiary-container": "#d29460",
+        "on-primary-container": "#7aa5cc",
+        "tertiary-fixed-dim": "#fcb882",
+        "on-tertiary": "#ffffff",
+        "primary-container": "#003b5c",
+        "secondary-container": "#42d0fe",
+        "tertiary-container": "#572d02",
+        "surface-container-highest": "#e1e3e4",
+        "on-background": "#191c1d",
+        "surface": "#f8f9fa",
+        "on-surface-variant": "#42474e",
+        "secondary-fixed-dim": "#5cd4ff",
+        "surface-container": "#edeeef",
+        "primary": "#00253b",
+        "on-error": "#ffffff",
+        "surface-container-lowest": "#ffffff",
+        "inverse-on-surface": "#f0f1f2",
+        "tertiary": "#391b00",
+        "error": "#ba1a1a",
+        "tertiary-fixed": "#ffdcc3",
+        "on-primary": "#ffffff",
+        "on-secondary": "#ffffff",
+        "secondary": "#006782",
+        "surface-variant": "#e1e3e4"
+      },
+      fontFamily: {
+        "headline": ["Public Sans", "sans-serif"],
+        "display": ["Public Sans", "sans-serif"],
+        "body": ["Inter", "sans-serif"],
+        "label": ["Inter", "sans-serif"]
+      }
+    }
+  },
+  plugins: [],
+}

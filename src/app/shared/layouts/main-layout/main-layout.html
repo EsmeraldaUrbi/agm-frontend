@@ -1,0 +1,15 @@
+<div class="flex min-h-screen">
+  <!-- SideNavBar compartido -->
+  <app-sidebar></app-sidebar>
+
+  <!-- Contenido Principal -->
+  <main class="flex-1 ml-[240px]">
+    <!-- TopNavBar compartido -->
+    <app-navbar></app-navbar>
+
+    <!-- Aquí se inyectarán las pantallas de los dashboards y módulos -->
+    <div class="p-8 max-w-[1440px] mx-auto">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>
