@@ -15,12 +15,12 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: MainLayoutComponent,
-    children: [
-      {
-        path: 'dashboard',
-        loadComponent: () => import('./features/admin/dashboard/dashboard').then(m => m.DashboardComponent)
-      }
-    ]
+    loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
+  },
+  {
+    path: 'docente',
+    component: MainLayoutComponent,
+    loadChildren: () => import('./features/docente/docente.routes').then(m => m.DOCENTE_ROUTES)
   },
   {
     path: '**',
