@@ -258,6 +258,54 @@ export class PerfilComponent {
   formPerfil = signal({ ...this.docente });
   mensajeToast = signal<string | null>(null);
 
+  // ── Cambio de Contraseña ─────────────────────────────────────────────────
+  formContrasena = { actual: '', nueva: '', confirmar: '' };
+
+  // Visibilidad de campos de contraseña
+  mostrarActual    = signal(false);
+  mostrarNueva     = signal(false);
+  mostrarConfirmar = signal(false);
+
+  // Estados de foco para resaltar border
+  campoActualFocused    = signal(false);
+  campoNuevaFocused     = signal(false);
+  campoConfirmarFocused = signal(false);
+
+  // Fortaleza de la contraseña nueva
+  passwordStrength = computed(() => {
+    const p = this.formContrasena.nueva;
+    if (p.length === 0) return 0;
+    let score = 0;
+    if (p.length >= 8) score++;
+    if (/[A-Z]/.test(p) && /[0-9]/.test(p)) score++;
+    if (/[^A-Za-z0-9]/.test(p)) score++;
+    return score;
+  });
+
+  passwordStrengthLabel = computed(() => {
+    const s = this.passwordStrength();
+    if (s === 1) return 'Débil';
+    if (s === 2) return 'Regular';
+    if (s === 3) return 'Fuerte';
+    return '';
+  });
+
+  // Habilitar botón de guardar contraseña
+  puedeGuardarContrasena = computed(() => {
+    return (
+      this.formContrasena.actual.length >= 6 &&
+      this.formContrasena.nueva.length >= 8 &&
+      this.formContrasena.nueva === this.formContrasena.confirmar
+    );
+  });
+
+  cambiarContrasena() {
+    if (!this.puedeGuardarContrasena()) return;
+    // Mock: aquí irá la llamada a AuthService.changePassword()
+    this.formContrasena = { actual: '', nueva: '', confirmar: '' };
+    this.mostrarToast('¡Contraseña actualizada correctamente. Sesión refrescada con nuevo token JWT.');
+  }
+
   abrirEditarPerfil() {
     this.formPerfil.set({ ...this.docente });
     this.showEditModal.set(true);

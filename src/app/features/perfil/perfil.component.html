@@ -94,6 +94,183 @@
 
   </div>
 
+  <!-- ===== Seguridad de la Cuenta ===== -->
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+    <!-- Cambio de Contraseña (3/5) -->
+    <div class="lg:col-span-3 bg-white rounded-2xl border border-[#c2c7ce] shadow-sm overflow-hidden">
+      <div class="bg-gradient-to-r from-[#003b5c]/5 to-transparent p-6 border-b border-[#c2c7ce]/60 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">lock_reset</span>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-[#003b5c]">Seguridad de la Cuenta</h2>
+          <p class="text-xs text-[#72787e] font-medium">Actualiza tu contraseña de acceso institucional</p>
+        </div>
+      </div>
+
+      <form (ngSubmit)="cambiarContrasena()" class="p-6 space-y-4">
+
+        <!-- Contraseña Actual -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-[#42474e] uppercase tracking-wider block">Contraseña Actual</label>
+          <div class="flex items-center border-2 rounded-xl px-4 py-2.5 bg-[#f8f9fa] transition-all"
+               [class.border-[#003b5c]]="campoActualFocused()"
+               [class.border-[#c2c7ce]]="!campoActualFocused()">
+            <span class="material-symbols-outlined text-[#72787e] mr-3 text-lg">lock</span>
+            <input
+              [(ngModel)]="formContrasena.actual"
+              name="actual"
+              [type]="mostrarActual() ? 'text' : 'password'"
+              placeholder="••••••••••••"
+              (focus)="campoActualFocused.set(true)"
+              (blur)="campoActualFocused.set(false)"
+              class="flex-1 bg-transparent outline-none text-sm text-[#191c1d] placeholder:text-[#72787e]/60"/>
+            <button type="button" (click)="mostrarActual.set(!mostrarActual())" class="text-[#72787e] hover:text-[#003b5c] transition-colors ml-2">
+              <span class="material-symbols-outlined text-lg">{{ mostrarActual() ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Nueva Contraseña -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-[#42474e] uppercase tracking-wider block">Nueva Contraseña</label>
+          <div class="flex items-center border-2 rounded-xl px-4 py-2.5 bg-[#f8f9fa] transition-all"
+               [class.border-[#003b5c]]="campoNuevaFocused()"
+               [class.border-[#c2c7ce]]="!campoNuevaFocused()">
+            <span class="material-symbols-outlined text-[#72787e] mr-3 text-lg">key</span>
+            <input
+              [(ngModel)]="formContrasena.nueva"
+              name="nueva"
+              [type]="mostrarNueva() ? 'text' : 'password'"
+              placeholder="Mínimo 8 caracteres"
+              (focus)="campoNuevaFocused.set(true)"
+              (blur)="campoNuevaFocused.set(false)"
+              class="flex-1 bg-transparent outline-none text-sm text-[#191c1d] placeholder:text-[#72787e]/60"/>
+            <button type="button" (click)="mostrarNueva.set(!mostrarNueva())" class="text-[#72787e] hover:text-[#003b5c] transition-colors ml-2">
+              <span class="material-symbols-outlined text-lg">{{ mostrarNueva() ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+
+          <!-- Indicador de fortaleza -->
+          <div *ngIf="formContrasena.nueva.length > 0" class="flex items-center gap-2 mt-1.5">
+            <div class="flex gap-1 flex-1">
+              <div class="h-1.5 flex-1 rounded-full transition-all" [class]="passwordStrength() >= 1 ? 'bg-red-400' : 'bg-slate-200'"></div>
+              <div class="h-1.5 flex-1 rounded-full transition-all" [class]="passwordStrength() >= 2 ? 'bg-amber-400' : 'bg-slate-200'"></div>
+              <div class="h-1.5 flex-1 rounded-full transition-all" [class]="passwordStrength() >= 3 ? 'bg-emerald-400' : 'bg-slate-200'"></div>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider"
+                  [class.text-red-500]="passwordStrength() === 1"
+                  [class.text-amber-500]="passwordStrength() === 2"
+                  [class.text-emerald-600]="passwordStrength() === 3">
+              {{ passwordStrengthLabel() }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Confirmar Contraseña -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-[#42474e] uppercase tracking-wider block">Confirmar Nueva Contraseña</label>
+          <div class="flex items-center border-2 rounded-xl px-4 py-2.5 bg-[#f8f9fa] transition-all"
+               [class.border-error]="formContrasena.confirmar.length > 0 && formContrasena.nueva !== formContrasena.confirmar"
+               [class.border-emerald-500]="formContrasena.confirmar.length > 0 && formContrasena.nueva === formContrasena.confirmar"
+               [class.border-[#003b5c]]="campoConfirmarFocused() && formContrasena.confirmar.length === 0"
+               [class.border-[#c2c7ce]]="!campoConfirmarFocused() && formContrasena.confirmar.length === 0">
+            <span class="material-symbols-outlined text-[#72787e] mr-3 text-lg">key_vertical</span>
+            <input
+              [(ngModel)]="formContrasena.confirmar"
+              name="confirmar"
+              [type]="mostrarConfirmar() ? 'text' : 'password'"
+              placeholder="Repite tu nueva contraseña"
+              (focus)="campoConfirmarFocused.set(true)"
+              (blur)="campoConfirmarFocused.set(false)"
+              class="flex-1 bg-transparent outline-none text-sm text-[#191c1d] placeholder:text-[#72787e]/60"/>
+            <span *ngIf="formContrasena.confirmar.length > 0" class="material-symbols-outlined text-lg ml-2"
+                  [class.text-emerald-500]="formContrasena.nueva === formContrasena.confirmar"
+                  [class.text-error]="formContrasena.nueva !== formContrasena.confirmar">
+              {{ formContrasena.nueva === formContrasena.confirmar ? 'check_circle' : 'cancel' }}
+            </span>
+          </div>
+          <p *ngIf="formContrasena.confirmar.length > 0 && formContrasena.nueva !== formContrasena.confirmar"
+             class="text-[11px] text-error font-semibold mt-1">
+            Las contraseñas no coinciden.
+          </p>
+        </div>
+
+        <!-- Botón de envío -->
+        <div class="flex justify-end pt-2">
+          <button
+            type="submit"
+            [disabled]="!puedeGuardarContrasena()"
+            class="flex items-center gap-2 px-6 py-2.5 bg-[#003b5c] text-white font-bold text-sm rounded-xl shadow-md hover:bg-[#00253b] transition-all disabled:opacity-50 disabled:pointer-events-none active:scale-95">
+            <span class="material-symbols-outlined text-sm">shield_lock</span>
+            Actualizar Contraseña
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Info de Sesión (2/5) -->
+    <div class="lg:col-span-2 space-y-4">
+      <!-- Card de Sesión Activa -->
+      <div class="bg-white rounded-2xl border border-[#c2c7ce] shadow-sm p-6 space-y-4">
+        <div class="flex items-center gap-3 border-b border-[#c2c7ce]/40 pb-4">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+            <span class="material-symbols-outlined text-emerald-600" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-[#003b5c]">Sesión Activa</p>
+            <p class="text-xs text-[#72787e] font-medium">Token JWT válido</p>
+          </div>
+          <div class="ml-auto w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>
+        </div>
+        <div class="space-y-3 text-xs">
+          <div class="flex justify-between items-center">
+            <span class="text-[#72787e] font-semibold flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm">person</span> Rol
+            </span>
+            <span class="font-bold text-[#003b5c] bg-[#003b5c]/10 px-2 py-0.5 rounded-full uppercase tracking-wider">Administrador</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-[#72787e] font-semibold flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm">devices</span> Dispositivo
+            </span>
+            <span class="font-bold text-[#191c1d]">Navegador Web</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-[#72787e] font-semibold flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm">schedule</span> Expira en
+            </span>
+            <span class="font-bold text-amber-600">23:45 min</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card de Recomendaciones de Seguridad -->
+      <div class="bg-[#003b5c]/5 border border-[#003b5c]/15 rounded-2xl p-5 space-y-3">
+        <p class="text-xs font-black text-[#003b5c] uppercase tracking-wider flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-sm">tips_and_updates</span>
+          Buenas Prácticas
+        </p>
+        <ul class="space-y-2">
+          <li class="flex items-start gap-2 text-xs text-[#42474e] font-medium">
+            <span class="material-symbols-outlined text-sm text-[#003b5c] mt-0.5 flex-shrink-0">check_small</span>
+            Usa al menos 8 caracteres con mayúsculas, números y símbolos.
+          </li>
+          <li class="flex items-start gap-2 text-xs text-[#42474e] font-medium">
+            <span class="material-symbols-outlined text-sm text-[#003b5c] mt-0.5 flex-shrink-0">check_small</span>
+            No reutilices contraseñas de otros sistemas institucionales.
+          </li>
+          <li class="flex items-start gap-2 text-xs text-[#42474e] font-medium">
+            <span class="material-symbols-outlined text-sm text-[#003b5c] mt-0.5 flex-shrink-0">check_small</span>
+            Cambia tu contraseña cada semestre por seguridad.
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
   <!-- ===== Sección Principal: Historial Académico y Trayectoria ===== -->
   <div class="bg-white rounded-2xl border border-[#c2c7ce] shadow-sm overflow-hidden flex flex-col">
     
