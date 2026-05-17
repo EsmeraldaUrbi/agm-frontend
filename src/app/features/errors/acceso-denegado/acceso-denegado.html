@@ -1,0 +1,70 @@
+<div class="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden font-body text-slate-100">
+  
+  <!-- Decorative background elements -->
+  <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-red-950/20 rounded-full blur-[128px] pointer-events-none"></div>
+  <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary-container/10 rounded-full blur-[128px] pointer-events-none"></div>
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-white/5 rounded-full pointer-events-none animate-ring"></div>
+  
+  <div class="relative z-10 w-full max-w-lg bg-slate-900/60 border border-slate-800/80 rounded-3xl p-8 md:p-10 shadow-2xl backdrop-blur-xl text-center space-y-8">
+    
+    <!-- Shield/Error visual indicator -->
+    <div class="relative flex justify-center">
+      <div class="w-24 h-24 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-500 shadow-[0_0_50px_rgba(239,68,68,0.15)] animate-float">
+        <!-- Padlock SVG -->
+        <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+        </svg>
+      </div>
+      <span class="absolute bottom-0 right-[40%] bg-red-600 text-white font-mono text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-lg border border-red-500">
+        403
+      </span>
+    </div>
+
+    <!-- Content -->
+    <div class="space-y-3">
+      <div class="flex justify-center items-center gap-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+        <h1 class="text-2xl font-black font-headline tracking-tight uppercase text-red-400">Acceso Restringido</h1>
+        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+      </div>
+      <h2 class="text-base font-bold text-slate-300">No tienes permisos para ver esta página</h2>
+      <p class="text-xs text-slate-400 leading-relaxed max-w-sm mx-auto">
+        Tu cuenta institucional actual no cuenta con los privilegios de seguridad necesarios para acceder a este recurso. Si crees que se trata de un error, contacta al administrador de TI.
+      </p>
+    </div>
+
+    <!-- System info / context metadata -->
+    <div class="bg-slate-950/50 border border-slate-800 rounded-2xl p-4 text-left text-xs space-y-2">
+      <div class="flex justify-between items-center text-[10px] uppercase font-bold text-slate-500 border-b border-slate-800/80 pb-2">
+        <span>Detalles del Sistema</span>
+        <span class="text-red-400">Seguridad AGM</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-slate-400 font-medium">
+        <div class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-sm text-slate-600">shield</span>
+          <span>Nivel requerido:</span>
+        </div>
+        <div class="text-right font-bold text-slate-300">Autorizado</div>
+        <div class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-sm text-slate-600">dns</span>
+          <span>Microservicio:</span>
+        </div>
+        <div class="text-right font-mono text-[10px] text-slate-300">ms-auth-gateway</div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+      <button (click)="goBack()" 
+              class="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#003b5c] to-[#00566d] hover:from-[#002b44] hover:to-[#004255] text-white font-bold text-sm rounded-xl transition-all shadow-lg active:scale-95">
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+        Volver al Inicio
+      </button>
+      <button (click)="logout()" 
+              class="flex items-center justify-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700/80 text-slate-200 font-bold text-sm rounded-xl transition-all active:scale-95 border border-slate-700/50">
+        <span class="material-symbols-outlined text-base">logout</span>
+        Cerrar Sesión
+      </button>
+    </div>
+  </div>
+</div>

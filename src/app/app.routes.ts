@@ -51,7 +51,15 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'acceso-denegado',
+    loadComponent: () => import('./features/errors/acceso-denegado/acceso-denegado').then(m => m.AccesoDenegadoComponent)
+  },
+  {
+    path: 'sesion-expirada',
+    loadComponent: () => import('./features/errors/sesion-expirada/sesion-expirada').then(m => m.SesionExpiradaComponent)
+  },
+  {
     path: '**',
-    redirectTo: ''
+    loadComponent: () => import('./features/errors/error-404/error-404').then(m => m.Error404Component)
   }
 ];
