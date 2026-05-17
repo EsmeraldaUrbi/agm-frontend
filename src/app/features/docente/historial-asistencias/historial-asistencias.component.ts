@@ -30,7 +30,7 @@ export class HistorialAsistenciasComponent {
     periodo: 'Primavera 2026',
   };
 
-  tabs = ['Alumnos', 'Ponderaciones', 'Actividades', 'Asistencias', 'Reportes'];
+  tabs = ['Alumnos', 'Ponderaciones', 'Actividades'];
 
   constructor(private route: ActivatedRoute) {
     this.route.paramMap.subscribe(params => {

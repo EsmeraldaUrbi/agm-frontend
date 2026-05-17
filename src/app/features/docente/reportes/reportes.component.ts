@@ -27,7 +27,7 @@ export class ReportesComponent {
     periodo: 'Primavera 2026',
   };
 
-  tabs = ['Alumnos', 'Ponderaciones', 'Actividades', 'Asistencias', 'Reportes'];
+  tabs = ['Alumnos', 'Ponderaciones', 'Actividades'];
 
   alumnos = signal<AlumnoRendimiento[]>([
     { matricula: '202012345', nombre: 'Diego Cannata', promedioActual: 9.4, promedioFinal: 9.5, asistencia: 96, estatus: 'Aprobado Excelente' },

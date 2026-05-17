@@ -40,7 +40,7 @@
 
     <!-- Tabs de navegación -->
     <nav class="flex border-b border-slate-100 bg-white px-6 overflow-x-auto">
-      @for (tab of ['Alumnos','Ponderaciones','Actividades','Asistencias','Reportes']; track tab) {
+      @for (tab of ['Alumnos','Ponderaciones','Actividades']; track tab) {
         <a class="px-5 py-4 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 cursor-pointer"
           [routerLink]="['/docente/materias', materia.nrc, tab.toLowerCase()]"
           [ngClass]="tab === 'Ponderaciones'

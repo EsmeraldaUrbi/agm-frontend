@@ -35,7 +35,7 @@ export class RegistroCalificacionesComponent {
     periodo: 'Primavera 2026',
   };
 
-  tabs = ['Alumnos', 'Ponderaciones', 'Actividades', 'Asistencias', 'Reportes'];
+  tabs = ['Alumnos', 'Ponderaciones', 'Actividades'];
 
   actividadActual = {
     id: '16655e27-37d5-470a-bac2-f9ebbf48e850',

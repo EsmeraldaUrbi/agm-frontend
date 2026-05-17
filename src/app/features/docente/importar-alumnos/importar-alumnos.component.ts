@@ -26,7 +26,7 @@ export class ImportarAlumnosComponent {
     periodo: 'Primavera 2026',
   };
 
-  tabs = ['Alumnos', 'Ponderaciones', 'Actividades', 'Asistencias', 'Reportes'];
+  tabs = ['Alumnos', 'Ponderaciones', 'Actividades'];
 
   // Lista de Alumnos Inscritos
   alumnos = signal<Alumno[]>([
