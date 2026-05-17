@@ -34,7 +34,14 @@ export class LoginComponent {
     if (this.email && this.password) {
       const success = this.authService.login(this.email, this.password, this.selectedRole());
       if (success) {
-        this.router.navigate(['/admin/dashboard']);
+        const role = this.selectedRole();
+        if (role === 'admin') {
+          this.router.navigate(['/admin/dashboard']);
+        } else if (role === 'docente') {
+          this.router.navigate(['/docente/dashboard']);
+        } else if (role === 'alumno') {
+          this.router.navigate(['/alumno/dashboard']);
+        }
       }
     } else {
       this.showError.set(true);

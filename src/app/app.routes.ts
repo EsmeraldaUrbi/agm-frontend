@@ -23,6 +23,16 @@ export const routes: Routes = [
     loadChildren: () => import('./features/docente/docente.routes').then(m => m.DOCENTE_ROUTES)
   },
   {
+    path: 'alumno',
+    component: MainLayoutComponent,
+    loadChildren: () => import('./features/alumno/alumno.routes').then(m => m.ALUMNO_ROUTES)
+  },
+  {
+    path: 'profile',
+    component: MainLayoutComponent,
+    loadComponent: () => import('./shared/components/placeholder-dashboard/placeholder-dashboard').then(m => m.PlaceholderDashboardComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }

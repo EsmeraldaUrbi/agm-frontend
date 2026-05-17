@@ -1,9 +1,55 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-navbar',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './navbar.html',
-  styles: ``,
+  styles: [`
+    :host {
+      display: block;
+    }
+  `]
 })
-export class NavbarComponent {}
+export class NavbarComponent implements OnInit {
+  userName = signal<string>('Usuario');
+  userEmail = signal<string>('');
+  userRole = signal<string>('');
+  userInitials = signal<string>('U');
+  
+  // Computada para dar un formato elegante al rol
+  roleLabel = computed(() => {
+    const role = this.userRole();
+    if (role === 'admin') return 'Administrador Global';
+    if (role === 'docente') return 'Docente FCC';
+    if (role === 'alumno') return 'Alumno FCC';
+    return 'Usuario Institucional';
+  });
+
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    const user = this.authService.currentUser();
+    if (user) {
+      this.userName.set(user.name || 'Usuario');
+      this.userEmail.set(user.email || '');
+      this.userRole.set(user.role || '');
+      
+      // Generar iniciales del nombre
+      const nameParts = (user.name || 'Usuario').split(' ');
+      const initials = nameParts.map((p: string) => p[0]).join('').substring(0, 2).toUpperCase();
+      this.userInitials.set(initials || 'U');
+    }
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+}

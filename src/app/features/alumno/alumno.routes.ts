@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-export const DOCENTE_ROUTES: Routes = [
+export const ALUMNO_ROUTES: Routes = [
   {
     path: 'dashboard',
     loadComponent: () => import('../../shared/components/placeholder-dashboard/placeholder-dashboard').then(m => m.PlaceholderDashboardComponent)
@@ -11,4 +11,3 @@ export const DOCENTE_ROUTES: Routes = [
     pathMatch: 'full'
   }
 ];
-
