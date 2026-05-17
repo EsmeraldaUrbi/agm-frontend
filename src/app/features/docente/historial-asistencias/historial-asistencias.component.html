@@ -1,0 +1,239 @@
+<!-- Padding inferior para no tapar contenido con la barra fija -->
+<div class="max-w-7xl mx-auto pb-24 font-['Inter']">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-black text-[#00253b] tracking-tight font-['Public_Sans']">Historial de Asistencias</h1>
+    <p class="text-[#42474e] mt-1">Gestione y consulte el registro de asistencia diaria de sus grupos</p>
+  </div>
+
+  <div class="grid grid-cols-12 gap-6">
+
+    <!-- ============================================================ -->
+    <!-- PANEL IZQUIERDO: Filtros + Resumen                           -->
+    <!-- ============================================================ -->
+    <section class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+
+      <!-- Filtros -->
+      <div class="bg-white p-6 rounded-xl border border-[#c2c7ce] shadow-sm">
+        <h3 class="font-black text-[#00253b] mb-5 flex items-center gap-2 font-['Public_Sans']">
+          <span class="material-symbols-outlined text-xl">filter_list</span>
+          Filtros de Búsqueda
+        </h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">Materia</label>
+            <select [(ngModel)]="materiaSeleccionada"
+              class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-4 py-2 text-sm text-[#191c1d] focus:border-[#00253b] focus:ring-1 focus:ring-[#00253b] outline-none transition-all">
+              <option *ngFor="let m of materias">{{ m }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">Fecha de Registro</label>
+            <input type="date" [(ngModel)]="fechaSeleccionada"
+              class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-4 py-2 text-sm text-[#191c1d] focus:border-[#00253b] focus:ring-1 focus:ring-[#00253b] outline-none transition-all"/>
+          </div>
+          <button class="w-full mt-2 bg-[#1a4a6c] text-white py-2.5 rounded-lg font-bold text-sm shadow-sm hover:bg-[#003b5c] transition-all">
+            Actualizar Vista
+          </button>
+        </div>
+      </div>
+
+      <!-- Resumen Asistencia Grupal -->
+      <div class="bg-[#00253b] text-white p-6 rounded-xl border border-[#003b5c] shadow-md relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+          <span class="material-symbols-outlined text-[160px]">analytics</span>
+        </div>
+        <div class="relative z-10">
+          <div class="flex justify-between items-start mb-6">
+            <div>
+              <p class="text-[#a0cbf3] text-xs font-bold uppercase tracking-widest">Asistencia Grupal</p>
+              <h2 class="text-5xl font-black font-['Public_Sans'] mt-1">{{ resumen().porcentaje }}%</h2>
+            </div>
+            <!-- Donut chart SVG -->
+            <div class="relative w-20 h-20 flex items-center justify-center flex-shrink-0">
+              <svg class="w-full h-full -rotate-90" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="34" fill="transparent" stroke="#003b5c" stroke-width="8"/>
+                <circle cx="40" cy="40" r="34" fill="transparent" stroke="#5cd4ff"
+                  stroke-width="8"
+                  stroke-dasharray="213.6"
+                  [attr.stroke-dashoffset]="213.6 - (213.6 * resumen().porcentaje / 100)"/>
+              </svg>
+              <span class="absolute text-[10px] font-bold text-[#a0cbf3]">{{ fechaSeleccionada | date:'dd/MM' }}</span>
+            </div>
+          </div>
+
+          <!-- Stats grid 2x2 -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-[#003b5c]/60 p-3 rounded-lg border border-[#a0cbf3]/10">
+              <p class="text-[10px] text-[#a0cbf3] uppercase font-bold">Total Alumnos</p>
+              <p class="text-xl font-bold">{{ resumen().total }}</p>
+            </div>
+            <div class="bg-[#003b5c]/60 p-3 rounded-lg border border-[#a0cbf3]/10">
+              <p class="text-[10px] text-[#a0cbf3] uppercase font-bold">Presentes</p>
+              <p class="text-xl font-bold">{{ resumen().presentes }}</p>
+            </div>
+            <div class="bg-[#003b5c]/60 p-3 rounded-lg border border-[#a0cbf3]/10">
+              <p class="text-[10px] text-[#a0cbf3] uppercase font-bold">Faltas</p>
+              <p class="text-xl font-bold text-red-300">{{ resumen().faltas }}</p>
+            </div>
+            <div class="bg-[#003b5c]/60 p-3 rounded-lg border border-[#a0cbf3]/10">
+              <p class="text-[10px] text-[#a0cbf3] uppercase font-bold">Retardos</p>
+              <p class="text-xl font-bold text-yellow-200">{{ resumen().retardos }}</p>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-[#003b5c]/60 flex justify-between items-center">
+            <span class="text-xs text-[#a0cbf3]">Justificados</span>
+            <span class="text-sm font-bold">{{ resumen().justificados }}</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TABLA DERECHA: Listado de alumnos                            -->
+    <!-- ============================================================ -->
+    <section class="col-span-12 lg:col-span-8">
+      <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden">
+
+        <!-- Tabla Header -->
+        <div class="p-5 border-b border-[#c2c7ce] flex justify-between items-center bg-[#f3f4f5]/50">
+          <h3 class="font-black text-[#00253b] font-['Public_Sans']">Listado de Alumnos</h3>
+          <div class="flex gap-2">
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#72787e] text-sm">search</span>
+              <input [(ngModel)]="busqueda" type="text"
+                class="pl-9 pr-4 py-1.5 text-sm bg-[#f8f9fa] border border-[#c2c7ce] rounded-full w-56 focus:border-[#00253b] outline-none"
+                placeholder="Buscar por nombre..."/>
+            </div>
+            <button class="p-2 rounded-lg border border-[#c2c7ce] hover:bg-[#edeeef] transition-colors" title="Descargar lista">
+              <span class="material-symbols-outlined text-sm text-[#42474e]">download</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-[#e7e8e9] border-b border-[#c2c7ce]">
+              <tr>
+                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider">Matrícula</th>
+                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider">Nombre del Alumno</th>
+                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider">Hora</th>
+                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider">Estado de Asistencia</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#c2c7ce]/50">
+              @for (alumno of alumnos(); track alumno.matricula) {
+                <tr class="hover:bg-[#f3f4f5]/60 transition-colors">
+
+                  <td class="px-6 py-4 text-sm font-bold text-[#003b5c]">{{ alumno.matricula }}</td>
+
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                           [ngClass]="alumno.colorAvatar">
+                        {{ alumno.iniciales }}
+                      </div>
+                      <span class="text-sm font-medium text-[#191c1d]">{{ alumno.nombre }}</span>
+                    </div>
+                  </td>
+
+                  <td class="px-6 py-4 text-xs text-[#42474e] font-mono">{{ alumno.hora }}</td>
+
+                  <!-- Toggle de estado -->
+                  <td class="px-6 py-4">
+                    <div class="flex bg-[#e7e8e9] p-1 rounded-lg w-fit gap-0.5">
+                      <button (click)="setEstado(alumno.matricula, 'presente')"
+                        class="px-3 py-1 text-[10px] font-bold rounded-md transition-all"
+                        [ngClass]="btnClass(alumno.estado, 'presente')">
+                        Presente
+                      </button>
+                      <button (click)="setEstado(alumno.matricula, 'retardo')"
+                        class="px-3 py-1 text-[10px] font-bold rounded-md transition-all"
+                        [ngClass]="btnClass(alumno.estado, 'retardo')">
+                        Retardo
+                      </button>
+                      <button (click)="setEstado(alumno.matricula, 'falta')"
+                        class="px-3 py-1 text-[10px] font-bold rounded-md transition-all"
+                        [ngClass]="btnClass(alumno.estado, 'falta')">
+                        Falta
+                      </button>
+                      <button (click)="setEstado(alumno.matricula, 'justificado')"
+                        class="px-3 py-1 text-[10px] font-bold rounded-md transition-all"
+                        [ngClass]="btnClass(alumno.estado, 'justificado')">
+                        Just.
+                      </button>
+                    </div>
+                  </td>
+
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="p-4 border-t border-[#c2c7ce] bg-[#f3f4f5]/50 flex justify-between items-center">
+          <span class="text-xs text-[#42474e] font-medium">Mostrando {{ alumnos().length }} de 35 alumnos</span>
+          <div class="flex gap-1">
+            <button class="w-8 h-8 flex items-center justify-center rounded border border-[#c2c7ce] bg-white text-[#42474e] hover:bg-[#edeeef] transition-colors">
+              <span class="material-symbols-outlined text-sm">chevron_left</span>
+            </button>
+            <button class="w-8 h-8 flex items-center justify-center rounded border border-[#00253b] bg-[#00253b] text-white font-bold text-xs shadow-sm">1</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded border border-[#c2c7ce] bg-white text-[#42474e] hover:bg-[#edeeef] transition-colors text-xs">2</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded border border-[#c2c7ce] bg-white text-[#42474e] hover:bg-[#edeeef] transition-colors text-xs">3</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded border border-[#c2c7ce] bg-white text-[#42474e] hover:bg-[#edeeef] transition-colors">
+              <span class="material-symbols-outlined text-sm">chevron_right</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- BARRA DE ACCIONES FIJA (bottom)                             -->
+<!-- ============================================================ -->
+<div class="fixed bottom-0 left-[240px] right-0 bg-white/80 backdrop-blur-md border-t border-[#c2c7ce] py-4 px-8 flex justify-between items-center z-30">
+
+  <!-- Leyenda de resumen -->
+  <div class="flex items-center gap-6">
+    <div class="flex items-center gap-2">
+      <span class="w-3 h-3 rounded-full bg-green-500"></span>
+      <span class="text-xs font-bold text-[#42474e]">{{ resumen().presentes }} Presentes</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="w-3 h-3 rounded-full bg-red-500"></span>
+      <span class="text-xs font-bold text-[#42474e]">{{ resumen().faltas }} Faltas</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+      <span class="text-xs font-bold text-[#42474e]">{{ resumen().retardos }} Retardos</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+      <span class="text-xs font-bold text-[#42474e]">{{ resumen().justificados }} Justificados</span>
+    </div>
+  </div>
+
+  <!-- Botones de acción -->
+  <div class="flex gap-3">
+    <button (click)="descartarCambios()"
+      class="px-6 py-2.5 rounded-lg font-bold text-[#42474e] hover:bg-[#edeeef] transition-colors text-sm">
+      Descartar Cambios
+    </button>
+    <button (click)="guardarCambios()"
+      class="flex items-center gap-2 bg-[#00253b] text-white px-8 py-2.5 rounded-lg font-bold shadow-md hover:bg-[#003b5c] transition-all text-sm">
+      <span class="material-symbols-outlined text-lg">save</span>
+      Guardar Cambios Manuales
+    </button>
+  </div>
+
+</div>

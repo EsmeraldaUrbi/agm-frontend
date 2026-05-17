@@ -22,6 +22,14 @@ export const DOCENTE_ROUTES: Routes = [
     loadComponent: () => import('./cierre-materia/cierre-materia.component').then(m => m.CierreMateriaComponent)
   },
   {
+    path: 'materias/:id/asistencias',
+    loadComponent: () => import('./historial-asistencias/historial-asistencias.component').then(m => m.HistorialAsistenciasComponent)
+  },
+  {
+    path: 'pase-lista',
+    loadComponent: () => import('./pase-lista/pase-lista.component').then(m => m.PaseListaComponent)
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'

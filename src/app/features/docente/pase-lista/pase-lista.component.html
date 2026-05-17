@@ -1,0 +1,226 @@
+<div class="max-w-[1200px] mx-auto font-['Inter'] pb-8">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-black text-[#00253b] tracking-tight font-['Public_Sans']">Pase de Lista</h1>
+    <p class="text-[#42474e] mt-1">Gestione sesiones de asistencia con código QR para sus grupos</p>
+  </div>
+
+  <!-- ===================== ESTADO: IDLE ===================== -->
+  @if (esIdle) {
+    <div class="max-w-lg mx-auto mt-12">
+      <div class="bg-white rounded-2xl border border-[#c2c7ce] shadow-sm p-10 text-center">
+        <div class="w-20 h-20 bg-[#baeaff] rounded-full flex items-center justify-center mx-auto mb-6">
+          <span class="material-symbols-outlined text-[#003b5c] text-4xl" style="font-variation-settings:'FILL' 1">qr_code_scanner</span>
+        </div>
+        <h2 class="text-2xl font-black text-[#003b5c] font-['Public_Sans'] mb-2">Iniciar Pase de Lista</h2>
+        <p class="text-[#42474e] text-sm mb-8">Seleccione la materia para generar una sesión de asistencia de 10 minutos. Los alumnos escanearán su QR personal para registrarse.</p>
+
+        <div class="text-left mb-6">
+          <label class="block text-xs font-bold text-[#42474e] mb-2 uppercase tracking-wider">Seleccionar Materia</label>
+          <select [(ngModel)]="materiaSeleccionada"
+            class="w-full bg-[#f8f9fa] border-2 border-[#c2c7ce] rounded-xl px-4 py-3 text-sm text-[#191c1d] focus:border-[#003b5c] outline-none transition-all font-semibold">
+            <option value="">-- Seleccione una materia --</option>
+            @for (m of materias; track m.nrc) {
+              <option [value]="m.nrc">NRC {{ m.nrc }} — {{ m.nombre }} (Sec. {{ m.seccion }})</option>
+            }
+          </select>
+        </div>
+
+        <button (click)="iniciarSesion()"
+          [disabled]="!materiaSeleccionada"
+          class="w-full h-14 bg-[#003b5c] text-white font-bold text-base rounded-xl shadow-md hover:bg-[#00253b] transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3">
+          <span class="material-symbols-outlined">play_circle</span>
+          Iniciar Sesión de Asistencia
+        </button>
+
+        <!-- Info de flujo -->
+        <div class="mt-8 grid grid-cols-3 gap-3 text-xs text-[#42474e]">
+          <div class="flex flex-col items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-[#003b5c] text-white flex items-center justify-center font-black text-sm">1</div>
+            <span class="text-center">Inicias la sesión aquí</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-[#003b5c] text-white flex items-center justify-center font-black text-sm">2</div>
+            <span class="text-center">Escaneas el QR con tu teléfono</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-[#003b5c] text-white flex items-center justify-center font-black text-sm">3</div>
+            <span class="text-center">Escaneas el QR de cada alumno</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ===================== ESTADO: ACTIVA ===================== -->
+  @if (esActiva) {
+    <div class="grid grid-cols-12 gap-6">
+
+      <!-- QR Panel (izquierda) -->
+      <div class="col-span-12 lg:col-span-5 space-y-5">
+
+        <!-- Sesión info -->
+        <div class="bg-[#003b5c] text-white rounded-2xl p-6 relative overflow-hidden">
+          <div class="absolute -right-6 -top-6 opacity-10 pointer-events-none">
+            <span class="material-symbols-outlined text-[120px]">qr_code_2</span>
+          </div>
+          <div class="relative z-10">
+            <p class="text-[#7aa5cc] text-xs font-bold uppercase tracking-widest mb-1">Sesión Activa</p>
+            <h3 class="text-xl font-black font-['Public_Sans']">{{ materiaActual?.nombre }}</h3>
+            <p class="text-[#a0cbf3] text-sm mt-1">NRC: {{ materiaActual?.nrc }} • Sec. {{ materiaActual?.seccion }}</p>
+          </div>
+        </div>
+
+        <!-- QR Code -->
+        <div class="bg-white rounded-2xl border border-[#c2c7ce] shadow-sm p-6 text-center">
+          <p class="text-xs font-bold text-[#42474e] uppercase tracking-wider mb-4">📱 Escanea con tu teléfono para abrir el escáner</p>
+          <div class="flex justify-center mb-4">
+            <qrcode
+              [qrdata]="qrUrl()"
+              [width]="220"
+              [margin]="2"
+              colorDark="#003b5c"
+              colorLight="#ffffff"
+              errorCorrectionLevel="M">
+            </qrcode>
+          </div>
+          <p class="text-[10px] text-[#72787e] break-all font-mono">{{ qrUrl() }}</p>
+        </div>
+
+        <!-- Timer -->
+        <div class="bg-white rounded-2xl border border-[#c2c7ce] shadow-sm p-6">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-[#42474e] uppercase tracking-wider">Tiempo restante</span>
+            <span class="text-2xl font-black text-[#003b5c] font-mono">{{ tiempoFormateado() }}</span>
+          </div>
+          <div class="w-full bg-[#e7e8e9] rounded-full h-3 overflow-hidden">
+            <div class="h-3 rounded-full transition-all duration-1000"
+              [style.width]="timerPorcentaje() + '%'"
+              [ngClass]="{
+                'bg-emerald-500': timerPorcentaje() > 40,
+                'bg-amber-500':   timerPorcentaje() > 15 && timerPorcentaje() <= 40,
+                'bg-red-500':     timerPorcentaje() <= 15
+              }">
+            </div>
+          </div>
+          <p class="text-[11px] text-[#72787e] mt-2">La sesión se cierra automáticamente al llegar a cero.</p>
+        </div>
+
+        <!-- Finalizar -->
+        <button (click)="finalizarSesion()"
+          class="w-full h-12 bg-[#ba1a1a] text-white font-bold rounded-xl hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined">stop_circle</span>
+          Finalizar Sesión
+        </button>
+
+      </div>
+
+      <!-- Feed en tiempo real (derecha) -->
+      <div class="col-span-12 lg:col-span-7">
+        <div class="bg-white rounded-2xl border border-[#c2c7ce] shadow-sm overflow-hidden h-full">
+
+          <!-- Stats rápidas -->
+          <div class="grid grid-cols-3 border-b border-[#c2c7ce]">
+            <div class="p-5 text-center border-r border-[#c2c7ce]">
+              <p class="text-3xl font-black text-emerald-600">{{ presentes() }}</p>
+              <p class="text-[10px] font-bold text-[#42474e] uppercase tracking-wider mt-1">Presentes</p>
+            </div>
+            <div class="p-5 text-center border-r border-[#c2c7ce]">
+              <p class="text-3xl font-black text-amber-500">{{ retardos() }}</p>
+              <p class="text-[10px] font-bold text-[#42474e] uppercase tracking-wider mt-1">Retardos</p>
+            </div>
+            <div class="p-5 text-center">
+              <p class="text-3xl font-black text-slate-400">{{ pendientes() }}</p>
+              <p class="text-[10px] font-bold text-[#42474e] uppercase tracking-wider mt-1">Pendientes</p>
+            </div>
+          </div>
+
+          <!-- Encabezado feed -->
+          <div class="px-6 py-4 border-b border-[#c2c7ce] flex items-center justify-between">
+            <h3 class="font-black text-[#003b5c] font-['Public_Sans']">Registro en Tiempo Real</h3>
+            <div class="flex items-center gap-2 text-xs font-bold text-emerald-600">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              EN VIVO
+            </div>
+          </div>
+
+          <!-- Lista de alumnos registrados -->
+          <div class="divide-y divide-[#c2c7ce]/50 max-h-[360px] overflow-y-auto">
+            @if (alumnosRegistrados().length === 0) {
+              <div class="py-16 text-center text-[#72787e]">
+                <span class="material-symbols-outlined text-4xl mb-2 block">hourglass_empty</span>
+                <p class="text-sm font-semibold">Esperando el primer escaneo...</p>
+              </div>
+            }
+            @for (alumno of alumnosRegistrados(); track alumno.matricula) {
+              <div class="px-6 py-4 flex items-center justify-between hover:bg-[#f3f4f5] transition-colors">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-[#baeaff] flex items-center justify-center text-[#003b5c] font-black text-xs">
+                    {{ alumno.nombre.split(' ').map(n => n[0]).slice(0,2).join('') }}
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-[#191c1d]">{{ alumno.nombre }}</p>
+                    <p class="text-[11px] text-[#72787e]">ID: {{ alumno.matricula }}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-[10px] font-black uppercase px-2.5 py-1 rounded-full"
+                    [ngClass]="alumno.estado === 'presente'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-amber-100 text-amber-700'">
+                    {{ alumno.estado }}
+                  </span>
+                  <p class="text-[10px] text-[#72787e] mt-1">{{ alumno.hora }}</p>
+                </div>
+              </div>
+            }
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  }
+
+  <!-- ===================== ESTADO: FINALIZADA ===================== -->
+  @if (esFinalizada) {
+    <div class="max-w-lg mx-auto mt-12">
+      <div class="bg-white rounded-2xl border border-[#c2c7ce] shadow-sm p-10 text-center">
+        <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <span class="material-symbols-outlined text-emerald-600 text-4xl" style="font-variation-settings:'FILL' 1">check_circle</span>
+        </div>
+        <h2 class="text-2xl font-black text-[#003b5c] font-['Public_Sans'] mb-2">Sesión Finalizada</h2>
+        <p class="text-[#42474e] text-sm mb-8">La sesión de asistencia ha concluido. Se registraron <strong>{{ presentes() + retardos() }}</strong> alumnos de <strong>{{ totalGrupo }}</strong>.</p>
+
+        <div class="grid grid-cols-3 gap-4 mb-8">
+          <div class="bg-emerald-50 rounded-xl p-4">
+            <p class="text-2xl font-black text-emerald-600">{{ presentes() }}</p>
+            <p class="text-[10px] font-bold text-[#42474e] uppercase">Presentes</p>
+          </div>
+          <div class="bg-amber-50 rounded-xl p-4">
+            <p class="text-2xl font-black text-amber-500">{{ retardos() }}</p>
+            <p class="text-[10px] font-bold text-[#42474e] uppercase">Retardos</p>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-4">
+            <p class="text-2xl font-black text-slate-400">{{ pendientes() }}</p>
+            <p class="text-[10px] font-bold text-[#42474e] uppercase">Faltas</p>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <a routerLink="../historial-asistencias" class="flex-1 h-12 border-2 border-[#003b5c] text-[#003b5c] font-bold rounded-xl hover:bg-[#003b5c]/5 transition-colors flex items-center justify-center gap-2 text-sm">
+            <span class="material-symbols-outlined text-sm">history</span>
+            Ver Historial
+          </a>
+          <button (click)="nueva()"
+            class="flex-1 h-12 bg-[#003b5c] text-white font-bold rounded-xl hover:bg-[#00253b] transition-colors flex items-center justify-center gap-2 text-sm">
+            <span class="material-symbols-outlined text-sm">add</span>
+            Nueva Sesión
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>
