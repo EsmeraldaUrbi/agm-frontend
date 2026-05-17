@@ -28,9 +28,14 @@ export const routes: Routes = [
     loadChildren: () => import('./features/alumno/alumno.routes').then(m => m.ALUMNO_ROUTES)
   },
   {
-    path: 'profile',
+    path: '',
     component: MainLayoutComponent,
-    loadComponent: () => import('./shared/components/placeholder-dashboard/placeholder-dashboard').then(m => m.PlaceholderDashboardComponent)
+    children: [
+      {
+        path: 'profile',
+        loadComponent: () => import('./shared/components/placeholder-dashboard/placeholder-dashboard').then(m => m.PlaceholderDashboardComponent)
+      }
+    ]
   },
   {
     path: '**',

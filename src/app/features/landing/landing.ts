@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AgmButtonComponent, AgmCardComponent } from '../../shared/components/ui';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, AgmButtonComponent, AgmCardComponent],
   templateUrl: './landing.html',
   styles: [`
-    .hero-gradient {
-      background: linear-gradient(135deg, #003B5C 0%, #00253B 100%);
+    :host {
+      display: block;
     }
   `]
 })
