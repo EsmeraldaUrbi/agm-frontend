@@ -12,7 +12,11 @@ export const DOCENTE_ROUTES: Routes = [
   {
     path: 'materias/:id/importar-alumnos',
     loadComponent: () => import('./importar-alumnos/importar-alumnos.component').then(m => m.ImportarAlumnosComponent)
-  }, // rebuild trigger
+  },
+  {
+    path: 'materias/:id/alumnos',
+    loadComponent: () => import('./importar-alumnos/importar-alumnos.component').then(m => m.ImportarAlumnosComponent)
+  },
   {
     path: 'materias/:id/calificaciones',
     loadComponent: () => import('./registro-calificaciones/registro-calificaciones.component').then(m => m.RegistroCalificacionesComponent)
