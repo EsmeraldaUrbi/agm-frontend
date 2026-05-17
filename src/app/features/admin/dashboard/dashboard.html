@@ -1,169 +1,177 @@
-<!-- Dashboard Header & Quick Actions -->
-<div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-  <div>
-    <h2 class="text-2xl font-extrabold text-primary-container">Institutional Dashboard</h2>
-    <p class="text-slate-500 text-sm">System Overview and Administrative Controls</p>
-  </div>
-  <div class="flex items-center gap-3">
-    <button class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 font-semibold rounded-lg text-sm shadow-sm hover:bg-slate-50 transition-colors">
-      <span class="material-symbols-outlined text-lg">calendar_today</span>
-      Create Period
-    </button>
-    <button class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 font-semibold rounded-lg text-sm shadow-sm hover:bg-slate-50 transition-colors">
-      <span class="material-symbols-outlined text-lg">upload_file</span>
-      Import Subjects
-    </button>
-    <button class="flex items-center gap-2 px-4 py-2 bg-primary-container text-white font-semibold rounded-lg text-sm shadow-md hover:opacity-90 transition-opacity">
-      <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">person_add</span>
-      Import Teachers
-    </button>
-  </div>
-</div>
+<div class="p-6 md:p-8 space-y-6 bg-background min-h-screen font-body text-on-surface">
 
-<!-- Bento Summary Grid -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-  <!-- Active Period -->
-  <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-[0px_2px_4px_rgba(0,59,92,0.05)] flex flex-col justify-between">
-    <div class="flex items-center justify-between mb-4">
-      <div class="w-10 h-10 bg-primary-container/10 rounded-lg flex items-center justify-center text-primary-container">
-        <span class="material-symbols-outlined">event_available</span>
-      </div>
-      <span class="text-[10px] font-bold text-success-600 bg-emerald-100 px-2 py-1 rounded-full uppercase tracking-tighter">Current</span>
-    </div>
+  <!-- ── Cabecera + Reloj ──────────────────────────────────────────────── -->
+  <div class="animate-card delay-1 flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
-      <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Active Period</p>
-      <h3 class="text-2xl font-black text-primary">Primavera 2026</h3>
+      <h1 class="text-2xl font-black text-primary font-headline tracking-tight">Panel de Administración</h1>
+      <p class="text-xs text-outline font-medium capitalize">{{ currentDate() }}</p>
     </div>
-  </div>
-  <!-- Total Subjects -->
-  <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-[0px_2px_4px_rgba(0,59,92,0.05)] flex flex-col justify-between">
-    <div class="flex items-center justify-between mb-4">
-      <div class="w-10 h-10 bg-secondary-container/20 rounded-lg flex items-center justify-center text-secondary">
-        <span class="material-symbols-outlined">book</span>
-      </div>
-      <span class="text-[10px] font-bold text-primary bg-primary-fixed px-2 py-1 rounded-full">+12% vs LY</span>
-    </div>
-    <div>
-      <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Subjects</p>
-      <h3 class="text-3xl font-black text-primary">450</h3>
-    </div>
-  </div>
-  <!-- Total Teachers -->
-  <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-[0px_2px_4px_rgba(0,59,92,0.05)] flex flex-col justify-between">
-    <div class="flex items-center justify-between mb-4">
-      <div class="w-10 h-10 bg-tertiary-fixed/40 rounded-lg flex items-center justify-center text-tertiary">
-        <span class="material-symbols-outlined">supervisor_account</span>
-      </div>
-      <div class="flex -space-x-2">
-        <!-- Reemplazamos las fotos por avatares con iniciales -->
-        <div class="w-6 h-6 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[8px] text-white font-bold">JD</div>
-        <div class="w-6 h-6 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-[8px] text-white font-bold">MS</div>
-      </div>
-    </div>
-    <div>
-      <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Teachers</p>
-      <h3 class="text-3xl font-black text-primary">120</h3>
-    </div>
-  </div>
-  <!-- Last Import -->
-  <div class="bg-primary-container p-6 rounded-xl border border-primary-container shadow-[0px_4px_12px_rgba(0,59,92,0.1)] flex flex-col justify-between text-white">
-    <div class="flex items-center justify-between mb-4">
-      <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-white">
-        <span class="material-symbols-outlined">sync</span>
-      </div>
-      <span class="text-[10px] font-bold text-white bg-white/20 px-2 py-1 rounded-full uppercase tracking-tighter">Healthy</span>
-    </div>
-    <div>
-      <p class="text-white/70 text-xs font-bold uppercase tracking-wider mb-1">Last Import</p>
-      <h3 class="text-2xl font-black">2 hours ago</h3>
-      <p class="text-[10px] text-white/50 mt-1 italic">Source: Banner Integration</p>
-    </div>
-  </div>
-</div>
-
-<!-- Main Data Grid -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-  <!-- Performance Graph / Visualization Shell -->
-  <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-    <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+    <!-- Reloj en tiempo real -->
+    <div class="flex items-center gap-3 bg-primary rounded-2xl px-5 py-3 text-white shadow-lg self-start md:self-auto">
+      <span class="material-symbols-outlined text-secondary text-xl" style="font-variation-settings: 'FILL' 1;">schedule</span>
       <div>
-        <h3 class="font-bold text-primary-container">Grade Upload Progress</h3>
-        <p class="text-xs text-slate-500">Subject-wise compliance for Primavera 2026</p>
-      </div>
-      <select class="text-xs border-slate-200 rounded-md py-1">
-        <option>All Departments</option>
-        <option>Computer Science</option>
-        <option>Information Tech</option>
-      </select>
-    </div>
-    <div class="p-8">
-      <!-- Simulated Chart Visualization -->
-      <div class="relative h-64 w-full flex items-end gap-4 px-4 border-b border-slate-100 pb-2">
-        <div class="absolute inset-0 flex flex-col justify-between pointer-events-none text-[10px] text-slate-400">
-          <div class="border-t border-slate-50 w-full pt-1">100%</div>
-          <div class="border-t border-slate-50 w-full pt-1">75%</div>
-          <div class="border-t border-slate-50 w-full pt-1">50%</div>
-          <div class="border-t border-slate-50 w-full pt-1">25%</div>
-          <div></div>
-        </div>
-        <div class="flex-1 bg-primary-container/80 rounded-t-sm h-[85%] hover:bg-primary transition-colors cursor-help group relative"></div>
-        <div class="flex-1 bg-secondary rounded-t-sm h-[92%] hover:bg-secondary-container transition-colors cursor-help group relative"></div>
-        <div class="flex-1 bg-primary-container/80 rounded-t-sm h-[45%] hover:bg-primary transition-colors cursor-help group relative"></div>
-        <div class="flex-1 bg-primary-container/80 rounded-t-sm h-[78%] hover:bg-primary transition-colors cursor-help group relative"></div>
-        <div class="flex-1 bg-primary-container/80 rounded-t-sm h-[60%] hover:bg-primary transition-colors cursor-help group relative"></div>
-        <div class="flex-1 bg-primary-container/80 rounded-t-sm h-[88%] hover:bg-primary transition-colors cursor-help group relative"></div>
-      </div>
-      <div class="flex justify-between mt-4 text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
-        <span class="flex-1 text-center">CS01</span>
-        <span class="flex-1 text-center">CS02</span>
-        <span class="flex-1 text-center">IT01</span>
-        <span class="flex-1 text-center">IT02</span>
-        <span class="flex-1 text-center">MA01</span>
-        <span class="flex-1 text-center">MA02</span>
-      </div>
-    </div>
-    <div class="p-6 bg-slate-50/50 border-t border-slate-100 flex items-center gap-8">
-      <div class="flex items-center gap-2">
-        <div class="w-3 h-3 bg-primary-container/80 rounded-full"></div>
-        <span class="text-xs font-medium text-slate-600">Pending Grades</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <div class="w-3 h-3 bg-secondary rounded-full"></div>
-        <span class="text-xs font-medium text-slate-600">Validated</span>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-white/60">Hora del Sistema</p>
+        <p class="text-2xl font-black tracking-tight font-headline tabular-nums">{{ currentTime() }}</p>
       </div>
     </div>
   </div>
 
-  <!-- Recent Activity Feed -->
-  <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
-    <div class="p-6 border-b border-slate-100">
-      <h3 class="font-bold text-primary-container">Recent Activity</h3>
-      <p class="text-xs text-slate-500">Administrative log & system alerts</p>
-    </div>
-    <div class="p-6 space-y-6">
-      <div class="flex gap-4">
-        <div class="relative">
-          <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-            <span class="material-symbols-outlined text-lg">upload</span>
-          </div>
-          <div class="absolute top-8 left-1/2 -translate-x-1/2 w-[1px] h-6 bg-slate-100"></div>
+  <!-- ── Hero: Periodo Activo ──────────────────────────────────────────── -->
+  <div class="animate-card delay-2 relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#003b5c] to-[#00253B] p-6 md:p-8 text-white shadow-xl border border-primary/10">
+    <!-- Decorative blobs -->
+    <div class="absolute -right-16 -top-16 w-56 h-56 bg-secondary/15 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-secondary/10 rounded-full blur-2xl"></div>
+
+    <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div class="space-y-3 flex-grow">
+        <!-- Badge -->
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] font-black uppercase tracking-widest">Ciclo Activo</span>
+          <div class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
         </div>
-        <div>
-          <p class="text-xs font-bold text-slate-800">Subject Import Completed</p>
-          <p class="text-[11px] text-slate-500 mt-0.5">450 subjects mapped to Primavera 2026 successfully.</p>
+        <h2 class="text-3xl font-black font-headline tracking-tight">{{ activePeriod().name }}</h2>
+        <div class="flex flex-wrap gap-x-6 gap-y-1 text-xs text-white/70 font-medium">
+          <span class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-sm text-secondary">date_range</span>
+            Inicio: <strong class="text-white">{{ activePeriod().startDate }}</strong>
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-sm text-secondary">event_busy</span>
+            Término: <strong class="text-white">{{ activePeriod().endDate }}</strong>
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-sm text-emerald-400">hourglass_bottom</span>
+            <strong class="text-white">{{ daysLeft() }} días restantes</strong>
+          </span>
+        </div>
+        <!-- Progress bar -->
+        <div class="max-w-lg space-y-1.5 pt-2">
+          <div class="flex justify-between text-[10px] font-bold uppercase tracking-wider text-white/50">
+            <span>Progreso del Ciclo</span>
+            <span class="text-white">{{ periodProgress() }}% completado</span>
+          </div>
+          <div class="w-full h-2.5 bg-white/10 rounded-full overflow-hidden">
+            <div
+              class="h-full bg-gradient-to-r from-secondary to-[#00a3cc] rounded-full transition-all duration-700"
+              [style.width.%]="periodProgress()">
+            </div>
+          </div>
         </div>
       </div>
-      <div class="flex gap-4">
-        <div class="relative">
-          <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
-            <span class="material-symbols-outlined text-lg">warning</span>
-          </div>
+
+      <!-- CTA del periodo -->
+      <a
+        routerLink="/admin/periodos"
+        class="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-2xl transition-all border border-white/10"
+      >
+        <span class="material-symbols-outlined text-sm">settings</span>
+        Gestionar Periodos
+      </a>
+    </div>
+  </div>
+
+  <!-- ── Tarjetas de Estadísticas ──────────────────────────────────────── -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+    <!-- Docentes -->
+    <div class="animate-card delay-3 bg-white rounded-2xl border border-outline-variant/20 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
+      <div class="flex items-center justify-between">
+        <div class="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">person_book</span>
         </div>
-        <div>
-          <p class="text-xs font-bold text-slate-800">Teacher Conflict Detected</p>
-          <p class="text-[11px] text-slate-500 mt-0.5">ID #882 has overlapping schedules.</p>
+        <span class="text-[10px] font-black text-secondary bg-secondary/10 px-2 py-0.5 rounded-full uppercase">Docentes</span>
+      </div>
+      <div>
+        <p class="text-3xl font-black text-primary tabular-nums">{{ stats().totalDocentes }}</p>
+        <p class="text-xs text-outline font-medium mt-0.5">Registrados en el sistema</p>
+      </div>
+    </div>
+
+    <!-- Alumnos -->
+    <div class="animate-card delay-3 bg-white rounded-2xl border border-outline-variant/20 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
+      <div class="flex items-center justify-between">
+        <div class="w-10 h-10 rounded-xl bg-[#4f46e5]/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-[#4f46e5]" style="font-variation-settings: 'FILL' 1;">school</span>
+        </div>
+        <span class="text-[10px] font-black text-[#4f46e5] bg-[#4f46e5]/10 px-2 py-0.5 rounded-full uppercase">Alumnos</span>
+      </div>
+      <div>
+        <p class="text-3xl font-black text-primary tabular-nums">{{ stats().totalAlumnos | number }}</p>
+        <p class="text-xs text-outline font-medium mt-0.5">Inscritos en el periodo</p>
+      </div>
+    </div>
+
+    <!-- Materias totales -->
+    <div class="animate-card delay-4 bg-white rounded-2xl border border-outline-variant/20 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
+      <div class="flex items-center justify-between">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-amber-600" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+        </div>
+        <span class="text-[10px] font-black text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-full uppercase">Materias</span>
+      </div>
+      <div>
+        <p class="text-3xl font-black text-primary tabular-nums">{{ stats().totalMaterias }}</p>
+        <p class="text-xs text-outline font-medium mt-0.5">{{ stats().materiasActivas }} activas este periodo</p>
+      </div>
+    </div>
+
+    <!-- Estado del sistema -->
+    <div class="animate-card delay-4 bg-gradient-to-br from-primary to-[#006782] rounded-2xl shadow-lg p-5 flex flex-col gap-3 text-white">
+      <div class="flex items-center justify-between">
+        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified</span>
+        </div>
+        <span class="text-[10px] font-black bg-emerald-400/20 text-emerald-300 px-2 py-0.5 rounded-full uppercase">Operativo</span>
+      </div>
+      <div>
+        <p class="text-xl font-black tabular-nums">Sistema en línea</p>
+        <p class="text-xs text-white/60 font-medium mt-0.5">Todos los microservicios activos</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Acciones Rápidas + Actividad Reciente ─────────────────────────── -->
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+    <!-- Acciones Rápidas (3/5) -->
+    <div class="lg:col-span-3 animate-card delay-5 space-y-4">
+      <h3 class="text-sm font-black text-primary font-headline uppercase tracking-wider">Accesos Rápidos</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <a
+          *ngFor="let action of quickActions"
+          [routerLink]="action.route"
+          class="group flex items-start gap-4 p-5 bg-white rounded-2xl border border-outline-variant/20 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
+        >
+          <div [ngClass]="['w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-all', action.color]">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">{{ action.icon }}</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">{{ action.label }}</p>
+            <p class="text-xs text-outline mt-0.5 leading-snug">{{ action.description }}</p>
+          </div>
+          <span class="material-symbols-outlined text-outline/40 group-hover:text-primary group-hover:translate-x-1 transition-all self-center shrink-0">arrow_forward</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Actividad Reciente (2/5) -->
+    <div class="lg:col-span-2 animate-card delay-6">
+      <h3 class="text-sm font-black text-primary font-headline uppercase tracking-wider mb-4">Actividad Reciente</h3>
+      <div class="bg-white rounded-2xl border border-outline-variant/20 shadow-sm divide-y divide-outline-variant/10">
+        <div *ngFor="let item of recentActivity; let last = last" class="flex gap-3 p-4">
+          <!-- Icon -->
+          <div [ngClass]="['w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5', item.iconBg]">
+            <span [ngClass]="['material-symbols-outlined text-base', item.iconColor]">{{ item.icon }}</span>
+          </div>
+          <!-- Text -->
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-on-surface leading-tight">{{ item.title }}</p>
+            <p class="text-[11px] text-outline mt-0.5 leading-snug">{{ item.description }}</p>
+            <p class="text-[10px] text-outline/60 font-semibold mt-1 uppercase tracking-wide">{{ item.time }}</p>
+          </div>
         </div>
       </div>
     </div>
+
   </div>
 </div>
