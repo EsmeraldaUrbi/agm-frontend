@@ -107,35 +107,45 @@
         <p class="text-xs text-[#72787e] font-semibold pl-8">Listado de materias impartidas y estadísticas comparativas de desempeño.</p>
       </div>
 
-      <!-- Pestañas Rápidas de Periodo -->
-      <div class="flex bg-slate-200/70 p-1 rounded-xl gap-1 w-full md:w-auto overflow-x-auto">
-        <button (click)="periodoFiltro.set('Todos')"
-          [ngClass]="periodoFiltro() === 'Todos' ? 'bg-[#003b5c] text-white shadow-md' : 'text-[#42474e] hover:bg-white/50'"
-          class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
-          Todos los Periodos
-        </button>
-        <button (click)="periodoFiltro.set('Activos')"
-          [ngClass]="periodoFiltro() === 'Activos' ? 'bg-[#003b5c] text-white shadow-md' : 'text-[#42474e] hover:bg-white/50'"
-          class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          Periodo Activo
-        </button>
-        <button (click)="periodoFiltro.set('Inactivos')"
-          [ngClass]="periodoFiltro() === 'Inactivos' ? 'bg-[#003b5c] text-white shadow-md' : 'text-[#42474e] hover:bg-white/50'"
-          class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-          Histórico Inactivo
-        </button>
-        <button (click)="periodoFiltro.set('Primavera 2026')"
-          [ngClass]="periodoFiltro() === 'Primavera 2026' ? 'bg-[#003b5c] text-white shadow-md' : 'text-[#42474e] hover:bg-white/50'"
-          class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
-          Primavera 2026
-        </button>
-        <button (click)="periodoFiltro.set('Otoño 2025')"
-          [ngClass]="periodoFiltro() === 'Otoño 2025' ? 'bg-[#003b5c] text-white shadow-md' : 'text-[#42474e] hover:bg-white/50'"
-          class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
-          Otoño 2025
-        </button>
+      <!-- Barra Híbrida de Filtros (Botones Rápidos + Desplegable Dinámico para N años) -->
+      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        
+        <!-- Botones Rápidos de Estado -->
+        <div class="flex bg-slate-200/70 p-1 rounded-xl gap-1 overflow-x-auto flex-1 md:flex-none">
+          <button (click)="periodoFiltro.set('Todos')"
+            [ngClass]="periodoFiltro() === 'Todos' ? 'bg-[#003b5c] text-white shadow-md' : 'text-[#42474e] hover:bg-white/50'"
+            class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
+            Historial Completo
+          </button>
+          <button (click)="periodoFiltro.set('Activos')"
+            [ngClass]="periodoFiltro() === 'Activos' ? 'bg-[#003b5c] text-white shadow-md' : 'text-[#42474e] hover:bg-white/50'"
+            class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Periodo Activo
+          </button>
+          <button (click)="periodoFiltro.set('Inactivos')"
+            [ngClass]="periodoFiltro() === 'Inactivos' ? 'bg-[#003b5c] text-white shadow-md' : 'text-[#42474e] hover:bg-white/50'"
+            class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+            Histórico Inactivo
+          </button>
+        </div>
+
+        <!-- Desplegable Dinámico de Todos los Periodos Disponibles (Soporta N años) -->
+        <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-[#c2c7ce] shadow-sm flex-1 md:flex-none">
+          <span class="material-symbols-outlined text-sm text-[#003b5c]">calendar_month</span>
+          <span class="text-xs font-bold text-[#42474e] uppercase tracking-wider hidden md:inline">Periodo:</span>
+          <select [ngModel]="periodoFiltro()" (ngModelChange)="periodoFiltro.set($event)"
+            class="bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-3 py-1 text-xs font-bold text-[#003b5c] focus:border-[#003b5c] outline-none cursor-pointer w-full md:w-auto">
+            <option value="Todos">Seleccionar Periodo Específico...</option>
+            <optgroup label="Periodos Académicos Históricos">
+              @for (p of periodosDisponibles(); track p) {
+                <option [value]="p">{{ p }} {{ p === 'Primavera 2026' ? '(Activo)' : '(Inactivo)' }}</option>
+              }
+            </optgroup>
+          </select>
+        </div>
+
       </div>
     </div>
 

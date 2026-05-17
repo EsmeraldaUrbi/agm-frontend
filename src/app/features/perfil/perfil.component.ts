@@ -54,8 +54,9 @@ export class PerfilComponent {
   // Filtro de periodo seleccionado
   periodoFiltro = signal<string>('Todos');
 
-  // Lista de materias impartidas históricamente (cumpliendo el requerimiento del proyecto)
+  // Lista de materias impartidas históricamente (trayectoria de varios años)
   materiasHistorial = signal<MateriaHistorial[]>([
+    // --- 2026 ---
     {
       id: 'm1',
       nrc: '15842',
@@ -76,6 +77,7 @@ export class PerfilComponent {
         difTasa: -7
       }
     },
+    // --- 2025 ---
     {
       id: 'm2',
       nrc: '28491',
@@ -128,6 +130,7 @@ export class PerfilComponent {
         difTasa: 2
       }
     },
+    // --- 2024 ---
     {
       id: 'm5',
       nrc: '10580',
@@ -138,11 +141,109 @@ export class PerfilComponent {
       activo: false,
       promedioGeneral: 8.5,
       tasaAprobacion: 85,
-      totalAlumnos: 32
+      totalAlumnos: 32,
+      comparativa: {
+        periodoAnterior: 'Otoño 2023',
+        promedioAnterior: 8.2,
+        tasaAnterior: 81,
+        alumnosAnterior: 30,
+        difPromedio: 0.3,
+        difTasa: 4
+      }
+    },
+    {
+      id: 'm6',
+      nrc: '10115',
+      nombre: 'Web Services Architecture',
+      seccion: '101',
+      horario: 'Lunes, Miércoles 16:00 - 18:00',
+      periodo: 'Primavera 2024',
+      activo: false,
+      promedioGeneral: 8.0,
+      tasaAprobacion: 80,
+      totalAlumnos: 38,
+      comparativa: {
+        periodoAnterior: 'Primavera 2023',
+        promedioAnterior: 8.3,
+        tasaAnterior: 84,
+        alumnosAnterior: 42,
+        difPromedio: -0.3,
+        difTasa: -4
+      }
+    },
+    // --- 2023 ---
+    {
+      id: 'm7',
+      nrc: '98501',
+      nombre: 'Sistemas Distribuidos',
+      seccion: '001',
+      horario: 'Martes, Jueves 14:00 - 16:00',
+      periodo: 'Otoño 2023',
+      activo: false,
+      promedioGeneral: 8.2,
+      tasaAprobacion: 81,
+      totalAlumnos: 30
+    },
+    {
+      id: 'm8',
+      nrc: '95420',
+      nombre: 'Web Services Architecture',
+      seccion: '101',
+      horario: 'Lunes, Miércoles 16:00 - 18:00',
+      periodo: 'Primavera 2023',
+      activo: false,
+      promedioGeneral: 8.3,
+      tasaAprobacion: 84,
+      totalAlumnos: 42
+    },
+    // --- 2022 ---
+    {
+      id: 'm9',
+      nrc: '89100',
+      nombre: 'Bases de Datos Avanzadas',
+      seccion: '102',
+      horario: 'Lunes, Miércoles 10:00 - 12:00',
+      periodo: 'Otoño 2022',
+      activo: false,
+      promedioGeneral: 8.5,
+      tasaAprobacion: 86,
+      totalAlumnos: 34
+    },
+    {
+      id: 'm10',
+      nrc: '85211',
+      nombre: 'Web Services Architecture',
+      seccion: '101',
+      horario: 'Lunes, Miércoles 16:00 - 18:00',
+      periodo: 'Primavera 2022',
+      activo: false,
+      promedioGeneral: 8.2,
+      tasaAprobacion: 83,
+      totalAlumnos: 39
+    },
+    // --- 2021 ---
+    {
+      id: 'm11',
+      nrc: '78410',
+      nombre: 'Sistemas Distribuidos',
+      seccion: '001',
+      horario: 'Martes, Jueves 14:00 - 16:00',
+      periodo: 'Otoño 2021',
+      activo: false,
+      promedioGeneral: 8.1,
+      tasaAprobacion: 80,
+      totalAlumnos: 29
     }
   ]);
 
-  // Lista filtrada según la pestaña seleccionada
+  // Extraer dinámicamente todos los periodos únicos disponibles en el historial
+  periodosDisponibles = computed(() => {
+    const lista = this.materiasHistorial();
+    const periodos = lista.map(m => m.periodo);
+    return Array.from(new Set(periodos)); // Elimina duplicados
+  });
+
+  // Lista filtrada según la pestaña/select seleccionado
   materiasFiltradas = computed(() => {
     const filtro = this.periodoFiltro();
     const lista = this.materiasHistorial();
