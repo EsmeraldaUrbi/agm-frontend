@@ -46,7 +46,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'profile',
-        loadComponent: () => import('./shared/components/placeholder-dashboard/placeholder-dashboard').then(m => m.PlaceholderDashboardComponent)
+        loadComponent: () => import('./features/perfil/perfil.component').then(m => m.PerfilComponent)
       }
     ]
   },
