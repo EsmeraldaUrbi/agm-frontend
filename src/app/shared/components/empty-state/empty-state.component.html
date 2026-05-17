@@ -1,0 +1,24 @@
+<section class="bg-white rounded-xl shadow-[0px_2px_4px_rgba(0,59,92,0.05)] p-8 flex flex-col items-center text-center border border-slate-100 h-full">
+  <div class="w-full aspect-video mb-6 bg-slate-50 rounded-lg overflow-hidden relative">
+    <img *ngIf="imageSrc" [src]="imageSrc" [alt]="imageAlt" class="w-full h-full object-cover opacity-80" />
+    <div class="absolute inset-0 flex items-center justify-center">
+      <span class="material-symbols-outlined text-6xl text-primary/20">{{ iconName }}</span>
+    </div>
+  </div>
+  
+  <h3 class="text-xl font-bold text-primary mb-3">{{ title }}</h3>
+  <p class="text-on-surface-variant text-sm leading-relaxed mb-8 flex-1">{{ description }}</p>
+  
+  <!-- Action Button -->
+  <button 
+    *ngIf="actionText"
+    (click)="onAction()"
+    [class]="actionType === 'primary' 
+      ? 'w-full py-3 px-6 bg-primary-container text-white rounded-lg font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-sm active:scale-[0.98]'
+      : 'w-full py-3 px-6 border-2 border-primary-container text-primary-container bg-white rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-slate-50 transition-all active:scale-[0.98]'">
+    <span *ngIf="actionIcon" class="material-symbols-outlined text-sm">{{ actionIcon }}</span>
+    {{ actionText }}
+  </button>
+  
+  <ng-content></ng-content>
+</section>

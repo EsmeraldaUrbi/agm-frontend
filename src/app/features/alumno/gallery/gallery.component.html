@@ -1,0 +1,37 @@
+<div class="mb-10">
+<h2 class="text-3xl font-black text-primary mb-2">Empty State Design System</h2>
+<p class="text-on-surface-variant max-w-2xl">Visual collection of systemic states for non-existent or unconfigured data within the FCC management environment.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+
+<app-empty-state
+  title="Sin materias asignadas"
+  description="Parece que aún no tienes cursos asignados para el periodo actual. Completa tu proceso de inscripción para comenzar."
+  iconName="auto_stories"
+  imageSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuAAuItUTOsg4xPJbSqMqRcooYlzRIG9rauDa08YEqEGNK12qOBPozJrZgEDO8YZCkyDIYQjBOoVANb5MzByBMzJkD1Dhnlm0sjKSVoBCKERMp1Cqj-k0HwoF03RJ0yfSpXI8M14ujtKJv2TgmX9RVfYgWt91-DQ50U_BWZwVjr0KeMjCJ0n4rLXZydax3Cl7tuOtiuBnLjd6RRkdFlUsLfWaJFY6aHoecqwe-S1v4ziPMSJCOQ0meje2ULNa4-WiAxPDRJrz8CyuZyK"
+  actionText="Inscribir materia"
+  actionIcon="add_circle"
+></app-empty-state>
+
+<app-empty-state
+  title="Sin alumnos inscritos"
+  description="Esta sección se encuentra vacía. Puedes cargar la lista oficial de alumnos para este curso desde un archivo CSV o Excel."
+  iconName="group"
+  imageSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuAZUtgpFYirXmI1FN77LNLE8ynuQtxKKXueIrnFCVugaUot9qy_FahEVQ5KHwMb8UfX_yfnDqTvIEt91RF8mr4jcBU6AsScz8wT8aoCDnl5quBmjaAnI-44XyH66cHObMv398P5C_ywUEbOZuzC4Hdz9xNIyXR8dIGUpgTJPe7oq3-J8HMOLr31kMlV7us6I1MToqRVbit8eQWvMFtWXGmifLL6Kc29EcHmO-8FEB_5Miyx1Da9Rzed91fCOTbbkM9Z2SsILWZU5jPZ"
+  actionText="Importar lista"
+  actionIcon="upload_file"
+  actionType="secondary"
+></app-empty-state>
+
+<app-empty-state
+  title="Sin calificaciones"
+  description="Aún no hay registros de evaluación para este grupo. Selecciona un parcial para comenzar la captura de notas."
+  iconName="grade"
+  imageSrc="https://lh3.googleusercontent.com/aida-public/AB6AXuBX2MaLNu09uEVl3gdMyvfrHspCMhQYhig_m9MxK2PUEnjGATPZpOfcfXcVvLDnvy2zPLFwz5UnTIzckqkO0lTSdbSqHkol-ux7eOMqs9Uiq1Dgymk--9FkH_KY7bOeSKPZJRVhbU9XNdw8LLFJxwnlqLhhrWui8Ynl4hG9lq5pXK581uFuqQQprfy1v4_3rSmJhfnl1Rnmef-U6pr5h0j0J95PErFMt4H_ACZKEh13DETCrxMvjfOxUXH5BVKENcD98or622ovUAmI"
+>
+  <div class="w-full p-4 mt-2 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+    <p class="text-xs text-slate-500 font-medium italic">Esperando inicio de periodo de evaluación...</p>
+  </div>
+</app-empty-state>
+
+</div>
