@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { GalleryComponent } from './gallery/gallery.component';
 import { HorarioComponent } from './horario/horario.component';
+import { QrAsistenciaComponent } from './qr-asistencia/qr-asistencia.component';
 
 export const ALUMNO_ROUTES: Routes = [
   {
@@ -20,5 +21,9 @@ export const ALUMNO_ROUTES: Routes = [
   {
     path: 'horario',
     component: HorarioComponent
+  },
+  {
+    path: 'qr',
+    component: QrAsistenciaComponent
   }
 ];
