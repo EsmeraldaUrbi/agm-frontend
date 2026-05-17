@@ -151,7 +151,11 @@
             Total: {{ totalPonderacion() }}%
             @if (!esValido()) {
               <span class="font-normal text-xs">
-                ({{ totalPonderacion() > 100 ? 'excede' : 'faltan' }} {{ (totalPonderacion() - 100) | number:'1.0-0' | (totalPonderacion() > 100 ? '' : '') }}{{ totalPonderacion() > 100 ? totalPonderacion() - 100 : 100 - totalPonderacion() }}%)
+                @if (totalPonderacion() > 100) {
+                  (excede {{ totalPonderacion() - 100 }}%)
+                } @else {
+                  (faltan {{ 100 - totalPonderacion() }}%)
+                }
               </span>
             }
           </div>

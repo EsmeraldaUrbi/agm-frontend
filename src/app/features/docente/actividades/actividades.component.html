@@ -43,7 +43,7 @@
       @for (tab of tabs; track tab) {
         <a class="px-5 py-4 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 cursor-pointer"
           [routerLink]="['../../materias', materia.nrc, tab.toLowerCase()]"
-          [ngClass]="tab === 'Calificaciones'
+          [ngClass]="tab === 'Actividades'
             ? 'text-[#003b5c] border-[#003b5c]'
             : 'text-slate-500 hover:text-[#003b5c] border-transparent'">
           {{ tab }}
@@ -52,115 +52,191 @@
     </nav>
   </div>
 
-  <!-- ===== Contenido de Calificaciones ===== -->
+  <!-- ===== Contenido de Actividades ===== -->
   <div class="space-y-6">
 
-    <!-- Toast de guardado exitoso -->
-    @if (guardado()) {
-      <div class="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl animate-fade-in">
-        <span class="material-symbols-outlined text-emerald-600" style="font-variation-settings:'FILL' 1">check_circle</span>
-        <span class="text-sm font-bold text-emerald-700">Calificaciones guardadas y sincronizadas con MS-Calificaciones.</span>
-      </div>
-    }
-
-    <!-- Barra de Actividad Seleccionada y Acciones -->
-    <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <!-- Barra superior de filtros y acciones -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-xl border border-[#c2c7ce] shadow-sm">
       <div>
-        <div class="flex items-center gap-2 mb-1.5">
-          <span class="px-2.5 py-0.5 bg-[#003b5c]/8 text-[#003b5c] rounded text-xs font-bold uppercase tracking-wider">
-            {{ actividadActual.ponderacion_nombre }}
-          </span>
-          <span class="text-xs text-[#72787e] font-semibold">Valor: {{ actividadActual.valor_maximo }} pts</span>
-        </div>
-        <h2 class="text-2xl font-black text-[#003b5c] font-['Public_Sans']">{{ actividadActual.nombre }}</h2>
+        <h2 class="text-xl font-bold text-[#003b5c] font-['Public_Sans']">Evaluaciones y Actividades</h2>
+        <p class="text-sm text-[#42474e] mt-0.5">Gestiona las actividades calificables agrupadas por criterio de ponderación.</p>
       </div>
 
-      <div class="flex flex-wrap gap-3 w-full md:w-auto justify-end">
-        <button (click)="abrirImportarModal()"
-          class="flex items-center gap-2 px-4 py-2.5 border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 rounded-lg font-bold text-sm transition-colors shadow-sm flex-1 md:flex-none justify-center">
-          <span class="material-symbols-outlined text-sm">upload_file</span>
-          Importar Excel
-        </button>
-        <button class="flex items-center gap-2 px-4 py-2.5 border-2 border-[#c2c7ce] text-[#42474e] hover:bg-[#f3f4f5] rounded-lg font-bold text-sm transition-colors shadow-sm flex-1 md:flex-none justify-center">
-          <span class="material-symbols-outlined text-sm">download</span>
-          Exportar Concentrado
-        </button>
-        <button (click)="guardarCalificaciones()"
-          class="flex items-center gap-2 px-6 py-2.5 bg-[#003b5c] text-white hover:bg-[#00253b] rounded-lg font-bold text-sm shadow-md transition-all flex-1 md:flex-none justify-center">
-          <span class="material-symbols-outlined text-sm">save</span>
-          Guardar Cambios
+      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+        <!-- Filtro por Ponderación -->
+        <div class="inline-flex bg-[#f3f4f5] p-1 rounded-lg border border-[#c2c7ce]/60 overflow-x-auto max-w-full">
+          <button (click)="filtroPonderacion.set('todas')"
+            class="px-3 py-1.5 rounded-md text-xs font-bold transition-all whitespace-nowrap"
+            [ngClass]="filtroPonderacion() === 'todas' ? 'bg-white text-[#003b5c] shadow-sm' : 'text-[#72787e] hover:text-[#003b5c]'">
+            Todas ({{ actividades().length }})
+          </button>
+          @for (pond of ponderaciones; track pond.id) {
+            <button (click)="filtroPonderacion.set(pond.id)"
+              class="px-3 py-1.5 rounded-md text-xs font-bold transition-all whitespace-nowrap"
+              [ngClass]="filtroPonderacion() === pond.id ? 'bg-white text-[#003b5c] shadow-sm' : 'text-[#72787e] hover:text-[#003b5c]'">
+              {{ pond.nombre }}
+            </button>
+          }
+        </div>
+
+        <button (click)="abrirCrearModal()"
+          class="flex items-center gap-2 px-5 py-2.5 bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all text-sm font-bold flex-shrink-0">
+          <span class="material-symbols-outlined text-sm">add</span>
+          Crear Actividad
         </button>
       </div>
     </div>
 
-    <!-- Tabla Principal de Calificaciones (Alineada a Imagen 2) -->
-    <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden">
-      <div class="bg-[#f3f4f5] px-6 py-4 border-b border-[#c2c7ce]/60 flex justify-between items-center">
-        <div class="flex items-center gap-2 text-xs font-bold text-[#42474e] uppercase tracking-wider">
-          <span class="material-symbols-outlined text-[18px] text-[#003b5c]">group</span>
-          Lista de Alumnos Inscritos ({{ calificaciones().length }})
-        </div>
-        <div class="text-xs text-[#72787e] font-semibold">
-          Promedio de la Actividad: <strong class="text-[#003b5c] text-sm">{{ promedioActividad() | number:'1.1-1' }} / {{ actividadActual.valor_maximo }}</strong>
-        </div>
-      </div>
+    <!-- Grid de Actividades -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (act of actividadesFiltradas(); track act.id) {
+        <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden group">
+          
+          <!-- Card Header -->
+          <div class="p-6 border-b border-[#c2c7ce]/40 flex-1">
+            <div class="flex justify-between items-start gap-2 mb-3">
+              <span class="px-2.5 py-1 bg-[#003b5c]/8 text-[#003b5c] rounded-md text-xs font-bold tracking-wide">
+                {{ act.ponderacion_nombre }}
+              </span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest"
+                [ngClass]="act.estado === 'activa' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600'">
+                {{ act.estado }}
+              </span>
+            </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse whitespace-nowrap">
-          <thead>
-            <tr class="bg-slate-50/50 border-b border-[#c2c7ce]/40 text-[11px] font-extrabold text-[#72787e] uppercase tracking-widest">
-              <th class="py-4 px-6">MATRÍCULA</th>
-              <th class="py-4 px-6">ALUMNO</th>
-              <th class="py-4 px-6">CORREO INSTITUCIONAL</th>
-              <th class="py-4 px-6 text-center w-36">CALIFICACIÓN</th>
-              <th class="py-4 px-6 min-w-[300px]">OBSERVACIONES / RETROALIMENTACIÓN</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 font-medium text-sm">
-            @for (item of calificaciones(); track item.alumno_id) {
-              <tr class="hover:bg-[#f3f4f5]/40 transition-colors group" [ngClass]="{'bg-red-50/20': item.calificacion === 0}">
-                <td class="py-4 px-6 font-mono font-bold text-[#003b5c]">{{ item.matricula }}</td>
-                <td class="py-4 px-6 font-bold text-[#42474e]">{{ item.nombre }}</td>
-                <td class="py-4 px-6 text-xs text-[#72787e]">{{ item.correo }}</td>
-                
-                <!-- Input de Calificación -->
-                <td class="py-3 px-6 text-center bg-slate-50/40 group-hover:bg-white transition-colors">
-                  <div class="inline-flex items-center justify-center relative w-full max-w-[100px]">
-                    <input type="number" [(ngModel)]="item.calificacion" min="0" [max]="actividadActual.valor_maximo" step="0.1"
-                      class="w-full px-2 py-1.5 border-2 rounded-lg text-center font-bold text-[#003b5c] focus:outline-none transition-all text-sm"
-                      [ngClass]="item.calificacion > 0 ? 'border-[#c2c7ce] focus:border-[#003b5c]' : 'border-red-400 focus:border-red-500 bg-red-50/50 text-[#ba1a1a]'"/>
-                  </div>
-                </td>
+            <h3 class="text-lg font-bold text-[#003b5c] font-['Public_Sans'] mb-1.5 group-hover:text-[#006782] transition-colors">
+              {{ act.nombre }}
+            </h3>
+            <p class="text-xs text-[#72787e] line-clamp-2 mb-6 leading-relaxed">
+              {{ act.descripcion || 'Sin descripción especificada.' }}
+            </p>
 
-                <!-- Input de Observaciones -->
-                <td class="py-3 px-6 bg-slate-50/20 group-hover:bg-white transition-colors">
-                  <input type="text" [(ngModel)]="item.observaciones"
-                    class="w-full px-3 py-1.5 border border-transparent hover:border-[#c2c7ce] focus:border-[#003b5c] rounded-lg text-xs text-[#42474e] bg-transparent focus:bg-white focus:outline-none transition-all"
-                    placeholder="Agregar comentarios o retroalimentación..."/>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+            <!-- Progress / Stats -->
+            <div class="space-y-3 bg-[#f3f4f5]/60 p-3.5 rounded-lg border border-[#c2c7ce]/30">
+              <div class="flex justify-between text-xs font-bold text-[#42474e]">
+                <span class="flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[16px] text-[#003b5c]">grading</span>
+                  Calificadas
+                </span>
+                <span class="text-[#003b5c]">{{ act.evaluados }} / {{ act.total }} alumnos</span>
+              </div>
+              <div class="w-full bg-[#e7e8e9] h-2 rounded-full overflow-hidden">
+                <div class="bg-[#003b5c] h-2 rounded-full transition-all duration-500"
+                  [style.width]="(act.evaluados / act.total) * 100 + '%'">
+                </div>
+              </div>
+              <div class="flex justify-between items-center pt-1 border-t border-[#c2c7ce]/30 text-[11px] text-[#72787e] font-semibold">
+                <span>Valor: <strong class="text-[#003b5c]">{{ act.valor_maximo }} pts</strong></span>
+                <span>Promedio: <strong class="text-[#003b5c]">{{ act.promedio | number:'1.1-1' }}</strong></span>
+              </div>
+            </div>
+          </div>
 
-      <!-- Table Footer -->
-      <div class="p-6 bg-white border-t border-[#c2c7ce]/40 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-semibold text-[#72787e]">
-        <div class="flex items-center gap-6">
-          <span class="flex items-center gap-1.5 text-[#003b5c]">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#003b5c]"></span>
-            Aprobados: {{ calificaciones().length - 1 }}
-          </span>
-          <span class="flex items-center gap-1.5 text-[#ba1a1a]">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#ba1a1a]"></span>
-            Sin Calificar / Cero: 1
-          </span>
+          <!-- Card Footer Actions -->
+          <div class="p-4 bg-[#f3f4f5] border-t border-[#c2c7ce]/60 flex items-center gap-2">
+            <button [routerLink]="['../../materias', materia.nrc, 'calificaciones']" [queryParams]="{ actividad: act.id }"
+              class="flex-1 bg-[#003b5c] text-white py-2 rounded-lg text-xs font-bold hover:bg-[#00253b] transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+              <span class="material-symbols-outlined text-[16px]">edit_document</span>
+              Calificar
+            </button>
+            <button (click)="abrirImportarModal(act)"
+              class="px-3 py-2 border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors flex items-center justify-center shadow-sm flex-shrink-0"
+              title="Importar Excel de Calificaciones">
+              <span class="material-symbols-outlined text-[18px]">upload_file</span>
+            </button>
+            <button (click)="eliminarActividad(act.id)"
+              class="p-2 text-[#c2c7ce] hover:text-[#ba1a1a] transition-colors flex-shrink-0"
+              title="Eliminar Actividad">
+              <span class="material-symbols-outlined text-[18px]">delete</span>
+            </button>
+          </div>
+
         </div>
-        <p>Sincronización en tiempo real vía gRPC con MS-Alumnos y MS-Calificaciones</p>
-      </div>
+      }
+
+      @if (actividadesFiltradas().length === 0) {
+        <div class="col-span-full bg-white p-12 rounded-xl border border-[#c2c7ce] text-center text-[#72787e]">
+          <span class="material-symbols-outlined text-5xl mb-3 block">event_busy</span>
+          <p class="text-base font-bold text-[#003b5c]">No se encontraron actividades en esta categoría.</p>
+          <p class="text-xs mt-1">Crea una nueva actividad usando el botón superior.</p>
+        </div>
+      }
     </div>
-
   </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: CREAR ACTIVIDAD                                                    -->
+  <!-- ========================================================================= -->
+  @if (showCrearModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+      <div class="bg-white rounded-2xl shadow-2xl border border-[#c2c7ce] w-full max-w-lg overflow-hidden animate-scale-up">
+        
+        <!-- Header Modal -->
+        <div class="bg-[#003b5c] p-6 text-white flex justify-between items-center">
+          <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-2xl">add_task</span>
+            <h3 class="text-xl font-bold font-['Public_Sans']">Nueva Actividad</h3>
+          </div>
+          <button (click)="showCrearModal.set(false)" class="text-white/80 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Body Modal -->
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-[#72787e] uppercase tracking-wider mb-1.5">Criterio de Ponderación</label>
+            <select [(ngModel)]="nuevaActividad.ponderacion_id"
+              class="w-full px-3 py-2.5 border-2 border-[#c2c7ce] rounded-lg text-sm font-semibold text-[#003b5c] focus:border-[#003b5c] focus:outline-none transition-colors bg-white">
+              @for (pond of ponderaciones; track pond.id) {
+                <option [value]="pond.id">{{ pond.nombre }} ({{ pond.porcentaje }}%)</option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-[#72787e] uppercase tracking-wider mb-1.5">Nombre de la Actividad *</label>
+            <input [(ngModel)]="nuevaActividad.nombre"
+              class="w-full px-3 py-2.5 border-2 border-[#c2c7ce] rounded-lg text-sm font-semibold text-[#003b5c] focus:border-[#003b5c] focus:outline-none transition-colors"
+              placeholder="Ej. Examen Parcial 1, Práctica de Laboratorio 3"/>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-[#72787e] uppercase tracking-wider mb-1.5">Descripción</label>
+            <textarea [(ngModel)]="nuevaActividad.descripcion" rows="3"
+              class="w-full px-3 py-2 border-2 border-[#c2c7ce] rounded-lg text-sm text-[#42474e] focus:border-[#003b5c] focus:outline-none transition-colors"
+              placeholder="Instrucciones o detalles de la evaluación"></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-[#72787e] uppercase tracking-wider mb-1.5">Valor Máximo (Puntos)</label>
+              <input type="number" [(ngModel)]="nuevaActividad.valor_maximo" min="1" max="100"
+                class="w-full px-3 py-2.5 border-2 border-[#c2c7ce] rounded-lg text-sm font-bold text-[#003b5c] focus:border-[#003b5c] focus:outline-none transition-colors text-right"/>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#72787e] uppercase tracking-wider mb-1.5">Fecha de Aplicación</label>
+              <input type="date" [(ngModel)]="nuevaActividad.fecha_aplicacion"
+                class="w-full px-3 py-2.5 border-2 border-[#c2c7ce] rounded-lg text-sm font-semibold text-[#003b5c] focus:border-[#003b5c] focus:outline-none transition-colors"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Modal -->
+        <div class="p-6 bg-[#f3f4f5] border-t border-[#c2c7ce]/60 flex justify-end gap-3">
+          <button (click)="showCrearModal.set(false)"
+            class="px-5 py-2.5 text-sm font-bold text-[#42474e] hover:bg-slate-200 rounded-lg transition-colors">
+            Cancelar
+          </button>
+          <button (click)="guardarActividad()" [disabled]="!nuevaActividad.nombre"
+            class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+            Crear Actividad
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
 
   <!-- ========================================================================= -->
   <!-- MODAL: IMPORTAR EXCEL DE CALIFICACIONES (Imagen 1)                        -->
@@ -176,7 +252,7 @@
               <span class="material-symbols-outlined text-2xl">upload_file</span>
               <h3 class="text-xl font-bold font-['Public_Sans']">Importar Calificaciones desde Excel</h3>
             </div>
-            <p class="text-xs text-white/80 font-medium pl-8">Actividad: {{ actividadActual.nombre }}</p>
+            <p class="text-xs text-white/80 font-medium pl-8">Actividad: {{ actividadSeleccionada()?.nombre }}</p>
           </div>
           <button (click)="cerrarImportModal()" class="text-white/80 hover:text-white transition-colors">
             <span class="material-symbols-outlined">close</span>
@@ -306,7 +382,7 @@
           } @else {
             <button (click)="cerrarImportModal()"
               class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all">
-              Cerrar y Ver Calificaciones
+              Cerrar y Ver Actividad
             </button>
           }
         </div>

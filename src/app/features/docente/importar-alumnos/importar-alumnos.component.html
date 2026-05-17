@@ -1,0 +1,141 @@
+<div class="font-['Inter'] max-w-[1200px] mx-auto py-8">
+
+  <!-- ===== Header de Materia (Banner) ===== -->
+  <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden mb-8">
+    <div class="p-8 bg-gradient-to-r from-[#003B5C] to-[#00566d] text-white">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia.programa }}</span>
+        <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia.periodo }}</span>
+      </div>
+      <h1 class="text-3xl font-extrabold tracking-tight mb-2 font-['Public_Sans']">Importar Alumnos: {{ materia.nombre }}</h1>
+      <p class="text-white/80 text-sm font-medium">NRC: {{ materia.nrc }} • Sección: {{ materia.seccion }}</p>
+    </div>
+  </div>
+
+  <!-- Stepper de Importación -->
+  <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm p-8 space-y-8">
+    
+    <!-- Barra de Pasos -->
+    <div class="flex items-center justify-between max-w-3xl mx-auto relative border-b border-[#c2c7ce]/40 pb-8">
+      
+      <div class="flex flex-col items-center gap-2 z-10">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all"
+          [ngClass]="step() >= 1 ? 'bg-[#003b5c] text-white shadow-md' : 'bg-[#e7e8e9] text-[#72787e]'">
+          1
+        </div>
+        <span class="text-xs font-bold text-[#003b5c] uppercase tracking-wider">Subir PDF</span>
+      </div>
+
+      <div class="flex flex-col items-center gap-2 z-10">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all"
+          [ngClass]="step() >= 2 ? 'bg-[#003b5c] text-white shadow-md' : 'bg-[#e7e8e9] text-[#72787e]'">
+          2
+        </div>
+        <span class="text-xs font-bold" [ngClass]="step() >= 2 ? 'text-[#003b5c]' : 'text-[#72787e]'">Procesando</span>
+      </div>
+
+      <div class="flex flex-col items-center gap-2 z-10">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all"
+          [ngClass]="step() >= 3 ? 'bg-[#003b5c] text-white shadow-md' : 'bg-[#e7e8e9] text-[#72787e]'">
+          3
+        </div>
+        <span class="text-xs font-bold" [ngClass]="step() >= 3 ? 'text-[#003b5c]' : 'text-[#72787e]'">Previsualización</span>
+      </div>
+
+      <div class="flex flex-col items-center gap-2 z-10">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all"
+          [ngClass]="step() >= 4 ? 'bg-[#003b5c] text-white shadow-md' : 'bg-[#e7e8e9] text-[#72787e]'">
+          4
+        </div>
+        <span class="text-xs font-bold" [ngClass]="step() >= 4 ? 'text-[#003b5c]' : 'text-[#72787e]'">Confirmar</span>
+      </div>
+
+    </div>
+
+    <!-- Contenido de cada Paso -->
+    @if (step() === 1) {
+      <div class="border-2 border-dashed border-[#c2c7ce] rounded-xl p-12 text-center hover:border-[#003b5c] transition-colors relative group bg-[#f3f4f5]/30">
+        <input type="file" accept=".pdf" (change)="seleccionarArchivo($event)"
+          class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"/>
+        
+        <span class="material-symbols-outlined text-6xl text-[#003b5c] mb-4 block group-hover:scale-110 transition-transform duration-300">
+          picture_as_pdf
+        </span>
+
+        <p class="text-base font-bold text-[#003b5c] mb-1">Selecciona o arrastra el PDF oficial de Acta de Alumnos del BUAP</p>
+        <p class="text-xs text-[#72787e]">El sistema extraerá automáticamente las matrículas y nombres mediante OCR/Texto.</p>
+      </div>
+    }
+
+    @if (step() === 2) {
+      <div class="py-20 text-center space-y-4 animate-fade-in">
+        <div class="w-14 h-14 border-4 border-[#003b5c]/20 border-t-[#003b5c] rounded-full animate-spin mx-auto"></div>
+        <p class="text-base font-bold text-[#003b5c]">Analizando documento PDF y extrayendo matrículas...</p>
+        <p class="text-xs text-[#72787e]">Conectando con MS-Alumnos para verificar estatus de inscripción.</p>
+      </div>
+    }
+
+    @if (step() === 3) {
+      <div class="space-y-6 animate-fade-in">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="text-lg font-bold text-[#003b5c] font-['Public_Sans']">Alumnos Detectados ({{ alumnosExtraidos().length }})</h3>
+            <p class="text-xs text-[#72787e]">Revisa que la información sea correcta antes de registrar en la base de datos.</p>
+          </div>
+          <button (click)="confirmarImportacion()"
+            class="px-6 py-2.5 bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all text-sm font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">check_circle</span>
+            Confirmar e Importar Alumnos
+          </button>
+        </div>
+
+        <div class="border border-[#c2c7ce] rounded-xl overflow-hidden shadow-sm">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-slate-500 font-bold border-b border-[#c2c7ce]/40 text-xs tracking-wider uppercase">
+                <th class="p-4">Matrícula</th>
+                <th class="p-4">Nombre del Alumno</th>
+                <th class="p-4">Correo Institucional</th>
+                <th class="p-4">Estatus</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white font-medium">
+              @for (item of alumnosExtraidos(); track item.matricula) {
+                <tr class="hover:bg-[#f3f4f5]/40 transition-colors">
+                  <td class="p-4 font-mono font-bold text-[#003b5c]">{{ item.matricula }}</td>
+                  <td class="p-4 text-[#42474e] font-bold">{{ item.nombre }}</td>
+                  <td class="p-4 text-xs text-[#72787e]">{{ item.correo }}</td>
+                  <td class="p-4">
+                    <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-xs font-bold">
+                      {{ item.status }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    @if (step() === 4) {
+      <div class="py-16 text-center space-y-4 animate-fade-in">
+        <span class="material-symbols-outlined text-6xl text-emerald-600 mb-2 block" style="font-variation-settings:'FILL' 1">
+          task_alt
+        </span>
+        <h3 class="text-2xl font-black text-[#003b5c] font-['Public_Sans']">¡Alumnos Importados Exitosamente!</h3>
+        <p class="text-sm text-[#72787e] max-w-md mx-auto">
+          Los alumnos han sido registrados en la materia y sincronizados con MS-Alumnos.
+        </p>
+        <div class="pt-4">
+          <button [routerLink]="['../../materias', materia.nrc, 'ponderaciones']"
+            class="px-8 py-3 bg-[#003b5c] text-white rounded-xl shadow-md hover:bg-[#00253b] transition-all text-sm font-bold inline-flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            Continuar a Ponderaciones
+          </button>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

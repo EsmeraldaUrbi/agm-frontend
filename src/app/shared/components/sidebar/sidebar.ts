@@ -7,6 +7,7 @@ interface NavItem {
   label: string;
   route: string;
   icon: string;
+  section?: string;  // separador de sección opcional
 }
 
 @Component({
@@ -39,14 +40,25 @@ export class SidebarComponent implements OnInit {
 
   generateMenu(role: string) {
     const adminItems: NavItem[] = [
-      { label: 'Dashboard', route: '/admin/dashboard', icon: 'dashboard' },
-      { label: 'Directorios', route: '/admin/usuarios', icon: 'supervisor_account' },
-      { label: 'Periodos', route: '/admin/periodos', icon: 'calendar_month' },
-      { label: 'Mi Perfil', route: '/profile', icon: 'person' }
+      // ── Principal ──────────────────────────────────────────
+      { label: 'Dashboard',           route: '/admin/dashboard',          icon: 'dashboard',          section: 'Principal' },
+      { label: 'Directorios',         route: '/admin/usuarios',           icon: 'supervisor_account' },
+      { label: 'Periodos',            route: '/admin/periodos',           icon: 'calendar_month' },
+      // ── Gestión de Datos ───────────────────────────────────
+      { label: 'Importar Materias',   route: '/admin/importar-materias',  icon: 'upload_file',        section: 'Gestión de Datos' },
+      // ── Cuenta ─────────────────────────────────────────────
+      { label: 'Mi Perfil',           route: '/profile',                  icon: 'person',             section: 'Cuenta' },
     ];
 
     const docenteItems: NavItem[] = [
-      { label: 'Dashboard', route: '/docente/dashboard', icon: 'dashboard' }
+      // ── Principal ──────────────────────────────────────────
+      { label: 'Dashboard',           route: '/docente/dashboard',        icon: 'dashboard',          section: 'Principal' },
+      { label: 'Mis Cursos',          route: '/docente/mis-cursos',       icon: 'school' },
+      // ── Asistencias ────────────────────────────────────────
+      { label: 'Pase de Lista (QR)',  route: '/docente/pase-lista',       icon: 'qr_code_scanner',    section: 'Asistencias' },
+      { label: 'Historial',           route: '/docente/materias/0/asistencias', icon: 'calendar_month' },
+      // ── Cuenta ─────────────────────────────────────────────
+      { label: 'Mi Perfil',           route: '/profile',                  icon: 'person',             section: 'Cuenta' },
     ];
 
     const alumnoItems: NavItem[] = [

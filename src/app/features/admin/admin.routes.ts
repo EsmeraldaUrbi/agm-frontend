@@ -14,6 +14,10 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () => import('../../shared/components/placeholder-dashboard/placeholder-dashboard').then(m => m.PlaceholderDashboardComponent)
   },
   {
+    path: 'importar-materias',
+    loadComponent: () => import('../docente/importar-materias/importar-materias.component').then(m => m.ImportarMateriasComponent)
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'

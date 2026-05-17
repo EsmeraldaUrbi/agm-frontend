@@ -1,6 +1,6 @@
 import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 interface Criterio {
@@ -27,6 +27,15 @@ export class PonderacionesComponent {
     programa: 'Postgrado en Computación',
     periodo: 'Primavera 2026',
   };
+
+  constructor(private route: ActivatedRoute) {
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.materia.nrc = id;
+      }
+    });
+  }
 
   // Criterios de evaluación — reactivos con signal
   criterios = signal<Criterio[]>([

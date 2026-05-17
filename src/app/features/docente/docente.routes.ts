@@ -10,9 +10,9 @@ export const DOCENTE_ROUTES: Routes = [
     loadComponent: () => import('./mis-cursos/mis-cursos.component').then(m => m.MisCursosComponent)
   },
   {
-    path: 'importar-materias',
-    loadComponent: () => import('./importar-materias/importar-materias.component').then(m => m.ImportarMateriasComponent)
-  },
+    path: 'materias/:id/importar-alumnos',
+    loadComponent: () => import('./importar-alumnos/importar-alumnos.component').then(m => m.ImportarAlumnosComponent)
+  }, // rebuild trigger
   {
     path: 'materias/:id/calificaciones',
     loadComponent: () => import('./registro-calificaciones/registro-calificaciones.component').then(m => m.RegistroCalificacionesComponent)
@@ -32,6 +32,10 @@ export const DOCENTE_ROUTES: Routes = [
   {
     path: 'materias/:id/ponderaciones',
     loadComponent: () => import('./ponderaciones/ponderaciones.component').then(m => m.PonderacionesComponent)
+  },
+  {
+    path: 'materias/:id/actividades',
+    loadComponent: () => import('./actividades/actividades.component').then(m => m.ActividadesComponent)
   },
   {
     path: '',

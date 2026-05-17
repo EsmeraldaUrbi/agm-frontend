@@ -99,6 +99,12 @@
             Calificaciones
           </button>
           <button
+            [routerLink]="['../materias', curso.nrc, 'importar-alumnos']"
+            class="px-3 py-2 border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors flex-shrink-0"
+            title="Importar Alumnos desde PDF">
+            <span class="material-symbols-outlined text-[20px] block">group_add</span>
+          </button>
+          <button
             [routerLink]="['../materias', curso.nrc, 'ponderaciones']"
             class="px-3 py-2 border-2 border-[#006782] text-[#006782] rounded-lg hover:bg-[#006782]/5 transition-colors flex-shrink-0"
             title="Configurar Ponderaciones">
@@ -109,9 +115,6 @@
             class="px-3 py-2 border-2 border-amber-500 text-amber-600 rounded-lg hover:bg-amber-50 transition-colors flex-shrink-0"
             title="Cerrar Materia">
             <span class="material-symbols-outlined text-[20px] block">lock_reset</span>
-          </button>
-          <button class="px-3 py-2 border-2 border-[#003b5c] text-[#003b5c] rounded-lg hover:bg-[#003b5c]/5 transition-colors flex-shrink-0" title="Ver detalle">
-            <span class="material-symbols-outlined text-[20px] block">visibility</span>
           </button>
         </div>
       </div>
