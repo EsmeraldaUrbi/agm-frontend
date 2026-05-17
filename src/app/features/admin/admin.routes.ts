@@ -11,7 +11,7 @@ export const ADMIN_ROUTES: Routes = [
   },
   {
     path: 'periodos',
-    loadComponent: () => import('../../shared/components/placeholder-dashboard/placeholder-dashboard').then(m => m.PlaceholderDashboardComponent)
+    loadComponent: () => import('./periodos/periodos').then(m => m.PeriodosComponent)
   },
   {
     path: 'importar-materias',

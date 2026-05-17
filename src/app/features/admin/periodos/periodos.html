@@ -1,0 +1,245 @@
+<div class="p-6 md:p-8 space-y-6 bg-[#f8f9fa] min-h-screen font-body text-on-surface">
+  
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-black text-primary font-headline tracking-tight">Gestión de Periodos</h1>
+      <p class="text-xs text-outline font-medium">Configura los ciclos escolares y calendarios de evaluación de la facultad.</p>
+    </div>
+    <agm-button (agmClick)="openCreateModal()" size="md">
+      <span class="material-symbols-outlined text-base mr-1.5">calendar_add_on</span>
+      Crear Periodo
+    </agm-button>
+  </div>
+
+  <!-- Active Period Spotlight Banner (Hero Card) -->
+  <div *ngIf="activePeriodo() as active" class="relative overflow-hidden rounded-3xl border border-primary/10 bg-gradient-to-r from-[#003b5c] to-[#00253B] p-6 md:p-8 text-white shadow-xl">
+    <!-- Decorative background elements -->
+    <div class="absolute -right-16 -top-16 w-48 h-48 bg-[#006782]/20 rounded-full blur-3xl opacity-60"></div>
+    <div class="absolute -bottom-8 -left-8 w-32 h-32 bg-[#006782]/10 rounded-full blur-2xl opacity-60"></div>
+
+    <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div class="space-y-3 flex-grow">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary text-[9px] font-black uppercase tracking-wider">Ciclo Activo</span>
+          <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></div>
+        </div>
+        <h2 class="text-3xl font-black tracking-tight font-headline">{{ active.name }}</h2>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/80 font-medium">
+          <p class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-sm text-secondary">date_range</span>
+            Inicio: <strong class="text-white">{{ active.startDate }}</strong>
+          </p>
+          <p class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-sm text-secondary">event_busy</span>
+            Término: <strong class="text-white">{{ active.endDate }}</strong>
+          </p>
+        </div>
+
+        <!-- Completion Progress Bar -->
+        <div class="pt-3 max-w-xl space-y-1.5">
+          <div class="flex justify-between items-center text-[10px] uppercase font-bold tracking-wider text-white/60">
+            <span>Progreso del ciclo</span>
+            <span class="text-white font-extrabold">{{ activePeriodProgress() }}% completado</span>
+          </div>
+          <div class="w-full h-2.5 bg-white/10 rounded-full overflow-hidden">
+            <div 
+              class="h-full bg-gradient-to-r from-secondary to-[#00a3cc] rounded-full transition-all duration-500" 
+              [style.width.%]="activePeriodProgress()"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions for Active Period -->
+      <div class="flex items-center gap-2 self-stretch md:self-auto justify-end">
+        <button 
+          (click)="openEditModal(active)"
+          class="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition-all"
+        >
+          <span class="material-symbols-outlined text-sm">edit</span>
+          Editar Fechas
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Other Periods History Section -->
+  <div class="space-y-4">
+    <h3 class="text-sm font-black text-primary font-headline uppercase tracking-wider">Historial y Planificación de Periodos</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <tr *ngIf="otherPeriodos().length === 0" class="text-center text-outline py-8 block col-span-3">
+        <td class="text-center text-outline">
+          No hay otros periodos académicos registrados.
+        </td>
+      </tr>
+
+      <agm-card 
+        *ngFor="let per of otherPeriodos()" 
+        [title]="per.name"
+        [subtitle]="per.startDate + ' al ' + per.endDate"
+        [accent]="per.status === 'planning'"
+        [hoverable]="true"
+        customClass="bg-white border-outline-variant/15 shadow-md flex flex-col justify-between"
+        bodyClass="p-5 flex flex-col justify-between h-full"
+      >
+        <!-- Period Details -->
+        <div class="space-y-4 flex-grow">
+          <!-- Status pill -->
+          <div>
+            <span 
+              [class]="per.status === 'planning' 
+                ? 'px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-[9px] font-extrabold uppercase'
+                : 'px-2 py-0.5 rounded-full bg-outline/10 text-outline text-[9px] font-bold uppercase'"
+            >
+              {{ per.status === 'planning' ? 'Planificación' : 'Histórico (Cerrado)' }}
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2 text-xs text-on-surface-variant font-medium">
+            <span class="material-symbols-outlined text-base text-outline">calendar_month</span>
+            <p>Duración: <strong class="text-on-surface">16 semanas</strong></p>
+          </div>
+        </div>
+
+        <!-- Period Action Buttons -->
+        <div class="flex items-center justify-between border-t border-outline-variant/10 mt-5 pt-4">
+          <!-- Activation for planning period -->
+          <div>
+            <agm-button 
+              *ngIf="per.status === 'planning'" 
+              (agmClick)="setAsActive(per)" 
+              size="sm" 
+              variant="outline"
+            >
+              Activar Periodo
+            </agm-button>
+            <span *ngIf="per.status === 'closed'" class="text-[10px] text-outline font-bold uppercase tracking-wider">Histórico</span>
+          </div>
+
+          <!-- Edit & Delete utility icons -->
+          <div class="flex items-center gap-1">
+            <button 
+              (click)="openEditModal(per)"
+              title="Editar periodo"
+              class="p-1.5 rounded-lg text-outline hover:bg-primary/10 hover:text-primary transition-all"
+            >
+              <span class="material-symbols-outlined text-base">edit</span>
+            </button>
+            <button 
+              (click)="deletePeriodo(per)"
+              title="Eliminar periodo"
+              class="p-1.5 rounded-lg text-outline hover:bg-error-container/10 hover:text-error transition-all"
+            >
+              <span class="material-symbols-outlined text-base">delete</span>
+            </button>
+          </div>
+        </div>
+
+      </agm-card>
+    </div>
+  </div>
+
+  <!-- Interactive Create/Edit Dialog Modal Backdrop -->
+  <div 
+    *ngIf="showModal()" 
+    class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-modal-in"
+  >
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-outline-variant/10 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-outline-variant/10 flex justify-between items-center bg-surface-variant/5">
+        <div>
+          <h3 class="text-base font-black text-primary font-headline">
+            {{ isEditing() ? 'Editar Periodo Académico' : 'Crear Periodo Académico' }}
+          </h3>
+          <p class="text-[10px] text-outline font-semibold mt-0.5">Ingresa las fechas correspondientes para este ciclo escolar.</p>
+        </div>
+        <button 
+          (click)="showModal.set(false)" 
+          class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:bg-surface-variant/20 hover:text-on-surface transition-all"
+        >
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body (Form) -->
+      <form (ngSubmit)="savePeriodo()" class="p-6 space-y-4">
+        
+        <!-- Period Name -->
+        <agm-input 
+          label="Nombre del Periodo" 
+          placeholder="Ej. Otoño 2026, Verano 2026..." 
+          [(ngModel)]="periodoName" 
+          name="name" 
+          [required]="true"
+        >
+          <span iconLeft class="material-symbols-outlined text-base">calendar_today</span>
+        </agm-input>
+
+        <!-- Start Date -->
+        <agm-input 
+          label="Fecha de Inicio" 
+          type="date" 
+          [(ngModel)]="periodoStartDate" 
+          name="startDate" 
+          [required]="true"
+        >
+          <span iconLeft class="material-symbols-outlined text-base">date_range</span>
+        </agm-input>
+
+        <!-- End Date -->
+        <agm-input 
+          label="Fecha de Término" 
+          type="date" 
+          [(ngModel)]="periodoEndDate" 
+          name="endDate" 
+          [required]="true"
+        >
+          <span iconLeft class="material-symbols-outlined text-base">event_busy</span>
+        </agm-input>
+
+        <!-- Status selector -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-bold text-outline uppercase tracking-wider">Estado Inicial del Periodo</label>
+          <select 
+            [(ngModel)]="periodoStatus" 
+            name="status" 
+            class="w-full h-9 px-3 text-xs font-semibold bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface cursor-pointer"
+          >
+            <option value="planning">Planificación</option>
+            <option value="active">Activo (Desactivará el periodo actual)</option>
+            <option value="closed">Cerrado / Histórico</option>
+          </select>
+        </div>
+
+        <!-- Modal Actions Footer -->
+        <div class="flex justify-end gap-3 pt-6 border-t border-outline-variant/10 mt-6">
+          <agm-button 
+            type="button" 
+            variant="outline" 
+            (agmClick)="showModal.set(false)"
+          >
+            Cancelar
+          </agm-button>
+          
+          <agm-button type="submit">
+            {{ isEditing() ? 'Guardar Cambios' : 'Registrar Periodo' }}
+          </agm-button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom Alert Toast Popup Notification -->
+  <div 
+    *ngIf="showToast()" 
+    class="fixed bottom-6 right-6 px-4 py-3 rounded-2xl bg-secondary-container text-secondary border border-secondary/15 flex items-center gap-3 shadow-lg z-50 animate-bounce"
+  >
+    <span class="material-symbols-outlined text-lg">check_circle</span>
+    <span class="text-xs font-bold leading-none">{{ toastMessage() }}</span>
+  </div>
+
+</div>
