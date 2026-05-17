@@ -1,0 +1,5 @@
+.schedule-grid {
+    display: grid;
+    grid-template-columns: 80px repeat(5, 1fr);
+    grid-auto-rows: minmax(60px, auto);
+}
