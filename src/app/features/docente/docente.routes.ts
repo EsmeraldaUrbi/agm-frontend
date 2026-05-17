@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const DOCENTE_ROUTES: Routes = [
   {
     path: 'dashboard',
-    loadComponent: () => import('../../shared/components/placeholder-dashboard/placeholder-dashboard').then(m => m.PlaceholderDashboardComponent)
+    loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
   {
     path: '',
