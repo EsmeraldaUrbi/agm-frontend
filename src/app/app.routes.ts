@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './shared/layouts/main-layout/main-layout';
 import { LoginComponent } from './features/auth/login/login';
 import { LandingComponent } from './features/landing/landing';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -23,26 +24,35 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
+    data: { roles: ['admin'] },
     loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
   },
   {
     path: 'docente',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
+    data: { roles: ['docente'] },
     loadChildren: () => import('./features/docente/docente.routes').then(m => m.DOCENTE_ROUTES)
   },
   {
     path: 'alumno',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
+    data: { roles: ['alumno'] },
     loadChildren: () => import('./features/alumno/alumno.routes').then(m => m.ALUMNO_ROUTES)
   },
   {
     // Ruta del escáner QR — SIN main-layout (se usa desde el teléfono del docente)
     path: 'docente/escaner',
+    canActivate: [authGuard],
+    data: { roles: ['docente'] },
     loadComponent: () => import('./features/docente/escaner-qr/escaner-qr.component').then(m => m.EscanerQrComponent)
   },
   {
     path: '',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
     children: [
       {
         path: 'profile',
