@@ -30,6 +30,10 @@ export const DOCENTE_ROUTES: Routes = [
     loadComponent: () => import('./pase-lista/pase-lista.component').then(m => m.PaseListaComponent)
   },
   {
+    path: 'materias/:id/ponderaciones',
+    loadComponent: () => import('./ponderaciones/ponderaciones.component').then(m => m.PonderacionesComponent)
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'

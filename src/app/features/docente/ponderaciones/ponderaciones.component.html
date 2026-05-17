@@ -1,0 +1,284 @@
+<div class="font-['Inter']">
+
+  <!-- ===== Header de Materia (Banner) ===== -->
+  <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden mb-6">
+    <div class="p-8 bg-gradient-to-r from-[#003B5C] to-[#00566d] text-white">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia.programa }}</span>
+            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia.periodo }}</span>
+          </div>
+          <h1 class="text-3xl font-extrabold tracking-tight mb-3 font-['Public_Sans']">{{ materia.nombre }}</h1>
+          <div class="flex flex-wrap gap-4 text-white/80 font-medium text-sm">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm">numbers</span>
+              NRC: {{ materia.nrc }}
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm">meeting_room</span>
+              Sección: {{ materia.seccion }}
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm">schedule</span>
+              {{ materia.horario }}
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-3 flex-shrink-0">
+          <button class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg text-sm font-bold transition-all">
+            <span class="material-symbols-outlined text-sm">file_download</span>
+            Sílabo
+          </button>
+          <button class="flex items-center gap-2 px-4 py-2 bg-white text-[#003b5c] rounded-lg text-sm font-bold shadow-lg hover:opacity-90 transition-all">
+            <span class="material-symbols-outlined text-sm">edit</span>
+            Editar Datos
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs de navegación -->
+    <nav class="flex border-b border-slate-100 bg-white px-6 overflow-x-auto">
+      @for (tab of ['Resumen','Alumnos','Ponderaciones','Actividades','Calificaciones','Asistencias','Reportes']; track tab) {
+        <a class="px-5 py-4 text-sm font-semibold whitespace-nowrap transition-colors border-b-2"
+          [ngClass]="tab === 'Ponderaciones'
+            ? 'text-[#003b5c] border-[#003b5c]'
+            : 'text-slate-500 hover:text-[#003b5c] border-transparent'">
+          {{ tab }}
+        </a>
+      }
+    </nav>
+  </div>
+
+  <!-- ===== Grid Principal ===== -->
+  <div class="grid grid-cols-12 gap-6">
+
+    <!-- ============================================ -->
+    <!-- IZQUIERDA: Formulario de criterios           -->
+    <!-- ============================================ -->
+    <div class="col-span-12 lg:col-span-8 space-y-5">
+
+      <!-- Toast de guardado exitoso -->
+      @if (guardado()) {
+        <div class="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+          <span class="material-symbols-outlined text-emerald-600" style="font-variation-settings:'FILL' 1">check_circle</span>
+          <span class="text-sm font-bold text-emerald-700">Ponderaciones guardadas correctamente.</span>
+        </div>
+      }
+
+      <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm p-6">
+        <!-- Header del formulario -->
+        <div class="flex items-start justify-between mb-6">
+          <div>
+            <h2 class="text-xl font-bold text-[#003b5c] font-['Public_Sans']">Criterios de Evaluación</h2>
+            <p class="text-sm text-[#42474e] mt-0.5">Define los porcentajes para el cálculo de la nota final.</p>
+          </div>
+          <div class="flex gap-2 flex-shrink-0">
+            <button class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-[#003b5c] hover:bg-[#f3f4f5] rounded-lg transition-colors border border-[#c2c7ce]">
+              <span class="material-symbols-outlined text-sm">upload_file</span>
+              Importar desde Excel
+            </button>
+            <button (click)="agregarCriterio()"
+              class="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-sm hover:bg-[#00253b] transition-colors">
+              <span class="material-symbols-outlined text-sm">add</span>
+              Agregar Criterio
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de criterios -->
+        <div class="space-y-3">
+          @for (criterio of criterios(); track criterio.id) {
+            <div class="flex items-center gap-4 p-4 border border-[#c2c7ce]/60 rounded-xl hover:border-[#003b5c]/30 hover:bg-[#f3f4f5]/40 transition-all group">
+
+              <!-- Icono -->
+              <div class="w-10 h-10 bg-[#003b5c]/5 rounded-full flex items-center justify-center text-[#003b5c] flex-shrink-0">
+                <span class="material-symbols-outlined">{{ criterio.icono }}</span>
+              </div>
+
+              <!-- Nombre y descripción (editables inline) -->
+              <div class="flex-1 min-w-0">
+                <input [(ngModel)]="criterio.nombre"
+                  class="w-full text-sm font-bold text-[#003b5c] bg-transparent border-b border-transparent hover:border-[#c2c7ce] focus:border-[#003b5c] focus:outline-none transition-colors py-0.5"
+                  placeholder="Nombre del criterio"/>
+                <input [(ngModel)]="criterio.descripcion"
+                  class="w-full text-xs text-[#72787e] italic bg-transparent border-b border-transparent hover:border-[#c2c7ce] focus:border-[#003b5c] focus:outline-none transition-colors py-0.5 mt-0.5"
+                  placeholder="Descripción"/>
+              </div>
+
+              <!-- Input de porcentaje -->
+              <div class="w-28 flex-shrink-0">
+                <div class="relative">
+                  <input type="number" min="0" max="100"
+                    [value]="criterio.porcentaje"
+                    (input)="updatePorcentaje(criterio.id, $any($event.target).value)"
+                    class="w-full pl-3 pr-8 py-2 border-2 rounded-lg text-right font-bold text-[#003b5c] focus:outline-none transition-all text-sm"
+                    [ngClass]="esValido()
+                      ? 'border-[#c2c7ce] focus:border-[#003b5c]'
+                      : 'border-amber-400 focus:border-amber-500'"/>
+                  <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[#72787e] font-bold text-sm">%</span>
+                </div>
+              </div>
+
+              <!-- Botón eliminar -->
+              <button (click)="eliminar(criterio.id)"
+                class="p-2 text-[#c2c7ce] hover:text-[#ba1a1a] transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100">
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+
+            </div>
+          }
+
+          <!-- Estado vacío -->
+          @if (criterios().length === 0) {
+            <div class="text-center py-10 text-[#72787e]">
+              <span class="material-symbols-outlined text-4xl mb-2 block">playlist_add</span>
+              <p class="text-sm font-semibold">No hay criterios. Agrega uno para comenzar.</p>
+            </div>
+          }
+        </div>
+
+        <!-- Footer con botones -->
+        <div class="mt-8 pt-6 border-t border-[#c2c7ce]/50 flex justify-between items-center">
+
+          <!-- Indicador de suma -->
+          <div class="flex items-center gap-2 text-sm font-bold"
+            [ngClass]="esValido() ? 'text-emerald-600' : (totalPonderacion() > 100 ? 'text-[#ba1a1a]' : 'text-amber-600')">
+            <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">
+              {{ esValido() ? 'check_circle' : (totalPonderacion() > 100 ? 'error' : 'warning') }}
+            </span>
+            Total: {{ totalPonderacion() }}%
+            @if (!esValido()) {
+              <span class="font-normal text-xs">
+                ({{ totalPonderacion() > 100 ? 'excede' : 'faltan' }} {{ (totalPonderacion() - 100) | number:'1.0-0' | (totalPonderacion() > 100 ? '' : '') }}{{ totalPonderacion() > 100 ? totalPonderacion() - 100 : 100 - totalPonderacion() }}%)
+              </span>
+            }
+          </div>
+
+          <div class="flex gap-3">
+            <button (click)="descartar()"
+              class="px-6 py-2.5 text-sm font-bold text-[#42474e] hover:bg-[#f3f4f5] rounded-lg transition-colors">
+              Descartar Cambios
+            </button>
+            <button (click)="guardar()"
+              [disabled]="!esValido()"
+              class="px-8 py-2.5 text-sm font-bold text-white rounded-lg shadow-md transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+              [ngClass]="esValido() ? 'bg-[#003b5c] hover:bg-[#00253b]' : 'bg-[#42474e]'">
+              <span class="material-symbols-outlined text-sm">save</span>
+              Guardar Ponderaciones
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- DERECHA: Estado + Gráfico + Lineamientos     -->
+    <!-- ============================================ -->
+    <div class="col-span-12 lg:col-span-4 space-y-5">
+
+      <!-- Indicador circular de estado -->
+      <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm p-6">
+        <h3 class="text-xs font-bold text-[#72787e] uppercase tracking-widest mb-6">Estado de Configuración</h3>
+        <div class="text-center mb-6">
+          <!-- Círculo reactivo -->
+          <div class="inline-flex items-center justify-center mb-3 relative">
+            <svg class="w-28 h-28 -rotate-90" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="50" fill="transparent" stroke="#e7e8e9" stroke-width="10"/>
+              <circle cx="60" cy="60" r="50" fill="transparent"
+                [attr.stroke]="esValido() ? '#22c55e' : (totalPonderacion() > 100 ? '#ba1a1a' : '#f59e0b')"
+                stroke-width="10"
+                stroke-linecap="round"
+                stroke-dasharray="314.16"
+                [attr.stroke-dashoffset]="314.16 - (314.16 * (totalPonderacion() / 100))"
+                class="transition-all duration-500"/>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="text-2xl font-black"
+                [ngClass]="colorIndicador().text">
+                {{ totalPonderacion() }}%
+              </span>
+            </div>
+          </div>
+          <p class="text-base font-bold text-[#003b5c] font-['Public_Sans']">{{ colorIndicador().label }}</p>
+          <p class="text-xs text-[#72787e] mt-1 leading-relaxed max-w-[200px] mx-auto">
+            @if (esValido()) {
+              El total suma exactamente el 100% requerido por el reglamento académico.
+            } @else if (totalPonderacion() > 100) {
+              Reduce {{ totalPonderacion() - 100 }}% de los criterios para poder guardar.
+            } @else {
+              Faltan {{ 100 - totalPonderacion() }}% por distribuir entre los criterios.
+            }
+          </p>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div class="space-y-2">
+          <div class="flex justify-between text-xs font-bold uppercase text-[#72787e]">
+            <span>Progreso Total</span>
+            <span [ngClass]="colorIndicador().text">{{ colorIndicador().desc }}</span>
+          </div>
+          <div class="w-full bg-[#e7e8e9] h-3 rounded-full overflow-hidden">
+            <div class="h-3 rounded-full transition-all duration-500"
+              [ngClass]="colorIndicador().bg"
+              [style.width]="(totalPonderacion() > 100 ? 100 : totalPonderacion()) + '%'">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Distribución Visual (gráfico de barras dinámico) -->
+      <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm p-6">
+        <h3 class="text-xs font-bold text-[#72787e] uppercase tracking-widest mb-4">Distribución Visual</h3>
+        <div class="h-48 w-full flex items-end gap-2 px-2">
+          @for (criterio of criterios(); track criterio.id; let i = $index) {
+            <div class="flex-1 flex flex-col items-center gap-1 min-w-0">
+              <span class="text-[10px] font-bold text-[#003b5c]">{{ criterio.porcentaje }}%</span>
+              <div class="w-full rounded-t-lg transition-all duration-500"
+                [style.height]="alturaBarra(criterio.porcentaje)"
+                [style.backgroundColor]="colorBarra(i)">
+              </div>
+            </div>
+          }
+          @if (criterios().length === 0) {
+            <p class="w-full text-center text-xs text-[#72787e] pb-4">Sin criterios</p>
+          }
+        </div>
+        <div class="flex justify-around mt-3">
+          @for (criterio of criterios(); track criterio.id) {
+            <span class="text-[9px] font-bold text-[#72787e] uppercase truncate max-w-[48px] text-center">
+              {{ criterio.nombre.split(' ')[0] }}
+            </span>
+          }
+        </div>
+      </div>
+
+      <!-- Lineamientos BUAP -->
+      <div class="bg-[#003b5c] text-white rounded-xl shadow-md p-6 relative overflow-hidden">
+        <div class="absolute -right-8 -bottom-8 opacity-10 pointer-events-none">
+          <span class="material-symbols-outlined text-[120px]">info</span>
+        </div>
+        <h3 class="text-sm font-bold mb-4 flex items-center gap-2 relative z-10">
+          <span class="material-symbols-outlined text-sm text-[#42d0fe]">lightbulb</span>
+          Lineamientos BUAP
+        </h3>
+        <ul class="text-xs space-y-2.5 font-medium text-[#a0cbf3] relative z-10">
+          <li class="flex gap-2">
+            <span class="text-white flex-shrink-0">•</span>
+            La asistencia no puede superar el 15% de la ponderación total.
+          </li>
+          <li class="flex gap-2">
+            <span class="text-white flex-shrink-0">•</span>
+            Debe existir al menos un criterio de evaluación práctico.
+          </li>
+          <li class="flex gap-2">
+            <span class="text-white flex-shrink-0">•</span>
+            Las ponderaciones deben ser aprobadas antes de la semana 3.
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>

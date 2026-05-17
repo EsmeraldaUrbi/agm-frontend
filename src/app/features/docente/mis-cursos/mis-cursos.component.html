@@ -96,7 +96,13 @@
           <button
             [routerLink]="['../materias', curso.nrc, 'calificaciones']"
             class="flex-1 bg-[#003b5c] text-white py-2.5 rounded-lg text-sm font-bold hover:bg-[#00253b] transition-colors truncate">
-            Registrar Calificaciones
+            Calificaciones
+          </button>
+          <button
+            [routerLink]="['../materias', curso.nrc, 'ponderaciones']"
+            class="px-3 py-2 border-2 border-[#006782] text-[#006782] rounded-lg hover:bg-[#006782]/5 transition-colors flex-shrink-0"
+            title="Configurar Ponderaciones">
+            <span class="material-symbols-outlined text-[20px] block">percent</span>
           </button>
           <button
             [routerLink]="['../materias', curso.nrc, 'cierre']"
