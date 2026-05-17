@@ -18,6 +18,10 @@ export const DOCENTE_ROUTES: Routes = [
     loadComponent: () => import('./registro-calificaciones/registro-calificaciones.component').then(m => m.RegistroCalificacionesComponent)
   },
   {
+    path: 'materias/:id/cierre',
+    loadComponent: () => import('./cierre-materia/cierre-materia.component').then(m => m.CierreMateriaComponent)
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'

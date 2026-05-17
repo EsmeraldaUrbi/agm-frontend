@@ -92,13 +92,19 @@
         </div>
 
         <!-- Card Footer Actions -->
-        <div class="border-t border-[#c2c7ce] p-4 bg-[#f3f4f5] flex gap-3">
+        <div class="border-t border-[#c2c7ce] p-4 bg-[#f3f4f5] flex gap-2">
           <button
             [routerLink]="['../materias', curso.nrc, 'calificaciones']"
-            class="flex-1 bg-[#003b5c] text-white py-2.5 rounded-lg text-sm font-bold hover:bg-[#00253b] transition-colors">
+            class="flex-1 bg-[#003b5c] text-white py-2.5 rounded-lg text-sm font-bold hover:bg-[#00253b] transition-colors truncate">
             Registrar Calificaciones
           </button>
-          <button class="px-3 py-2 border-2 border-[#003b5c] text-[#003b5c] rounded-lg hover:bg-[#003b5c]/5 transition-colors" title="Ver detalle">
+          <button
+            [routerLink]="['../materias', curso.nrc, 'cierre']"
+            class="px-3 py-2 border-2 border-amber-500 text-amber-600 rounded-lg hover:bg-amber-50 transition-colors flex-shrink-0"
+            title="Cerrar Materia">
+            <span class="material-symbols-outlined text-[20px] block">lock_reset</span>
+          </button>
+          <button class="px-3 py-2 border-2 border-[#003b5c] text-[#003b5c] rounded-lg hover:bg-[#003b5c]/5 transition-colors flex-shrink-0" title="Ver detalle">
             <span class="material-symbols-outlined text-[20px] block">visibility</span>
           </button>
         </div>

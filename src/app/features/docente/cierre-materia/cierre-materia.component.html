@@ -1,0 +1,267 @@
+<div class="max-w-[1200px] mx-auto w-full font-['Inter'] space-y-8">
+
+  <!-- Breadcrumbs -->
+  <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-widest">
+    <a routerLink="/docente/dashboard" class="hover:text-[#003b5c] transition-colors">Dashboard</a>
+    <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+    <a routerLink="/docente/mis-cursos" class="hover:text-[#003b5c] transition-colors">Mis Cursos</a>
+    <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+    <span class="text-[#003b5c] font-bold">Cierre de Materia</span>
+  </nav>
+
+  <!-- Banner de Estado (cambia según el estado de la materia) -->
+  @if (esCerrada) {
+    <div class="flex items-center gap-4 p-4 bg-amber-50 border border-amber-300 rounded-xl">
+      <span class="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0">lock</span>
+      <div>
+        <p class="font-bold text-amber-900 text-sm">Materia Cerrada — Período de correcciones activo</p>
+        <p class="text-amber-700 text-xs">Puede realizar ajustes hasta imprimir la lista final. Los alumnos ya fueron notificados por correo.</p>
+      </div>
+      <button (click)="abrirModalActa()" class="ml-auto flex-shrink-0 px-5 py-2 bg-[#003b5c] text-white rounded-lg text-sm font-bold hover:bg-[#00253b] transition-colors flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+        Imprimir Acta Final
+      </button>
+    </div>
+  }
+
+  @if (esFinalizada) {
+    <div class="flex items-center gap-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+      <span class="material-symbols-outlined text-red-500 text-2xl flex-shrink-0" style="font-variation-settings: 'FILL' 1;">lock</span>
+      <div>
+        <p class="font-bold text-red-900 text-sm">Materia Finalizada — No se permiten más cambios</p>
+        <p class="text-red-700 text-xs">El acta final fue impresa. Cualquier corrección requiere un proceso administrativo presencial.</p>
+      </div>
+    </div>
+  }
+
+  <!-- Grid Principal -->
+  <section class="grid grid-cols-12 gap-6 items-start">
+
+    <!-- Card Principal (izquierda) -->
+    <div class="col-span-12 lg:col-span-8 space-y-6">
+      <div class="bg-white rounded-xl shadow-sm p-8 border border-slate-100 overflow-hidden relative">
+        <!-- Decorativo -->
+        <div class="absolute -top-12 -right-12 w-48 h-48 bg-[#003b5c]/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10">
+          <h2 class="text-2xl font-extrabold text-[#003B5C] mb-2 font-['Public_Sans']">Confirmación de Cierre Académico</h2>
+          <p class="text-slate-500 mb-8 max-w-xl">
+            Ha completado todos los requisitos para finalizar el periodo de evaluación de
+            <span class="font-bold text-slate-700">{{ materia.nombre }} (Sección {{ materia.seccion }})</span>.
+            Por favor, revise el resumen antes de proceder.
+          </p>
+
+          <!-- Stats Bento Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-[#F8F9FA] p-5 rounded-lg border border-slate-200 flex flex-col gap-2">
+              <div class="flex items-center justify-between text-slate-400">
+                <span class="material-symbols-outlined text-xl">group</span>
+                <span class="text-[10px] font-bold uppercase tracking-tighter">Estudiantes</span>
+              </div>
+              <div class="text-3xl font-black text-[#003B5C]">{{ materia.alumnos }}</div>
+              <div class="text-[11px] text-slate-500 font-medium">Alumnos Evaluados</div>
+            </div>
+            <div class="bg-[#F8F9FA] p-5 rounded-lg border border-slate-200 flex flex-col gap-2">
+              <div class="flex items-center justify-between text-[#006782]">
+                <span class="material-symbols-outlined text-xl">insights</span>
+                <span class="text-[10px] font-bold uppercase tracking-tighter">Promedio</span>
+              </div>
+              <div class="text-3xl font-black text-[#003B5C]">{{ materia.promedioGrupal }}</div>
+              <div class="text-[11px] text-slate-500 font-medium">Rendimiento Grupal</div>
+            </div>
+            <div class="bg-[#F8F9FA] p-5 rounded-lg border border-slate-200 flex flex-col gap-2">
+              <div class="flex items-center justify-between text-emerald-600">
+                <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                <span class="text-[10px] font-bold uppercase tracking-tighter">Asistencia</span>
+              </div>
+              <div class="text-3xl font-black text-[#003B5C]">{{ materia.asistencias }}%</div>
+              <div class="text-[11px] text-slate-500 font-medium">Registros Completos</div>
+            </div>
+          </div>
+
+          <!-- Warning Box (solo si aún no está cerrada) -->
+          @if (!esFinalizada) {
+            <div class="bg-amber-50 border-l-4 border-amber-400 p-5 rounded-r-lg mb-8 flex gap-4">
+              <span class="material-symbols-outlined text-amber-500 text-2xl flex-shrink-0">warning</span>
+              <div>
+                <h4 class="text-amber-900 font-bold text-sm mb-1">Advertencia Importante</h4>
+                <p class="text-amber-800/80 text-sm leading-relaxed">
+                  Al cerrar la materia se notificarán las calificaciones finales a los alumnos de forma automática.
+                  <span class="font-bold">Esta acción permite cambios solo hasta la impresión de la lista final (acta).</span>
+                  Una vez impresa el acta, cualquier cambio requerirá de un proceso administrativo presencial.
+                </p>
+              </div>
+            </div>
+          }
+
+          <!-- Botones de acción -->
+          <div class="flex flex-col sm:flex-row items-center gap-4">
+            @if (esActiva) {
+              <button
+                (click)="abrirModalCierre()"
+                class="w-full sm:w-auto px-8 h-12 bg-[#003b5c] text-white rounded-lg font-bold hover:bg-[#00253b] hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                Cerrar Materia Definitivamente
+                <span class="material-symbols-outlined">lock_reset</span>
+              </button>
+            }
+
+            @if (esCerrada) {
+              <button
+                (click)="abrirModalActa()"
+                class="w-full sm:w-auto px-8 h-12 bg-[#003b5c] text-white rounded-lg font-bold hover:bg-[#00253b] hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                Imprimir Acta Final
+                <span class="material-symbols-outlined">picture_as_pdf</span>
+              </button>
+            }
+
+            @if (esFinalizada) {
+              <div class="flex items-center gap-3 px-6 h-12 bg-slate-100 rounded-lg text-slate-400 font-bold text-sm">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">lock</span>
+                Materia finalizada — sin cambios posibles
+              </div>
+            }
+
+            <a
+              [routerLink]="['/docente/materias', materia.nrc, 'calificaciones']"
+              class="w-full sm:w-auto px-8 h-12 border border-slate-300 text-slate-600 rounded-lg font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+              Revisar Calificaciones
+              <span class="material-symbols-outlined">visibility</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Glassmorphism: Pre-visualizar Acta -->
+      <div class="bg-white/70 backdrop-blur-md border border-slate-200 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-6">
+          <div class="flex -space-x-3">
+            <div class="w-10 h-10 rounded-full border-2 border-white bg-[#baeaff] flex items-center justify-center text-[#003b5c] font-black text-xs">JG</div>
+            <div class="w-10 h-10 rounded-full border-2 border-white bg-[#ffdcc3] flex items-center justify-center text-[#391b00] font-black text-xs">MR</div>
+            <div class="w-10 h-10 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500">+{{ materia.alumnos - 2 }}</div>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-[#003B5C]">Listado de Alumnos</p>
+            <p class="text-[11px] text-slate-500">Visualizar pre-acta individual de calificaciones</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Vista Previa:</span>
+          <button class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-[#003b5c] flex items-center gap-2 hover:shadow-md transition-shadow">
+            <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+            Pre-visualizar Acta
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rail Derecho -->
+    <div class="col-span-12 lg:col-span-4 space-y-6">
+
+      <!-- Checklist de Cierre -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5">Checklist de Cierre</h3>
+        <ul class="space-y-4">
+          @for (item of checklist; track item.label) {
+            <li class="flex items-center gap-3">
+              @if (item.completado) {
+                <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+                  <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 700;">check</span>
+                </div>
+                <span class="text-sm text-slate-700">{{ item.label }}</span>
+              } @else {
+                <div class="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-slate-300 flex-shrink-0">
+                  <span class="material-symbols-outlined text-sm">hourglass_empty</span>
+                </div>
+                <span class="text-sm text-slate-400">{{ item.label }}</span>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+
+      <!-- Soporte Técnico -->
+      <div class="p-6 bg-slate-900 rounded-xl text-white">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="material-symbols-outlined text-[#7aa5cc]">contact_support</span>
+          <h4 class="font-bold text-sm">¿Necesita soporte técnico?</h4>
+        </div>
+        <p class="text-xs text-slate-400 mb-5 leading-relaxed">
+          Si tiene problemas con el cálculo de promedios o faltas, contacte a la Secretaría Académica de la FCC antes de realizar el cierre.
+        </p>
+        <a href="mailto:soporte.fcc@buap.mx"
+           class="block w-full py-2.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-center transition-colors">
+          Contactar Soporte
+        </a>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+
+<!-- ===== MODAL: Confirmar Cierre ===== -->
+@if (mostrarModalCierre) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="cancelarModal()"></div>
+
+    <!-- Modal Card -->
+    <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 z-10">
+      <div class="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5">
+        <span class="material-symbols-outlined text-amber-500 text-3xl">lock_reset</span>
+      </div>
+      <h3 class="text-xl font-black text-[#003b5c] text-center mb-2 font-['Public_Sans']">¿Cerrar la materia?</h3>
+      <p class="text-slate-500 text-sm text-center mb-2">
+        Esta acción <strong>notificará por correo a los {{ materia.alumnos }} alumnos inscritos</strong> con sus calificaciones finales.
+      </p>
+      <p class="text-slate-400 text-xs text-center mb-8">
+        Podrá realizar correcciones hasta imprimir la lista final (acta).
+      </p>
+
+      <div class="flex gap-3">
+        <button (click)="cancelarModal()" class="flex-1 py-3 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-colors text-sm">
+          Cancelar
+        </button>
+        <button (click)="confirmarCierre()" class="flex-1 py-3 bg-[#003b5c] text-white rounded-xl font-bold hover:bg-[#00253b] transition-colors text-sm flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-sm">check</span>
+          Sí, cerrar y notificar
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+
+<!-- ===== MODAL: Confirmar Impresión de Acta ===== -->
+@if (mostrarModalActa) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="cancelarModal()"></div>
+
+    <!-- Modal Card -->
+    <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 z-10">
+      <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
+        <span class="material-symbols-outlined text-red-500 text-3xl" style="font-variation-settings: 'FILL' 1;">lock</span>
+      </div>
+      <h3 class="text-xl font-black text-[#003b5c] text-center mb-2 font-['Public_Sans']">¿Imprimir Acta Final?</h3>
+      <p class="text-slate-500 text-sm text-center mb-2">
+        Esta es una acción <strong class="text-red-700">irreversible</strong>.
+      </p>
+      <div class="bg-red-50 border border-red-100 rounded-lg p-4 mb-8">
+        <p class="text-red-700 text-xs text-center font-semibold leading-relaxed">
+          Una vez impresa el acta, ya no se permitirán modificaciones en el sistema. Cualquier cambio posterior requerirá un proceso administrativo presencial.
+        </p>
+      </div>
+
+      <div class="flex gap-3">
+        <button (click)="cancelarModal()" class="flex-1 py-3 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-colors text-sm">
+          Cancelar
+        </button>
+        <button (click)="confirmarImpresionActa()" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors text-sm flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+          Imprimir y finalizar
+        </button>
+      </div>
+    </div>
+  </div>
+}
