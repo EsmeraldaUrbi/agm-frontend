@@ -7,7 +7,7 @@ export const ADMIN_ROUTES: Routes = [
   },
   {
     path: 'usuarios',
-    loadComponent: () => import('../../shared/components/placeholder-dashboard/placeholder-dashboard').then(m => m.PlaceholderDashboardComponent)
+    loadComponent: () => import('./usuarios/usuarios').then(m => m.UsuariosComponent)
   },
   {
     path: 'periodos',
