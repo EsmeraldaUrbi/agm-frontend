@@ -3,6 +3,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { GalleryComponent } from './gallery/gallery.component';
 import { HorarioComponent } from './horario/horario.component';
 import { QrAsistenciaComponent } from './qr-asistencia/qr-asistencia.component';
+import { CalificacionesComponent } from './calificaciones/calificaciones.component';
 
 export const ALUMNO_ROUTES: Routes = [
   {
@@ -25,5 +26,9 @@ export const ALUMNO_ROUTES: Routes = [
   {
     path: 'qr',
     component: QrAsistenciaComponent
+  },
+  {
+    path: 'calificaciones',
+    component: CalificacionesComponent
   }
 ];
