@@ -1,0 +1,154 @@
+<div class="max-w-[1200px] mx-auto w-full font-['Inter']">
+  
+  <!-- Breadcrumbs -->
+  <div class="flex items-center gap-2 text-sm text-slate-500 font-semibold mb-6 mt-4">
+    <a href="#" class="hover:text-[#0070A8]">Mis Cursos</a>
+    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+    <a href="#" class="hover:text-[#0070A8]">Programación Avanzada</a>
+    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+    <span class="text-[#0070A8] font-bold">Registro Manual</span>
+  </div>
+
+  <!-- Header Section -->
+  <div class="flex justify-between items-start mb-8">
+    <div>
+      <h1 class="text-3xl font-black text-[#003B5C] font-['Public_Sans'] mb-1">Programación Avanzada (SEC 001)</h1>
+      <p class="text-slate-600 font-medium">Facultad de Ciencias de la Computación • Otoño 2024</p>
+    </div>
+    <div class="flex gap-4">
+      <button class="px-5 py-2.5 rounded-lg border-2 border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-50 transition-colors flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">download</span>
+        Exportar Excel
+      </button>
+      <button class="px-5 py-2.5 rounded-lg bg-[#003B5C] text-white font-bold text-sm shadow-md hover:bg-[#002A42] transition-colors flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">save</span>
+        Guardar Cambios
+      </button>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+    <div class="overflow-x-auto">
+      <table class="w-full text-center border-collapse whitespace-nowrap">
+        <thead>
+          <tr class="bg-slate-50/50">
+            <th class="py-4 px-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest border-b border-slate-200 text-left">#</th>
+            <th class="py-4 px-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest border-b border-slate-200 text-left">MATRÍCULA</th>
+            <th class="py-4 px-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest border-b border-slate-200 text-left">ALUMNO</th>
+            <th class="py-4 px-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest border-b border-slate-200 bg-slate-50">TAREA 1</th>
+            <th class="py-4 px-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest border-b border-slate-200 bg-slate-50">TAREA 2</th>
+            <th class="py-4 px-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest border-b border-slate-200 bg-slate-50">EXAMEN 1</th>
+            <th class="py-4 px-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest border-b border-slate-200">PROMEDIO<br>REAL</th>
+            <th class="py-4 px-4 text-[11px] font-extrabold text-slate-500 uppercase tracking-widest border-b border-slate-200">P.<br>REDONDEADO</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let alumno of alumnos; let i = index" class="hover:bg-slate-50 transition-colors">
+            
+            <td class="py-4 px-4 text-xs font-bold text-slate-400 text-left">0{{ alumno.id }}</td>
+            <td class="py-4 px-4 text-sm font-semibold text-[#0070A8] text-left">{{ alumno.matricula }}</td>
+            <td class="py-4 px-4 text-sm font-semibold text-slate-800 text-left">{{ alumno.nombre }}</td>
+            
+            <!-- Calificaciones editables (simuladas con un input transparente) -->
+            <td class="py-3 px-2 bg-slate-50/30" [ngClass]="{'bg-red-50/30': !alumno.aprobado}">
+              <input type="number" [value]="alumno.t1 | number:'1.1-1'" 
+                class="w-16 text-center text-sm font-bold bg-transparent border border-transparent hover:border-slate-300 focus:border-[#0070A8] focus:ring-1 focus:ring-[#0070A8] rounded px-1 py-1 focus:outline-none transition-all"
+                [ngClass]="alumno.aprobado ? 'text-slate-700' : 'text-[#ba1a1a]'">
+            </td>
+            
+            <td class="py-3 px-2 bg-slate-50/30" [ngClass]="{'bg-red-50/30': !alumno.aprobado}">
+              <input type="number" [value]="alumno.t2 | number:'1.1-1'" 
+                class="w-16 text-center text-sm font-bold bg-transparent border border-transparent hover:border-slate-300 focus:border-[#0070A8] focus:ring-1 focus:ring-[#0070A8] rounded px-1 py-1 focus:outline-none transition-all"
+                [ngClass]="alumno.aprobado ? 'text-slate-700' : 'text-[#ba1a1a]'">
+            </td>
+            
+            <td class="py-3 px-2 bg-slate-50/30" [ngClass]="{'bg-red-50/30': !alumno.aprobado}">
+              <input type="number" [value]="alumno.e1 | number:'1.1-1'" 
+                class="w-16 text-center text-sm font-bold bg-transparent border border-transparent hover:border-slate-300 focus:border-[#0070A8] focus:ring-1 focus:ring-[#0070A8] rounded px-1 py-1 focus:outline-none transition-all"
+                [ngClass]="alumno.aprobado ? 'text-slate-700' : 'text-[#ba1a1a]'">
+            </td>
+            
+            <!-- Promedios calculados -->
+            <td class="py-4 px-4 font-mono text-sm" [ngClass]="alumno.aprobado ? 'text-slate-600' : 'text-[#ba1a1a] bg-red-50/50 font-bold'">
+              {{ alumno.promedioReal | number:'1.2-2' }}
+            </td>
+            
+            <td class="py-4 px-4">
+              <div class="inline-flex items-center justify-center w-8 h-8 rounded-lg font-bold text-sm shadow-sm"
+                   [ngClass]="alumno.aprobado ? 'bg-cyan-50 text-cyan-700' : 'bg-red-100 text-red-700'">
+                {{ alumno.promedioRedondeado }}
+              </div>
+            </td>
+            
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer (Pagination & Stats) -->
+    <div class="p-4 border-t border-slate-100 flex justify-between items-center bg-white">
+      <div class="flex items-center gap-6 text-xs font-bold">
+        <div class="flex items-center gap-2 text-slate-600">
+          <div class="w-2 h-2 rounded-full bg-[#003B5C]"></div>
+          Inscritos: 32
+        </div>
+        <div class="flex items-center gap-2 text-slate-600">
+          <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+          Evaluados: 28
+        </div>
+        <div class="flex items-center gap-2 text-[#ba1a1a]">
+          <div class="w-2 h-2 rounded-full bg-[#ba1a1a]"></div>
+          Reprobados: 4
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-4 text-xs font-bold text-slate-500">
+        Página 1 de 4
+        <div class="flex gap-1">
+          <button class="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-800 transition-colors">
+            <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+          </button>
+          <button class="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-800 transition-colors">
+            <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-600">
+        <span class="material-symbols-outlined">trending_up</span>
+      </div>
+      <div>
+        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Promedio Grupal</p>
+        <p class="text-2xl font-black text-[#003B5C]">8.42</p>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-full bg-cyan-50 flex items-center justify-center text-cyan-600">
+        <span class="material-symbols-outlined">checklist</span>
+      </div>
+      <div>
+        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Avance Evaluación</p>
+        <p class="text-2xl font-black text-[#003B5C]">87.5%</p>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-700">
+        <span class="material-symbols-outlined">history</span>
+      </div>
+      <div>
+        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Último Guardado</p>
+        <p class="text-2xl font-black text-[#003B5C]">14:20 hrs</p>
+      </div>
+    </div>
+
+  </div>
+</div>

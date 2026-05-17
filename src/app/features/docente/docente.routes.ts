@@ -6,6 +6,18 @@ export const DOCENTE_ROUTES: Routes = [
     loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
   {
+    path: 'mis-cursos',
+    loadComponent: () => import('./mis-cursos/mis-cursos.component').then(m => m.MisCursosComponent)
+  },
+  {
+    path: 'importar-materias',
+    loadComponent: () => import('./importar-materias/importar-materias.component').then(m => m.ImportarMateriasComponent)
+  },
+  {
+    path: 'materias/:id/calificaciones',
+    loadComponent: () => import('./registro-calificaciones/registro-calificaciones.component').then(m => m.RegistroCalificacionesComponent)
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'

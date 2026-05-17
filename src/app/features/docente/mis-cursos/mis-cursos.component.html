@@ -1,0 +1,156 @@
+<div class="max-w-[1440px] mx-auto font-['Inter']">
+
+  <!-- Page Header & Filter Bar -->
+  <div class="mb-8">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+      <div>
+        <h2 class="text-3xl font-black text-[#00253b] tracking-tight font-['Public_Sans']">Mis Cursos</h2>
+        <p class="text-[#42474e] mt-1">Periodo: Otoño 2024 • Facultad de Ciencias de la Computación</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="bg-[#00253b] text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 shadow-sm hover:opacity-90 transition-opacity">
+          <span class="material-symbols-outlined text-sm">download</span>
+          Descargar Reporte General
+        </button>
+      </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-[#c2c7ce] flex flex-wrap items-center gap-4">
+      <div class="flex-1 min-w-[300px] relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#72787e]">search</span>
+        <input
+          class="w-full pl-10 pr-4 py-2 rounded-lg border border-[#c2c7ce] focus:ring-2 focus:ring-[#42d0fe] focus:border-[#006782] outline-none transition-all text-sm"
+          placeholder="Buscar por NRC, materia o sección..."
+          type="text"
+        />
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-bold text-[#00253b] px-2">Filtrar por:</span>
+        <select class="bg-[#f3f4f5] border border-[#c2c7ce] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#00253b]">
+          <option>Todos los Niveles</option>
+          <option>Licenciatura</option>
+          <option>Maestría</option>
+        </select>
+        <select class="bg-[#f3f4f5] border border-[#c2c7ce] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#00253b]">
+          <option>Estatus: Activo</option>
+          <option>Estatus: Concluido</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Courses Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+    <!-- Course Cards -->
+    @for (curso of cursos; track curso.nrc) {
+      <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-all group">
+        <div class="p-6 flex-1">
+          <!-- NRC & Sección badges -->
+          <div class="flex justify-between items-start mb-4">
+            <span class="bg-[#baeaff] text-[#001f29] text-[10px] font-black px-2.5 py-1 rounded uppercase tracking-widest">
+              NRC: {{ curso.nrc }}
+            </span>
+            <span class="bg-[#e1e3e4] text-[#42474e] text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-widest">
+              Sección: {{ curso.seccion }}
+            </span>
+          </div>
+
+          <!-- Course Name -->
+          <h3 class="text-xl font-black text-[#00253b] leading-tight mb-5 font-['Public_Sans']">{{ curso.nombre }}</h3>
+
+          <!-- Stats -->
+          <div class="space-y-4">
+            <!-- Alumnos -->
+            <div class="flex items-center justify-between text-sm">
+              <div class="flex items-center gap-2 text-[#42474e]">
+                <span class="material-symbols-outlined text-lg">group</span>
+                <span>Estudiantes Inscritos:</span>
+              </div>
+              <span class="font-bold text-[#00253b]">{{ curso.alumnos }}</span>
+            </div>
+
+            <!-- Progress -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center gap-2 text-[#42474e]">
+                  <span class="material-symbols-outlined text-lg">task_alt</span>
+                  <span>Progreso de Evaluación:</span>
+                </div>
+                <span class="font-bold text-[#00253b]">{{ curso.progreso }}%</span>
+              </div>
+              <div class="w-full bg-[#e7e8e9] rounded-full h-2">
+                <div
+                  class="h-2 rounded-full transition-all duration-500"
+                  [ngClass]="curso.progresoColor"
+                  [style.width]="curso.progreso + '%'">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Footer Actions -->
+        <div class="border-t border-[#c2c7ce] p-4 bg-[#f3f4f5] flex gap-3">
+          <button
+            [routerLink]="['../materias', curso.nrc, 'calificaciones']"
+            class="flex-1 bg-[#003b5c] text-white py-2.5 rounded-lg text-sm font-bold hover:bg-[#00253b] transition-colors">
+            Registrar Calificaciones
+          </button>
+          <button class="px-3 py-2 border-2 border-[#003b5c] text-[#003b5c] rounded-lg hover:bg-[#003b5c]/5 transition-colors" title="Ver detalle">
+            <span class="material-symbols-outlined text-[20px] block">visibility</span>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Resumen Académico (Summary Card) -->
+    <div class="bg-[#003b5c] text-white rounded-xl p-8 border border-[#003b5c] shadow-md flex flex-col justify-between relative overflow-hidden">
+      <div class="relative z-10">
+        <h4 class="text-lg font-black mb-2 font-['Public_Sans']">Resumen Académico</h4>
+        <p class="text-[#7aa5cc] text-sm mb-8 leading-relaxed">Estado actual de sus cursos asignados para este periodo lectivo.</p>
+        <div class="space-y-5">
+          <div class="flex items-end gap-3">
+            <span class="text-5xl font-black">{{ cursos.length }}</span>
+            <span class="text-sm text-[#7aa5cc] pb-1.5">Cursos Activos</span>
+          </div>
+          <div class="flex items-end gap-3">
+            <span class="text-5xl font-black">{{ totalAlumnos }}</span>
+            <span class="text-sm text-[#7aa5cc] pb-1.5">Alumnos Totales</span>
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 relative z-10">
+        <button
+          routerLink="../dashboard"
+          class="w-full py-3 bg-white text-[#003b5c] rounded-lg font-black uppercase text-xs tracking-widest hover:bg-[#f3f4f5] transition-colors">
+          Ver Asistencias Globales
+        </button>
+      </div>
+      <!-- Decorative background element -->
+      <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+        <span class="material-symbols-outlined text-[160px]">shield</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Info Banner -->
+  <div class="mt-10 p-6 bg-[#edeeef] rounded-xl border border-[#c2c7ce] flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-full bg-[#baeaff] flex items-center justify-center text-[#00253b] flex-shrink-0">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">info</span>
+      </div>
+      <div>
+        <h5 class="font-bold text-[#00253b]">Fecha límite de captura: Ordinario 1</h5>
+        <p class="text-sm text-[#42474e]">Faltan 4 días para el cierre del sistema de calificaciones del primer parcial.</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 flex-shrink-0">
+      <span class="text-xs font-bold text-[#72787e] uppercase tracking-widest">Soporte Técnico</span>
+      <a class="text-[#003b5c] font-bold hover:underline" href="mailto:soporte.fcc@buap.mx">soporte.fcc@buap.mx</a>
+    </div>
+  </div>
+
+</div>
