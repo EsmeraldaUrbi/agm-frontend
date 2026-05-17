@@ -13,6 +13,14 @@ export const routes: Routes = [
     component: LoginComponent
   },
   {
+    path: 'forgot-password',
+    loadComponent: () => import('./features/auth/recover-password/recover-password').then(m => m.RecoverPasswordComponent)
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => import('./features/auth/reset-password/reset-password').then(m => m.ResetPasswordComponent)
+  },
+  {
     path: 'admin',
     component: MainLayoutComponent,
     loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)

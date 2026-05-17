@@ -37,4 +37,18 @@ export class AuthService {
   isAuthenticated(): boolean {
     return this.currentUser() !== null;
   }
+
+  // Mock recuperar contraseña (ms-auth / Pág. 4)
+  recoverPassword(email: string) {
+    console.log(`Solicitando recuperación de contraseña para: ${email}`);
+    // Simular éxito para pruebas del Front
+    return true;
+  }
+
+  // Mock restablecer contraseña (ms-auth / Pág. 5)
+  resetPassword(password: string) {
+    console.log(`Restableciendo contraseña a nueva contraseña`);
+    // Simular éxito para pruebas del Front
+    return true;
+  }
 }
