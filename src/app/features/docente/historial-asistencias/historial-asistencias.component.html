@@ -1,10 +1,56 @@
 <!-- Padding inferior para no tapar contenido con la barra fija -->
-<div class="max-w-7xl mx-auto pb-24 font-['Inter']">
+<div class="max-w-7xl mx-auto pb-24 font-['Inter'] space-y-6">
 
-  <!-- Header -->
-  <div class="mb-8">
-    <h1 class="text-3xl font-black text-[#00253b] tracking-tight font-['Public_Sans']">Historial de Asistencias</h1>
-    <p class="text-[#42474e] mt-1">Gestione y consulte el registro de asistencia diaria de sus grupos</p>
+  <!-- ===== Header de Materia (Banner) ===== -->
+  <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden">
+    <div class="p-8 bg-gradient-to-r from-[#003B5C] to-[#00566d] text-white">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia.programa }}</span>
+            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia.periodo }}</span>
+          </div>
+          <h1 class="text-3xl font-extrabold tracking-tight mb-3 font-['Public_Sans']">{{ materia.nombre }}</h1>
+          <div class="flex flex-wrap gap-4 text-white/80 font-medium text-sm">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm">numbers</span>
+              NRC: {{ materia.nrc }}
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm">meeting_room</span>
+              Sección: {{ materia.seccion }}
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm">schedule</span>
+              {{ materia.horario }}
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-3 flex-shrink-0">
+          <button class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg text-sm font-bold transition-all">
+            <span class="material-symbols-outlined text-sm">file_download</span>
+            Sílabo
+          </button>
+          <button class="flex items-center gap-2 px-4 py-2 bg-white text-[#003b5c] rounded-lg text-sm font-bold shadow-lg hover:opacity-90 transition-all">
+            <span class="material-symbols-outlined text-sm">edit</span>
+            Editar Datos
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs de navegación -->
+    <nav class="flex border-b border-slate-100 bg-white px-6 overflow-x-auto">
+      @for (tab of tabs; track tab) {
+        <a class="px-5 py-4 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 cursor-pointer"
+          [routerLink]="['/docente/materias', materia.nrc, tab.toLowerCase()]"
+          [ngClass]="tab === 'Asistencias'
+            ? 'text-[#003b5c] border-[#003b5c]'
+            : 'text-slate-500 hover:text-[#003b5c] border-transparent'">
+          {{ tab }}
+        </a>
+      }
+    </nav>
   </div>
 
   <div class="grid grid-cols-12 gap-6">

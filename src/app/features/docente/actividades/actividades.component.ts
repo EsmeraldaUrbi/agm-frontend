@@ -42,7 +42,7 @@ export class ActividadesComponent {
     });
   }
 
-  tabs = ['Resumen', 'Alumnos', 'Ponderaciones', 'Actividades', 'Calificaciones', 'Asistencias', 'Reportes'];
+  tabs = ['Alumnos', 'Ponderaciones', 'Actividades', 'Asistencias', 'Reportes'];
 
   ponderaciones = [
     { id: 'p1', nombre: 'Exámenes Parciales', porcentaje: 40 },

@@ -18,7 +18,7 @@ export const DOCENTE_ROUTES: Routes = [
     loadComponent: () => import('./importar-alumnos/importar-alumnos.component').then(m => m.ImportarAlumnosComponent)
   },
   {
-    path: 'materias/:id/calificaciones',
+    path: 'materias/:id/calificar',
     loadComponent: () => import('./registro-calificaciones/registro-calificaciones.component').then(m => m.RegistroCalificacionesComponent)
   },
   {
@@ -40,6 +40,10 @@ export const DOCENTE_ROUTES: Routes = [
   {
     path: 'materias/:id/actividades',
     loadComponent: () => import('./actividades/actividades.component').then(m => m.ActividadesComponent)
+  },
+  {
+    path: 'materias/:id/reportes',
+    loadComponent: () => import('./reportes/reportes.component').then(m => m.ReportesComponent)
   },
   {
     path: '',

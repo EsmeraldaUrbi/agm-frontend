@@ -12,8 +12,11 @@ interface CalificacionActividad {
   nombre: string;
   correo: string;
   calificacion: number;
+  promedio_actual: number;
+  promedio_final: number;
   observaciones: string;
   actividad_nombre: string;
+  estatus_entrega?: string;
 }
 
 @Component({
@@ -32,7 +35,7 @@ export class RegistroCalificacionesComponent {
     periodo: 'Primavera 2026',
   };
 
-  tabs = ['Resumen', 'Alumnos', 'Ponderaciones', 'Actividades', 'Calificaciones', 'Asistencias', 'Reportes'];
+  tabs = ['Alumnos', 'Ponderaciones', 'Actividades', 'Asistencias', 'Reportes'];
 
   actividadActual = {
     id: '16655e27-37d5-470a-bac2-f9ebbf48e850',
@@ -52,6 +55,8 @@ export class RegistroCalificacionesComponent {
       nombre: 'Diego Cannata',
       correo: 'diego.cannata@alumno.buap.mx',
       calificacion: 10.0,
+      promedio_actual: 9.4,
+      promedio_final: 9.5,
       observaciones: 'Buen trabajo, solo que te falto el video',
       actividad_nombre: 'Examen Parcial Semana 1'
     },
@@ -64,6 +69,8 @@ export class RegistroCalificacionesComponent {
       nombre: 'Alejandro Garcia',
       correo: 'alejandro.garciacon@alumno.buap.mx',
       calificacion: 0.0,
+      promedio_actual: 6.8,
+      promedio_final: 7.0,
       observaciones: 'No entregado',
       actividad_nombre: 'Examen Parcial Semana 1'
     },
@@ -76,6 +83,8 @@ export class RegistroCalificacionesComponent {
       nombre: 'Maria Rodriguez Ortiz',
       correo: 'maria.rodriguez@alumno.buap.mx',
       calificacion: 9.5,
+      promedio_actual: 9.1,
+      promedio_final: 9.2,
       observaciones: 'Excelente análisis y diagrama C4',
       actividad_nombre: 'Examen Parcial Semana 1'
     },
@@ -88,6 +97,8 @@ export class RegistroCalificacionesComponent {
       nombre: 'Ana Beltrán López',
       correo: 'ana.beltran@alumno.buap.mx',
       calificacion: 8.0,
+      promedio_actual: 8.5,
+      promedio_final: 8.6,
       observaciones: 'Faltó implementar el interceptor gRPC',
       actividad_nombre: 'Examen Parcial Semana 1'
     }
@@ -171,6 +182,59 @@ export class RegistroCalificacionesComponent {
   cerrarImportModal() {
     this.showImportModal.set(false);
     this.resultadoImportacion.set(null);
+  }
+
+  // ==========================================
+  // MODAL CALIFICACIÓN MANUAL POR ALUMNO
+  // ==========================================
+  showManualModal = signal(false);
+  alumnoSeleccionado = signal<CalificacionActividad | null>(null);
+  formCalificacionManual = signal({
+    calificacion: 0,
+    observaciones: '',
+    estatus_entrega: 'Entregado a Tiempo'
+  });
+  mensajeExitoManual = signal<string | null>(null);
+
+  abrirManualModal(alumno: CalificacionActividad) {
+    this.alumnoSeleccionado.set(alumno);
+    this.formCalificacionManual.set({
+      calificacion: alumno.calificacion || 0,
+      observaciones: alumno.observaciones || '',
+      estatus_entrega: alumno.estatus_entrega || 'Entregado a Tiempo'
+    });
+    this.showManualModal.set(true);
+  }
+
+  cerrarManualModal() {
+    this.showManualModal.set(false);
+    this.alumnoSeleccionado.set(null);
+  }
+
+  guardarCalificacionManual() {
+    const current = this.alumnoSeleccionado();
+    if (!current) return;
+
+    const form = this.formCalificacionManual();
+
+    this.calificaciones.update(list => list.map(c => {
+      if (c.alumno_id === current.alumno_id) {
+        return {
+          ...c,
+          calificacion: form.calificacion,
+          observaciones: form.observaciones,
+          estatus_entrega: form.estatus_entrega
+        };
+      }
+      return c;
+    }));
+
+    this.showManualModal.set(false);
+    this.mensajeExitoManual.set(`¡Calificación de ${current.nombre} guardada exitosamente en MS-Calificaciones!`);
+
+    setTimeout(() => {
+      this.mensajeExitoManual.set(null);
+    }, 4000);
   }
 
   // Promedio de la actividad

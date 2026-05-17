@@ -1,6 +1,6 @@
 import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 type EstadoAsistencia = 'presente' | 'retardo' | 'falta' | 'justificado' | null;
@@ -21,6 +21,26 @@ interface Alumno {
   templateUrl: './historial-asistencias.component.html'
 })
 export class HistorialAsistenciasComponent {
+  materia = {
+    nrc: '28491',
+    nombre: 'Web Services Architecture',
+    seccion: '101',
+    horario: 'Lunes, Miércoles 16:00 - 18:00',
+    programa: 'Postgrado en Computación',
+    periodo: 'Primavera 2026',
+  };
+
+  tabs = ['Alumnos', 'Ponderaciones', 'Actividades', 'Asistencias', 'Reportes'];
+
+  constructor(private route: ActivatedRoute) {
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.materia.nrc = id;
+      }
+    });
+  }
+
   // Filtros
   materiaSeleccionada = 'Programación I - Sec. 001';
   fechaSeleccionada = '2024-10-15';
