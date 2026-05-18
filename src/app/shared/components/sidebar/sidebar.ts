@@ -67,7 +67,8 @@ export class SidebarComponent implements OnInit {
       { label: 'Dashboard', route: '/alumno/dashboard', icon: 'dashboard', section: 'Principal' },
       { label: 'Mi Horario', route: '/alumno/horario', icon: 'calendar_today' },
       { label: 'Generar QR', route: '/alumno/qr', icon: 'qr_code_scanner', section: 'Asistencia' },
-      { label: 'Notificaciones', route: '/alumno/notificaciones', icon: 'notifications', section: 'Reportes' }
+      { label: 'Notificaciones', route: '/alumno/notificaciones', icon: 'notifications', section: 'Centro de Avisos' },
+      { label: 'Reportes', route: '/alumno/reportes', icon: 'assessment' }
     ];
 
     if (role === 'admin') {
