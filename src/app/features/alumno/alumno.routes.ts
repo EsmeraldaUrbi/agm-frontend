@@ -5,6 +5,7 @@ import { HorarioComponent } from './horario/horario.component';
 import { QrAsistenciaComponent } from './qr-asistencia/qr-asistencia.component';
 import { CalificacionesComponent } from './calificaciones/calificaciones.component';
 import { SolicitarBajaComponent } from './solicitar-baja/solicitar-baja.component';
+import { NotificacionesComponent } from './notificaciones/notificaciones.component';
 
 export const ALUMNO_ROUTES: Routes = [
   {
@@ -35,5 +36,9 @@ export const ALUMNO_ROUTES: Routes = [
   {
     path: 'solicitar-baja',
     component: SolicitarBajaComponent
+  },
+  {
+    path: 'notificaciones',
+    component: NotificacionesComponent
   }
 ];

@@ -66,7 +66,8 @@ export class SidebarComponent implements OnInit {
     const alumnoItems: NavItem[] = [
       { label: 'Dashboard', route: '/alumno/dashboard', icon: 'dashboard', section: 'Principal' },
       { label: 'Mi Horario', route: '/alumno/horario', icon: 'calendar_today' },
-      { label: 'Generar QR', route: '/alumno/qr', icon: 'qr_code_scanner', section: 'Asistencia' }
+      { label: 'Generar QR', route: '/alumno/qr', icon: 'qr_code_scanner', section: 'Asistencia' },
+      { label: 'Notificaciones', route: '/alumno/notificaciones', icon: 'notifications', section: 'Reportes' }
     ];
 
     if (role === 'admin') {
