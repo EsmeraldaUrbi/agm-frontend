@@ -2,12 +2,12 @@ import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-calificaciones',
+  selector: 'app-solicitar-baja',
   standalone: true,
   imports: [RouterModule],
-  templateUrl: './calificaciones.component.html',
+  templateUrl: './solicitar-baja.component.html',
   styles: ``
 })
-export class CalificacionesComponent {
+export class SolicitarBajaComponent {
 
 }
