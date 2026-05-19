@@ -62,17 +62,18 @@ export class ResetPasswordComponent {
 
     this.isLoading.set(true);
 
-    // Simular retraso de red
-    setTimeout(() => {
-      const success = this.authService.resetPassword(this.password);
-      this.isLoading.set(false);
-
-      if (success) {
+    // Llamar al API real
+    this.authService.resetPassword(this.password).subscribe({
+      next: () => {
+        this.isLoading.set(false);
         this.isSubmitted.set(true);
-      } else {
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.errorMessage.set('Ocurrió un error. El token puede haber expirado.');
         this.showError.set(true);
       }
-    }, 1500);
+    });
   }
 
   goToLogin() {

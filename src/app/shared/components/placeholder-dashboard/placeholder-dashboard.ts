@@ -88,7 +88,7 @@ export class PlaceholderDashboardComponent implements OnInit {
   ngOnInit() {
     this.currentUrl = this.router.url;
     const user = this.authService.currentUser();
-    const role = user?.role || 'Usuario';
+    const role = user?.rol?.toLowerCase() || 'usuario';
     
     if (role === 'docente') {
       this.roleLabel = 'Docentes';

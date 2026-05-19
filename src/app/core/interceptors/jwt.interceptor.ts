@@ -9,8 +9,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
   
-  const user = authService.currentUser();
-  const token = user?.token;
+  const token = authService.getToken();
   
   // Verificar si la petición va dirigida a alguna URL de nuestros microservicios
   const isMicroserviceReq = Object.values(environment).some(url => 

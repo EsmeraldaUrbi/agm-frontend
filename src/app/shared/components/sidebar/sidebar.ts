@@ -33,7 +33,7 @@ export class SidebarComponent implements OnInit {
   ngOnInit() {
     // Escuchar el estado de autenticación reactivamente
     const user = this.authService.currentUser();
-    const role = user?.role || 'admin'; // Fallback a admin para testing si es necesario
+    const role = user?.rol?.toLowerCase() || 'admin'; // Fallback a admin para testing si es necesario
     this.userRole.set(role);
     this.generateMenu(role);
   }

@@ -47,17 +47,18 @@ export class RecoverPasswordComponent {
 
     this.isLoading.set(true);
     
-    // Simular retraso de red
-    setTimeout(() => {
-      const success = this.authService.recoverPassword(this.email);
-      this.isLoading.set(false);
-      
-      if (success) {
+    // Llamar al API real
+    this.authService.recoverPassword(this.email).subscribe({
+      next: () => {
+        this.isLoading.set(false);
         this.isSubmitted.set(true);
-      } else {
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.errorMessage.set('Ocurrió un error al procesar tu solicitud. Intenta nuevamente.');
         this.showError.set(true);
       }
-    }, 1500);
+    });
   }
 
   goToLogin() {

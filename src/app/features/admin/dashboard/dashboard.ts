@@ -1,6 +1,7 @@
-import { Component, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, computed, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { PeriodosService, Periodo } from '../../../core/services/periodos.service';
 
 interface QuickAction {
   label: string;
@@ -43,36 +44,34 @@ interface ActivityItem {
   `]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+  private periodosService = inject(PeriodosService);
   private clockInterval: any;
 
   // ── Reloj en tiempo real ─────────────────────────────────────────────────
   currentTime = signal<string>('');
   currentDate = signal<string>('');
 
-  // ── Mock Stats (se sustituirán por API calls al conectar el backend) ──────
-  activePeriod = signal({
-    name: 'Primavera 2026',
-    startDate: '2026-01-05',
-    endDate: '2026-05-22',
-    status: 'active' as const
-  });
+  // ── Periodo Activo (desde API) ───────────────────────────────────────────
+  activePeriod = signal<Periodo | null>(null);
 
 
   // ── Progreso del periodo activo ──────────────────────────────────────────
   periodProgress = computed(() => {
     const p = this.activePeriod();
-    const start = new Date(p.startDate).getTime();
-    const end   = new Date(p.endDate).getTime();
-    const now   = new Date('2026-04-22').getTime(); // mock "hoy" coherente con el mock
+    if (!p) return 0;
+    const start = new Date(p.fecha_inicio).getTime();
+    const end   = new Date(p.fecha_fin).getTime();
+    const now   = new Date().getTime(); 
     if (now <= start) return 0;
     if (now >= end)   return 100;
     return Math.round(((now - start) / (end - start)) * 100);
   });
 
-  // Días restantes del periodo
   daysLeft = computed(() => {
-    const end = new Date(this.activePeriod().endDate).getTime();
-    const now = new Date('2026-04-22').getTime();
+    const p = this.activePeriod();
+    if (!p) return 0;
+    const end = new Date(p.fecha_fin).getTime();
+    const now = new Date().getTime();
     const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
     return Math.max(0, diff);
   });
@@ -148,6 +147,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.updateClock();
     this.clockInterval = setInterval(() => this.updateClock(), 1000);
+    this.cargarPeriodoActivo();
+  }
+
+  cargarPeriodoActivo() {
+    this.periodosService.getPeriodoActivo().subscribe({
+      next: (res) => {
+        this.activePeriod.set(res.data);
+      },
+      error: (err) => console.error('Error obteniendo periodo activo', err)
+    });
   }
 
   ngOnDestroy() {

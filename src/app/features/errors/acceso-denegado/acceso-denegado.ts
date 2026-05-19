@@ -36,7 +36,7 @@ export class AccesoDenegadoComponent {
     // Redirigir según el rol del usuario si está autenticado, sino al login/landing
     const user = this.authService.currentUser();
     if (user) {
-      this.router.navigate([`/${user.role}/dashboard`]);
+      this.router.navigate([`/${user.rol}/dashboard`]);
     } else {
       this.router.navigate(['/login']);
     }

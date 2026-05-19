@@ -34,7 +34,7 @@ export class Error404Component {
   goHome(): void {
     const user = this.authService.currentUser();
     if (user) {
-      this.router.navigate([`/${user.role}/dashboard`]);
+      this.router.navigate([`/${user.rol}/dashboard`]);
     } else {
       this.router.navigate(['/']);
     }

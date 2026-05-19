@@ -24,7 +24,7 @@
         <!-- Avatar Centrado/Superpuesto -->
         <div class="flex justify-between items-end -mt-12 md:-mt-16 mb-8 relative z-10">
           <div class="w-24 h-24 md:w-32 md:h-32 rounded-3xl bg-white text-[#003b5c] flex items-center justify-center font-black text-4xl shadow-xl border-4 border-white flex-shrink-0">
-            {{ getInitials(usuario.nombre) }}
+            {{ getInitials(usuario.nombre_completo) }}
           </div>
           <span class="px-4 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-black tracking-widest uppercase shadow-sm">
             {{ usuario.rol }}
@@ -38,7 +38,7 @@
             <label class="text-[10px] font-extrabold text-[#72787e] uppercase tracking-wider block">Nombre Completo</label>
             <div class="flex items-center gap-3 bg-[#f8f9fa] border border-[#e1e3e5] rounded-xl px-4 py-3.5 hover:border-[#003b5c]/30 transition-colors">
               <span class="material-symbols-outlined text-[#003b5c] text-xl">badge</span>
-              <span class="text-sm font-bold text-[#191c1d]">{{ usuario.nombre }}</span>
+              <span class="text-sm font-bold text-[#191c1d]">{{ usuario.nombre_completo }}</span>
             </div>
           </div>
           
@@ -46,7 +46,7 @@
             <label class="text-[10px] font-extrabold text-[#72787e] uppercase tracking-wider block">Correo Institucional</label>
             <div class="flex items-center gap-3 bg-[#f8f9fa] border border-[#e1e3e5] rounded-xl px-4 py-3.5 hover:border-[#003b5c]/30 transition-colors">
               <span class="material-symbols-outlined text-[#003b5c] text-xl">mail</span>
-              <span class="text-sm font-bold text-[#191c1d]">{{ usuario.correo }}</span>
+              <span class="text-sm font-bold text-[#191c1d]">{{ usuario.email }}</span>
             </div>
           </div>
 

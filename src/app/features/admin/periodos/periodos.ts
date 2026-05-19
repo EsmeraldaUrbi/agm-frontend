@@ -1,15 +1,8 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AgmButtonComponent, AgmInputComponent, AgmCardComponent } from '../../../shared/components/ui';
-
-interface Periodo {
-  id: string;
-  name: string; // e.g. "Primavera 2026"
-  startDate: string;
-  endDate: string;
-  activo: boolean;
-}
+import { PeriodosService, Periodo } from '../../../core/services/periodos.service';
 
 @Component({
   selector: 'app-periodos',
@@ -35,38 +28,10 @@ interface Periodo {
     }
   `]
 })
-export class PeriodosComponent {
-  // Lista inicial de periodos académicos (Mock)
-  periodosList = signal<Periodo[]>([
-    {
-      id: '1',
-      name: 'Primavera 2026',
-      startDate: '2026-01-05',
-      endDate: '2026-05-22',
-      activo: true
-    },
-    {
-      id: '2',
-      name: 'Verano 2026',
-      startDate: '2026-06-15',
-      endDate: '2026-07-24',
-      activo: false
-    },
-    {
-      id: '3',
-      name: 'Otoño 2026',
-      startDate: '2026-08-10',
-      endDate: '2026-12-11',
-      activo: false
-    },
-    {
-      id: '4',
-      name: 'Otoño 2025',
-      startDate: '2025-08-11',
-      endDate: '2025-12-12',
-      activo: false
-    }
-  ]);
+export class PeriodosComponent implements OnInit {
+  private periodosService = inject(PeriodosService);
+
+  periodosList = signal<Periodo[]>([]);
 
   // Filtros y control de UI
   showModal = signal<boolean>(false);
@@ -83,6 +48,22 @@ export class PeriodosComponent {
   toastMessage = signal<string>('');
   showToast = signal<boolean>(false);
 
+  ngOnInit() {
+    this.cargarPeriodos();
+  }
+
+  cargarPeriodos() {
+    this.periodosService.getPeriodos(1, 100).subscribe({
+      next: (res) => {
+        this.periodosList.set(res.data.items);
+      },
+      error: (err) => {
+        console.error('Error cargando periodos:', err);
+        this.triggerToast('Error al cargar la lista de periodos');
+      }
+    });
+  }
+
   // Obtener periodo actualmente activo (Computed)
   activePeriodo = computed(() => {
     return this.periodosList().find(p => p.activo);
@@ -93,10 +74,9 @@ export class PeriodosComponent {
     const active = this.activePeriodo();
     if (!active) return 0;
 
-    const start = new Date(active.startDate).getTime();
-    const end = new Date(active.endDate).getTime();
-    // Fijar la fecha actual al primer trimestre del 2026 para que coincida con el mock Primavera 2026
-    const now = new Date('2026-04-10').getTime(); 
+    const start = new Date(active.fecha_inicio).getTime();
+    const end = new Date(active.fecha_fin).getTime();
+    const now = new Date().getTime(); 
 
     if (now <= start) return 0;
     if (now >= end) return 100;
@@ -125,10 +105,10 @@ export class PeriodosComponent {
   // Abrir Modal de Edición
   openEditModal(periodo: Periodo) {
     this.isEditing.set(true);
-    this.periodoId = periodo.id;
-    this.periodoName = periodo.name;
-    this.periodoStartDate = periodo.startDate;
-    this.periodoEndDate = periodo.endDate;
+    this.periodoId = periodo.periodo_id || '';
+    this.periodoName = periodo.nombre;
+    this.periodoStartDate = periodo.fecha_inicio;
+    this.periodoEndDate = periodo.fecha_fin;
     this.periodoActivo = periodo.activo;
     this.showModal.set(true);
   }
@@ -140,7 +120,6 @@ export class PeriodosComponent {
       return;
     }
 
-    // Validar orden de fechas
     const start = new Date(this.periodoStartDate).getTime();
     const end = new Date(this.periodoEndDate).getTime();
     if (start >= end) {
@@ -148,59 +127,53 @@ export class PeriodosComponent {
       return;
     }
 
-    const targetStatus = this.periodoActivo;
+    const payload: Partial<Periodo> = {
+      nombre: this.periodoName,
+      fecha_inicio: this.periodoStartDate,
+      fecha_fin: this.periodoEndDate,
+      activo: this.periodoActivo
+    };
 
-    if (this.isEditing()) {
-      // Si estamos editando y cambiamos a Activo, desactivar los demás
-      this.periodosList.update(list => {
-        let updatedList = list;
-        if (targetStatus) {
-          updatedList = list.map((p): Periodo => p.activo ? { ...p, activo: false } : p);
+    if (this.isEditing() && this.periodoId) {
+      this.periodosService.updatePeriodo(this.periodoId, payload).subscribe({
+        next: () => {
+          this.triggerToast('Periodo académico actualizado con éxito.');
+          this.cargarPeriodos();
+          this.showModal.set(false);
+        },
+        error: (err) => {
+          console.error(err);
+          this.triggerToast('Error al actualizar el periodo.');
         }
-        return updatedList.map((p): Periodo => p.id === this.periodoId 
-          ? {
-              ...p,
-              name: this.periodoName,
-              startDate: this.periodoStartDate,
-              endDate: this.periodoEndDate,
-              activo: this.periodoActivo
-            }
-          : p
-        );
       });
-      this.triggerToast('Periodo académico actualizado con éxito.');
     } else {
-      // Si estamos agregando y viene como Activo, desactivar los demás
-      const newPeriodo: Periodo = {
-        id: Math.random().toString(36).substring(2, 9),
-        name: this.periodoName,
-        startDate: this.periodoStartDate,
-        endDate: this.periodoEndDate,
-        activo: this.periodoActivo
-      };
-
-      this.periodosList.update(list => {
-        let updatedList = list;
-        if (targetStatus) {
-          updatedList = list.map((p): Periodo => p.activo ? { ...p, activo: false } : p);
+      this.periodosService.createPeriodo(payload).subscribe({
+        next: () => {
+          this.triggerToast('¡Nuevo periodo académico creado exitosamente!');
+          this.cargarPeriodos();
+          this.showModal.set(false);
+        },
+        error: (err) => {
+          console.error(err);
+          this.triggerToast('Error al crear el periodo.');
         }
-        return [newPeriodo, ...updatedList];
       });
-      this.triggerToast('¡Nuevo periodo académico creado exitosamente!');
     }
-
-    this.showModal.set(false);
   }
 
   // Activar directamente un periodo de la lista
   setAsActive(periodo: Periodo) {
-    this.periodosList.update(list => {
-      // Poner el actual activo a inactivo
-      const deactivated = list.map((p): Periodo => p.activo ? { ...p, activo: false } : p);
-      // Activar el periodo seleccionado
-      return deactivated.map((p): Periodo => p.id === periodo.id ? { ...p, activo: true } : p);
+    if (!periodo.periodo_id) return;
+    this.periodosService.activarPeriodo(periodo.periodo_id).subscribe({
+      next: () => {
+        this.triggerToast(`Se ha activado el periodo académico: ${periodo.nombre}`);
+        this.cargarPeriodos();
+      },
+      error: (err) => {
+        console.error(err);
+        this.triggerToast('Error al activar el periodo.');
+      }
     });
-    this.triggerToast(`Se ha activado el periodo académico: ${periodo.name}`);
   }
 
   // Eliminar periodo
@@ -210,9 +183,18 @@ export class PeriodosComponent {
       return;
     }
 
-    if (confirm(`¿Estás seguro de eliminar el periodo ${periodo.name}?`)) {
-      this.periodosList.update(list => list.filter(p => p.id !== periodo.id));
-      this.triggerToast('Periodo académico eliminado.');
+    if (confirm(`¿Estás seguro de eliminar el periodo ${periodo.nombre}?`)) {
+      if (!periodo.periodo_id) return;
+      this.periodosService.deletePeriodo(periodo.periodo_id).subscribe({
+        next: () => {
+          this.triggerToast('Periodo académico eliminado.');
+          this.cargarPeriodos();
+        },
+        error: (err) => {
+          console.error(err);
+          this.triggerToast('Error al eliminar el periodo.');
+        }
+      });
     }
   }
 

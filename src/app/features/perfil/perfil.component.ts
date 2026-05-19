@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService, UserProfile } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-perfil',
@@ -7,13 +8,38 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   templateUrl: './perfil.component.html'
 })
-export class PerfilComponent {
-  // Mock de los datos del usuario logueado (que provendrían del GET /auth/me)
-  usuario = {
-    nombre: 'Carlos Eduardo Fernández',
-    correo: 'carlos.fernandez@correo.buap.mx',
-    rol: 'Administrador'
+export class PerfilComponent implements OnInit {
+  private authService = inject(AuthService);
+
+  usuario: UserProfile = {
+    user_id: '',
+    nombre_completo: 'Cargando...',
+    email: 'cargando...',
+    rol: 'Cargando...',
+    activo: true
   };
+
+  ngOnInit() {
+    this.authService.getProfile().subscribe({
+      next: (profile) => {
+        this.usuario = profile;
+      },
+      error: (err) => {
+        console.error('Error al obtener perfil:', err);
+        // Fallback en caso de error o desarrollo local sin backend
+        const localUser = this.authService.currentUser();
+        if (localUser) {
+          this.usuario = {
+            user_id: localUser.user_id,
+            nombre_completo: 'Usuario Local (Offline)',
+            email: localUser.email,
+            rol: localUser.rol,
+            activo: true
+          };
+        }
+      }
+    });
+  }
 
   // Helper para generar iniciales
   getInitials(name: string): string {

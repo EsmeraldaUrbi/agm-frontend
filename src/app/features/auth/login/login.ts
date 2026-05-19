@@ -32,17 +32,24 @@ export class LoginComponent {
   onLogin() {
     // Simulamos una validación simple
     if (this.email && this.password) {
-      const success = this.authService.login(this.email, this.password, this.selectedRole());
-      if (success) {
-        const role = this.selectedRole();
-        if (role === 'admin') {
-          this.router.navigate(['/admin/dashboard']);
-        } else if (role === 'docente') {
-          this.router.navigate(['/docente/dashboard']);
-        } else if (role === 'alumno') {
-          this.router.navigate(['/alumno/dashboard']);
+      this.authService.login(this.email, this.password).subscribe({
+        next: (res) => {
+          const role = res.user.rol.toLowerCase();
+          if (role === 'administrador' || role === 'admin') {
+            this.router.navigate(['/admin/dashboard']);
+          } else if (role === 'docente') {
+            this.router.navigate(['/docente/dashboard']);
+          } else if (role === 'alumno') {
+            this.router.navigate(['/alumno/dashboard']);
+          } else {
+            this.router.navigate(['/perfil']);
+          }
+        },
+        error: (err) => {
+          console.error('Error en login:', err);
+          this.showError.set(true);
         }
-      }
+      });
     } else {
       this.showError.set(true);
     }

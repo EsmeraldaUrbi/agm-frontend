@@ -24,15 +24,15 @@
           <span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary text-[9px] font-black uppercase tracking-wider">Ciclo Activo</span>
           <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></div>
         </div>
-        <h2 class="text-3xl font-black tracking-tight font-headline">{{ active.name }}</h2>
+        <h2 class="text-3xl font-black tracking-tight font-headline">{{ active.nombre }}</h2>
         <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/80 font-medium">
           <p class="flex items-center gap-1.5">
             <span class="material-symbols-outlined text-sm text-secondary">date_range</span>
-            Inicio: <strong class="text-white">{{ active.startDate }}</strong>
+            Inicio: <strong class="text-white">{{ active.fecha_inicio }}</strong>
           </p>
           <p class="flex items-center gap-1.5">
             <span class="material-symbols-outlined text-sm text-secondary">event_busy</span>
-            Término: <strong class="text-white">{{ active.endDate }}</strong>
+            Término: <strong class="text-white">{{ active.fecha_fin }}</strong>
           </p>
         </div>
 
@@ -77,8 +77,8 @@
 
       <agm-card 
         *ngFor="let per of otherPeriodos()" 
-        [title]="per.name"
-        [subtitle]="per.startDate + ' al ' + per.endDate"
+        [title]="per.nombre"
+        [subtitle]="per.fecha_inicio + ' al ' + per.fecha_fin"
         [accent]="false"
         [hoverable]="true"
         customClass="bg-white border-outline-variant/15 shadow-md flex flex-col justify-between"

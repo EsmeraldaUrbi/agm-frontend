@@ -22,8 +22,8 @@ export class NavbarComponent implements OnInit {
   
   // Computada para dar un formato elegante al rol
   roleLabel = computed(() => {
-    const role = this.userRole();
-    if (role === 'admin') return 'Administrador Global';
+    const role = this.userRole().toLowerCase();
+    if (role === 'admin' || role === 'administrador') return 'Administrador Global';
     if (role === 'docente') return 'Docente FCC';
     if (role === 'alumno') return 'Alumno FCC';
     return 'Usuario Institucional';
@@ -37,12 +37,12 @@ export class NavbarComponent implements OnInit {
   ngOnInit() {
     const user = this.authService.currentUser();
     if (user) {
-      this.userName.set(user.name || 'Usuario');
+      this.userName.set(user.nombre_completo || 'Usuario');
       this.userEmail.set(user.email || '');
-      this.userRole.set(user.role || '');
+      this.userRole.set(user.rol || '');
       
       // Generar iniciales del nombre
-      const nameParts = (user.name || 'Usuario').split(' ');
+      const nameParts = (user.nombre_completo || 'Usuario').split(' ');
       const initials = nameParts.map((p: string) => p[0]).join('').substring(0, 2).toUpperCase();
       this.userInitials.set(initials || 'U');
     }
