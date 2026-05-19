@@ -1,530 +1,66 @@
 <div class="min-h-screen bg-[#f8f9fa] p-4 md:p-8 space-y-8 animate-fade-in font-['Public_Sans']">
-
-  <!-- ===== Banner Superior del Docente ===== -->
-  <div class="bg-gradient-to-r from-[#003b5c] to-[#00566d] rounded-2xl p-6 md:p-8 text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
-    <!-- Círculos decorativos de fondo -->
-    <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white/5 pointer-events-none"></div>
-    <div class="absolute right-32 -bottom-20 w-48 h-48 rounded-full bg-white/5 pointer-events-none"></div>
-
-    <div class="flex items-center gap-6 z-10">
-      <div class="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-white text-[#003b5c] flex items-center justify-center font-black text-3xl shadow-lg border-4 border-white/20 flex-shrink-0 font-['Public_Sans']">
-        CF
-      </div>
-      <div class="space-y-1.5">
-        <div class="flex flex-wrap items-center gap-3">
-          <h1 class="text-2xl md:text-3xl font-black tracking-tight">{{ docente.nombre }}</h1>
-          <span class="px-3 py-1 bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 rounded-full text-xs font-extrabold tracking-wider uppercase">
-            {{ docente.titulo }}
-          </span>
-        </div>
-        <p class="text-sm md:text-base text-white/90 font-medium">{{ docente.facultad }}</p>
-        <div class="flex flex-wrap items-center gap-4 text-xs text-white/80 font-mono pt-1">
-          <span class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-sm">mail</span>
-            {{ docente.correo }}
-          </span>
-          <span class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-sm">badge</span>
-            ID: {{ docente.idEmpleado }}
-          </span>
-          <span class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-sm">corporate_fare</span>
-            {{ docente.departamento }}
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <div class="flex gap-3 w-full md:w-auto z-10">
-      <button (click)="abrirEditarPerfil()"
-        class="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-white text-[#003b5c] hover:bg-slate-100 rounded-xl font-bold text-sm shadow-lg transition-all">
-        <span class="material-symbols-outlined text-sm">edit</span>
-        Editar Perfil
-      </button>
-      <button (click)="exportarHistorial()"
-        class="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-white/10 hover:bg-white/20 border border-white/30 text-white rounded-xl font-bold text-sm backdrop-blur-sm transition-all shadow-lg">
-        <span class="material-symbols-outlined text-sm">download</span>
-        Exportar Constancia
-      </button>
-    </div>
-  </div>
-
-  <!-- ===== Tarjetas de Resumen Global (KPIs) ===== -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+  
+  <div class="max-w-4xl mx-auto space-y-6">
     
-    <div class="bg-white rounded-2xl p-6 border border-[#c2c7ce] shadow-sm flex items-center gap-4 hover:border-[#003b5c] transition-colors group">
-      <div class="w-14 h-14 rounded-xl bg-[#003b5c]/10 text-[#003b5c] flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-        <span class="material-symbols-outlined text-3xl">history_edu</span>
-      </div>
-      <div>
-        <p class="text-xs font-extrabold text-[#72787e] uppercase tracking-wider mb-1">Materias Impartidas</p>
-        <h3 class="text-2xl font-black text-[#003b5c]">{{ kpis.totalMaterias }} <span class="text-xs font-semibold text-[#72787e]">cursos</span></h3>
-      </div>
+    <!-- Encabezado de Página -->
+    <div>
+      <h1 class="text-2xl font-black text-[#003b5c] tracking-tight">Mi Perfil</h1>
+      <p class="text-xs text-[#72787e] font-medium">Información de tu cuenta institucional de solo lectura.</p>
     </div>
 
-    <div class="bg-white rounded-2xl p-6 border border-[#c2c7ce] shadow-sm flex items-center gap-4 hover:border-[#003b5c] transition-colors group">
-      <div class="w-14 h-14 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-        <span class="material-symbols-outlined text-3xl">group</span>
-      </div>
-      <div>
-        <p class="text-xs font-extrabold text-[#72787e] uppercase tracking-wider mb-1">Alumnos Atendidos</p>
-        <h3 class="text-2xl font-black text-[#003b5c]">{{ kpis.alumnosAtendidos }} <span class="text-xs font-semibold text-[#72787e]">estudiantes</span></h3>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-2xl p-6 border border-[#c2c7ce] shadow-sm flex items-center gap-4 hover:border-[#003b5c] transition-colors group">
-      <div class="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-        <span class="material-symbols-outlined text-3xl">bar_chart</span>
-      </div>
-      <div>
-        <p class="text-xs font-extrabold text-[#72787e] uppercase tracking-wider mb-1">Promedio Histórico</p>
-        <h3 class="text-2xl font-black text-[#003b5c]">{{ kpis.promedioGlobal }} <span class="text-xs font-semibold text-[#72787e]">/ 10</span></h3>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-2xl p-6 border border-[#c2c7ce] shadow-sm flex items-center gap-4 hover:border-[#003b5c] transition-colors group">
-      <div class="w-14 h-14 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
-        <span class="material-symbols-outlined text-3xl">done_all</span>
-      </div>
-      <div>
-        <p class="text-xs font-extrabold text-[#72787e] uppercase tracking-wider mb-1">Aprobación Global</p>
-        <h3 class="text-2xl font-black text-[#003b5c]">{{ kpis.tasaAprobacionGlobal }}%</h3>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ===== Seguridad de la Cuenta ===== -->
-  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-    <!-- Cambio de Contraseña (3/5) -->
-    <div class="lg:col-span-3 bg-white rounded-2xl border border-[#c2c7ce] shadow-sm overflow-hidden">
-      <div class="bg-gradient-to-r from-[#003b5c]/5 to-transparent p-6 border-b border-[#c2c7ce]/60 flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-          <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">lock_reset</span>
-        </div>
-        <div>
-          <h2 class="text-base font-bold text-[#003b5c]">Seguridad de la Cuenta</h2>
-          <p class="text-xs text-[#72787e] font-medium">Actualiza tu contraseña de acceso institucional</p>
-        </div>
+    <!-- Tarjeta Principal de Perfil -->
+    <div class="bg-white rounded-3xl shadow-sm border border-[#c2c7ce] overflow-hidden">
+      
+      <!-- Banner Decorativo -->
+      <div class="bg-gradient-to-r from-[#003b5c] to-[#00566d] p-8 relative overflow-hidden h-32 md:h-40">
+        <!-- Círculos decorativos de fondo -->
+        <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white/5 pointer-events-none"></div>
+        <div class="absolute right-32 -bottom-20 w-48 h-48 rounded-full bg-white/5 pointer-events-none"></div>
       </div>
 
-      <form (ngSubmit)="cambiarContrasena()" class="p-6 space-y-4">
-
-        <!-- Contraseña Actual -->
-        <div class="space-y-1.5">
-          <label class="text-xs font-bold text-[#42474e] uppercase tracking-wider block">Contraseña Actual</label>
-          <div class="flex items-center border-2 rounded-xl px-4 py-2.5 bg-[#f8f9fa] transition-all"
-               [class.border-[#003b5c]]="campoActualFocused()"
-               [class.border-[#c2c7ce]]="!campoActualFocused()">
-            <span class="material-symbols-outlined text-[#72787e] mr-3 text-lg">lock</span>
-            <input
-              [(ngModel)]="formContrasena.actual"
-              name="actual"
-              [type]="mostrarActual() ? 'text' : 'password'"
-              placeholder="••••••••••••"
-              (focus)="campoActualFocused.set(true)"
-              (blur)="campoActualFocused.set(false)"
-              class="flex-1 bg-transparent outline-none text-sm text-[#191c1d] placeholder:text-[#72787e]/60"/>
-            <button type="button" (click)="mostrarActual.set(!mostrarActual())" class="text-[#72787e] hover:text-[#003b5c] transition-colors ml-2">
-              <span class="material-symbols-outlined text-lg">{{ mostrarActual() ? 'visibility_off' : 'visibility' }}</span>
-            </button>
+      <!-- Contenido del Perfil -->
+      <div class="px-8 pb-10 relative">
+        
+        <!-- Avatar Centrado/Superpuesto -->
+        <div class="flex justify-between items-end -mt-12 md:-mt-16 mb-8 relative z-10">
+          <div class="w-24 h-24 md:w-32 md:h-32 rounded-3xl bg-white text-[#003b5c] flex items-center justify-center font-black text-4xl shadow-xl border-4 border-white flex-shrink-0">
+            {{ getInitials(usuario.nombre) }}
           </div>
+          <span class="px-4 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-black tracking-widest uppercase shadow-sm">
+            {{ usuario.rol }}
+          </span>
         </div>
 
-        <!-- Nueva Contraseña -->
-        <div class="space-y-1.5">
-          <label class="text-xs font-bold text-[#42474e] uppercase tracking-wider block">Nueva Contraseña</label>
-          <div class="flex items-center border-2 rounded-xl px-4 py-2.5 bg-[#f8f9fa] transition-all"
-               [class.border-[#003b5c]]="campoNuevaFocused()"
-               [class.border-[#c2c7ce]]="!campoNuevaFocused()">
-            <span class="material-symbols-outlined text-[#72787e] mr-3 text-lg">key</span>
-            <input
-              [(ngModel)]="formContrasena.nueva"
-              name="nueva"
-              [type]="mostrarNueva() ? 'text' : 'password'"
-              placeholder="Mínimo 8 caracteres"
-              (focus)="campoNuevaFocused.set(true)"
-              (blur)="campoNuevaFocused.set(false)"
-              class="flex-1 bg-transparent outline-none text-sm text-[#191c1d] placeholder:text-[#72787e]/60"/>
-            <button type="button" (click)="mostrarNueva.set(!mostrarNueva())" class="text-[#72787e] hover:text-[#003b5c] transition-colors ml-2">
-              <span class="material-symbols-outlined text-lg">{{ mostrarNueva() ? 'visibility_off' : 'visibility' }}</span>
-            </button>
-          </div>
-
-          <!-- Indicador de fortaleza -->
-          <div *ngIf="formContrasena.nueva.length > 0" class="flex items-center gap-2 mt-1.5">
-            <div class="flex gap-1 flex-1">
-              <div class="h-1.5 flex-1 rounded-full transition-all" [class]="passwordStrength() >= 1 ? 'bg-red-400' : 'bg-slate-200'"></div>
-              <div class="h-1.5 flex-1 rounded-full transition-all" [class]="passwordStrength() >= 2 ? 'bg-amber-400' : 'bg-slate-200'"></div>
-              <div class="h-1.5 flex-1 rounded-full transition-all" [class]="passwordStrength() >= 3 ? 'bg-emerald-400' : 'bg-slate-200'"></div>
+        <!-- Campos de Información -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-extrabold text-[#72787e] uppercase tracking-wider block">Nombre Completo</label>
+            <div class="flex items-center gap-3 bg-[#f8f9fa] border border-[#e1e3e5] rounded-xl px-4 py-3.5 hover:border-[#003b5c]/30 transition-colors">
+              <span class="material-symbols-outlined text-[#003b5c] text-xl">badge</span>
+              <span class="text-sm font-bold text-[#191c1d]">{{ usuario.nombre }}</span>
             </div>
-            <span class="text-[10px] font-bold uppercase tracking-wider"
-                  [class.text-red-500]="passwordStrength() === 1"
-                  [class.text-amber-500]="passwordStrength() === 2"
-                  [class.text-emerald-600]="passwordStrength() === 3">
-              {{ passwordStrengthLabel() }}
-            </span>
           </div>
+          
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-extrabold text-[#72787e] uppercase tracking-wider block">Correo Institucional</label>
+            <div class="flex items-center gap-3 bg-[#f8f9fa] border border-[#e1e3e5] rounded-xl px-4 py-3.5 hover:border-[#003b5c]/30 transition-colors">
+              <span class="material-symbols-outlined text-[#003b5c] text-xl">mail</span>
+              <span class="text-sm font-bold text-[#191c1d]">{{ usuario.correo }}</span>
+            </div>
+          </div>
+
         </div>
 
-        <!-- Confirmar Contraseña -->
-        <div class="space-y-1.5">
-          <label class="text-xs font-bold text-[#42474e] uppercase tracking-wider block">Confirmar Nueva Contraseña</label>
-          <div class="flex items-center border-2 rounded-xl px-4 py-2.5 bg-[#f8f9fa] transition-all"
-               [class.border-error]="formContrasena.confirmar.length > 0 && formContrasena.nueva !== formContrasena.confirmar"
-               [class.border-emerald-500]="formContrasena.confirmar.length > 0 && formContrasena.nueva === formContrasena.confirmar"
-               [class.border-[#003b5c]]="campoConfirmarFocused() && formContrasena.confirmar.length === 0"
-               [class.border-[#c2c7ce]]="!campoConfirmarFocused() && formContrasena.confirmar.length === 0">
-            <span class="material-symbols-outlined text-[#72787e] mr-3 text-lg">key_vertical</span>
-            <input
-              [(ngModel)]="formContrasena.confirmar"
-              name="confirmar"
-              [type]="mostrarConfirmar() ? 'text' : 'password'"
-              placeholder="Repite tu nueva contraseña"
-              (focus)="campoConfirmarFocused.set(true)"
-              (blur)="campoConfirmarFocused.set(false)"
-              class="flex-1 bg-transparent outline-none text-sm text-[#191c1d] placeholder:text-[#72787e]/60"/>
-            <span *ngIf="formContrasena.confirmar.length > 0" class="material-symbols-outlined text-lg ml-2"
-                  [class.text-emerald-500]="formContrasena.nueva === formContrasena.confirmar"
-                  [class.text-error]="formContrasena.nueva !== formContrasena.confirmar">
-              {{ formContrasena.nueva === formContrasena.confirmar ? 'check_circle' : 'cancel' }}
-            </span>
-          </div>
-          <p *ngIf="formContrasena.confirmar.length > 0 && formContrasena.nueva !== formContrasena.confirmar"
-             class="text-[11px] text-error font-semibold mt-1">
-            Las contraseñas no coinciden.
+        <div class="mt-8 p-4 bg-blue-50/50 border border-blue-100 rounded-xl flex items-start gap-3">
+          <span class="material-symbols-outlined text-blue-600">info</span>
+          <p class="text-xs text-blue-800 font-medium leading-relaxed pt-0.5">
+            Estos datos son gestionados directamente por el microservicio de autenticación (<strong class="font-bold">ms-auth</strong>) y son de solo lectura. Si requieres modificar tu nombre o correo, por favor contacta al administrador del sistema.
           </p>
         </div>
 
-        <!-- Botón de envío -->
-        <div class="flex justify-end pt-2">
-          <button
-            type="submit"
-            [disabled]="!puedeGuardarContrasena()"
-            class="flex items-center gap-2 px-6 py-2.5 bg-[#003b5c] text-white font-bold text-sm rounded-xl shadow-md hover:bg-[#00253b] transition-all disabled:opacity-50 disabled:pointer-events-none active:scale-95">
-            <span class="material-symbols-outlined text-sm">shield_lock</span>
-            Actualizar Contraseña
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Info de Sesión (2/5) -->
-    <div class="lg:col-span-2 space-y-4">
-      <!-- Card de Sesión Activa -->
-      <div class="bg-white rounded-2xl border border-[#c2c7ce] shadow-sm p-6 space-y-4">
-        <div class="flex items-center gap-3 border-b border-[#c2c7ce]/40 pb-4">
-          <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-            <span class="material-symbols-outlined text-emerald-600" style="font-variation-settings: 'FILL' 1;">verified_user</span>
-          </div>
-          <div>
-            <p class="text-sm font-bold text-[#003b5c]">Sesión Activa</p>
-            <p class="text-xs text-[#72787e] font-medium">Token JWT válido</p>
-          </div>
-          <div class="ml-auto w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>
-        </div>
-        <div class="space-y-3 text-xs">
-          <div class="flex justify-between items-center">
-            <span class="text-[#72787e] font-semibold flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-sm">person</span> Rol
-            </span>
-            <span class="font-bold text-[#003b5c] bg-[#003b5c]/10 px-2 py-0.5 rounded-full uppercase tracking-wider">Administrador</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-[#72787e] font-semibold flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-sm">devices</span> Dispositivo
-            </span>
-            <span class="font-bold text-[#191c1d]">Navegador Web</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-[#72787e] font-semibold flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-sm">schedule</span> Expira en
-            </span>
-            <span class="font-bold text-amber-600">23:45 min</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card de Recomendaciones de Seguridad -->
-      <div class="bg-[#003b5c]/5 border border-[#003b5c]/15 rounded-2xl p-5 space-y-3">
-        <p class="text-xs font-black text-[#003b5c] uppercase tracking-wider flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-sm">tips_and_updates</span>
-          Buenas Prácticas
-        </p>
-        <ul class="space-y-2">
-          <li class="flex items-start gap-2 text-xs text-[#42474e] font-medium">
-            <span class="material-symbols-outlined text-sm text-[#003b5c] mt-0.5 flex-shrink-0">check_small</span>
-            Usa al menos 8 caracteres con mayúsculas, números y símbolos.
-          </li>
-          <li class="flex items-start gap-2 text-xs text-[#42474e] font-medium">
-            <span class="material-symbols-outlined text-sm text-[#003b5c] mt-0.5 flex-shrink-0">check_small</span>
-            No reutilices contraseñas de otros sistemas institucionales.
-          </li>
-          <li class="flex items-start gap-2 text-xs text-[#42474e] font-medium">
-            <span class="material-symbols-outlined text-sm text-[#003b5c] mt-0.5 flex-shrink-0">check_small</span>
-            Cambia tu contraseña cada semestre por seguridad.
-          </li>
-        </ul>
       </div>
     </div>
 
   </div>
-
-  <!-- ===== Sección Principal: Historial Académico y Trayectoria ===== -->
-  <div class="bg-white rounded-2xl border border-[#c2c7ce] shadow-sm overflow-hidden flex flex-col">
-    
-    <!-- Encabezado de la Sección y Filtros -->
-    <div class="p-6 bg-[#f3f4f5] border-b border-[#c2c7ce]/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-      <div>
-        <div class="flex items-center gap-2 mb-1">
-          <span class="material-symbols-outlined text-[#003b5c] text-2xl">school</span>
-          <h2 class="text-xl font-bold text-[#003b5c] font-['Public_Sans']">Historial Académico por Periodos</h2>
-        </div>
-        <p class="text-xs text-[#72787e] font-semibold pl-8">Listado de materias impartidas y estadísticas comparativas de desempeño.</p>
-      </div>
-
-      <!-- Barra Híbrida de Filtros (Botones Rápidos + Desplegable Dinámico para N años) -->
-      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-        
-        <!-- Botones Rápidos de Estado -->
-        <div class="flex bg-slate-200/70 p-1 rounded-xl gap-1 overflow-x-auto flex-1 md:flex-none">
-          <button (click)="periodoFiltro.set('Todos')"
-            [ngClass]="periodoFiltro() === 'Todos' ? 'bg-[#003b5c] text-white shadow-md' : 'text-[#42474e] hover:bg-white/50'"
-            class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
-            Historial Completo
-          </button>
-          <button (click)="periodoFiltro.set('Activos')"
-            [ngClass]="periodoFiltro() === 'Activos' ? 'bg-[#003b5c] text-white shadow-md' : 'text-[#42474e] hover:bg-white/50'"
-            class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Periodo Activo
-          </button>
-          <button (click)="periodoFiltro.set('Inactivos')"
-            [ngClass]="periodoFiltro() === 'Inactivos' ? 'bg-[#003b5c] text-white shadow-md' : 'text-[#42474e] hover:bg-white/50'"
-            class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-            Histórico Inactivo
-          </button>
-        </div>
-
-        <!-- Desplegable Dinámico de Todos los Periodos Disponibles (Soporta N años) -->
-        <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-[#c2c7ce] shadow-sm flex-1 md:flex-none">
-          <span class="material-symbols-outlined text-sm text-[#003b5c]">calendar_month</span>
-          <span class="text-xs font-bold text-[#42474e] uppercase tracking-wider hidden md:inline">Periodo:</span>
-          <select [ngModel]="periodoFiltro()" (ngModelChange)="periodoFiltro.set($event)"
-            class="bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-3 py-1 text-xs font-bold text-[#003b5c] focus:border-[#003b5c] outline-none cursor-pointer w-full md:w-auto">
-            <option value="Todos">Seleccionar Periodo Específico...</option>
-            <optgroup label="Periodos Académicos Históricos">
-              @for (p of periodosDisponibles(); track p) {
-                <option [value]="p">{{ p }} {{ p === 'Primavera 2026' ? '(Activo)' : '(Inactivo)' }}</option>
-              }
-            </optgroup>
-          </select>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Grid de Materias del Historial -->
-    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/30">
-      
-      @for (item of materiasFiltradas(); track item.id) {
-        <div class="bg-white rounded-2xl border border-[#c2c7ce] shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col justify-between group">
-          
-          <!-- Encabezado de Tarjeta de Materia -->
-          <div class="p-6 border-b border-slate-100 space-y-4 flex-1">
-            <div class="flex justify-between items-start gap-4">
-              <div>
-                <div class="flex items-center gap-2 mb-1.5">
-                  <span class="px-2.5 py-0.5 bg-[#003b5c]/8 text-[#003b5c] rounded text-xs font-bold uppercase tracking-wider font-mono">
-                    NRC: {{ item.nrc }}
-                  </span>
-                  <span class="text-xs text-[#72787e] font-semibold">Sección: {{ item.seccion }}</span>
-                </div>
-                <h3 class="text-xl font-bold text-[#003b5c] group-hover:text-[#00566d] transition-colors font-['Public_Sans']">{{ item.nombre }}</h3>
-                <p class="text-xs text-[#72787e] font-medium mt-1 flex items-center gap-1.5">
-                  <span class="material-symbols-outlined text-sm">schedule</span>
-                  {{ item.horario }}
-                </p>
-              </div>
-
-              <!-- Indicador de Estado del Periodo (Requerimiento del Proyecto) -->
-              <div class="flex-shrink-0">
-                @if (item.activo) {
-                  <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-full text-xs font-bold shadow-sm">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    {{ item.periodo }} (Activo)
-                  </span>
-                } @else {
-                  <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 border border-slate-200 text-slate-600 rounded-full text-xs font-bold shadow-sm">
-                    <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-                    {{ item.periodo }} (Inactivo)
-                  </span>
-                }
-              </div>
-            </div>
-
-            <!-- Métricas Principales del Curso -->
-            <div class="grid grid-cols-3 gap-4 pt-2">
-              <div class="bg-[#f8f9fa] p-3 rounded-xl border border-slate-200 text-center">
-                <p class="text-[10px] font-extrabold text-[#72787e] uppercase tracking-wider mb-1">Promedio</p>
-                <p class="text-lg font-black text-[#003b5c]">{{ item.promedioGeneral | number:'1.1-1' }}</p>
-              </div>
-              <div class="bg-[#f8f9fa] p-3 rounded-xl border border-slate-200 text-center">
-                <p class="text-[10px] font-extrabold text-[#72787e] uppercase tracking-wider mb-1">Aprobación</p>
-                <p class="text-lg font-black text-[#003b5c]">{{ item.tasaAprobacion }}%</p>
-              </div>
-              <div class="bg-[#f8f9fa] p-3 rounded-xl border border-slate-200 text-center">
-                <p class="text-[10px] font-extrabold text-[#72787e] uppercase tracking-wider mb-1">Alumnos</p>
-                <p class="text-lg font-black text-[#003b5c]">{{ item.totalAlumnos }}</p>
-              </div>
-            </div>
-
-            <!-- Estadísticas Comparativas si se ha impartido en más de un periodo (Requerimiento Clave) -->
-            @if (item.comparativa) {
-              <div class="mt-4 p-4 bg-[#baeaff]/15 border border-[#003b5c]/15 rounded-xl space-y-2 animate-fade-in">
-                <div class="flex items-center justify-between text-xs font-bold text-[#003b5c] border-b border-[#003b5c]/10 pb-1.5">
-                  <span class="flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-sm">compare_arrows</span>
-                    Estadísticas Comparativas
-                  </span>
-                  <span class="text-xs font-semibold text-[#72787e]">vs {{ item.comparativa.periodoAnterior }}</span>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4 text-xs pt-1">
-                  <div class="flex justify-between items-center bg-white/60 p-2 rounded-lg border border-slate-200/60">
-                    <span class="text-[#72787e] font-semibold">Dif. Promedio:</span>
-                    <span class="font-bold flex items-center gap-1" [ngClass]="item.comparativa.difPromedio >= 0 ? 'text-emerald-600' : 'text-red-600'">
-                      @if (item.comparativa.difPromedio >= 0) {
-                        <span class="material-symbols-outlined text-xs">trending_up</span>
-                        +{{ item.comparativa.difPromedio }} pts
-                      } @else {
-                        <span class="material-symbols-outlined text-xs">trending_down</span>
-                        {{ item.comparativa.difPromedio }} pts
-                      }
-                    </span>
-                  </div>
-
-                  <div class="flex justify-between items-center bg-white/60 p-2 rounded-lg border border-slate-200/60">
-                    <span class="text-[#72787e] font-semibold">Dif. Aprobación:</span>
-                    <span class="font-bold flex items-center gap-1" [ngClass]="item.comparativa.difTasa >= 0 ? 'text-emerald-600' : 'text-red-600'">
-                      @if (item.comparativa.difTasa >= 0) {
-                        <span class="material-symbols-outlined text-xs">trending_up</span>
-                        +{{ item.comparativa.difTasa }}%
-                      } @else {
-                        <span class="material-symbols-outlined text-xs">trending_down</span>
-                        {{ item.comparativa.difTasa }}%
-                      }
-                    </span>
-                  </div>
-                </div>
-              </div>
-            } @else {
-              <div class="mt-4 p-3 bg-slate-50 border border-slate-200/60 rounded-xl flex items-center gap-2 text-xs text-[#72787e] italic">
-                <span class="material-symbols-outlined text-sm text-slate-400">info</span>
-                Primera vez impartiendo esta materia en el registro histórico.
-              </div>
-            }
-          </div>
-
-          <!-- Pie de Tarjeta / Acción Directa -->
-          <div class="p-4 bg-[#f3f4f5]/60 border-t border-slate-100 flex justify-between items-center">
-            <span class="text-xs text-[#72787e] font-mono">ID Registro: {{ item.id }}</span>
-            <button [routerLink]="['/docente/materias', item.nrc, 'actividades']"
-              class="px-4 py-1.5 bg-[#003b5c] text-white hover:bg-[#00253b] rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
-              Ver Detalles
-              <span class="material-symbols-outlined text-xs">arrow_forward</span>
-            </button>
-          </div>
-
-        </div>
-      }
-
-    </div>
-
-  </div>
-
-  <!-- ===== Modal de Edición de Perfil ===== -->
-  @if (showEditModal()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div class="bg-white rounded-2xl shadow-2xl border border-[#c2c7ce] w-full max-w-lg overflow-hidden animate-scale-up flex flex-col">
-        
-        <!-- Header Modal -->
-        <div class="bg-gradient-to-r from-[#003b5c] to-[#00566d] p-6 text-white flex justify-between items-center flex-shrink-0">
-          <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-2xl">manage_accounts</span>
-            <h3 class="text-xl font-bold font-['Public_Sans']">Editar Perfil Docente</h3>
-          </div>
-          <button (click)="cerrarEditarPerfil()" class="text-white/80 hover:text-white transition-colors">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
-        <!-- Body Modal -->
-        <div class="p-6 space-y-4 overflow-y-auto flex-1">
-          <div>
-            <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">Nombre Completo</label>
-            <input type="text" [(ngModel)]="formPerfil().nombre"
-              class="w-full bg-[#f8f9fa] border-2 border-[#c2c7ce] rounded-lg px-4 py-2.5 text-sm font-bold text-[#003b5c] focus:border-[#003b5c] outline-none transition-all"/>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">Título / Nivel</label>
-              <input type="text" [(ngModel)]="formPerfil().titulo"
-                class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-4 py-2 text-sm text-[#191c1d] focus:border-[#003b5c] outline-none transition-all"/>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">ID Empleado</label>
-              <input type="text" [(ngModel)]="formPerfil().idEmpleado"
-                class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-4 py-2 text-sm text-[#191c1d] focus:border-[#003b5c] outline-none transition-all"/>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">Facultad / Adscripción</label>
-            <input type="text" [(ngModel)]="formPerfil().facultad"
-              class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-4 py-2 text-sm text-[#191c1d] focus:border-[#003b5c] outline-none transition-all"/>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">Correo Institucional</label>
-              <input type="email" [(ngModel)]="formPerfil().correo"
-                class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-4 py-2 text-sm text-[#191c1d] focus:border-[#003b5c] outline-none transition-all"/>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">Departamento</label>
-              <input type="text" [(ngModel)]="formPerfil().departamento"
-                class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-4 py-2 text-sm text-[#191c1d] focus:border-[#003b5c] outline-none transition-all"/>
-            </div>
-          </div>
-        </div>
-
-        <!-- Footer Modal -->
-        <div class="p-6 bg-[#f3f4f5] border-t border-[#c2c7ce]/60 flex justify-end gap-3 flex-shrink-0">
-          <button (click)="cerrarEditarPerfil()"
-            class="px-5 py-2.5 text-sm font-bold text-[#42474e] hover:bg-slate-200 rounded-lg transition-colors">
-            Cancelar
-          </button>
-          <button (click)="guardarPerfil()"
-            class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all flex items-center gap-2">
-            <span class="material-symbols-outlined text-sm">save</span>
-            Guardar Cambios
-          </button>
-        </div>
-
-      </div>
-    </div>
-  }
-
-  <!-- Toast de Confirmación -->
-  @if (mensajeToast()) {
-    <div class="fixed bottom-6 right-6 z-50 flex items-center gap-3 p-4 bg-emerald-600 text-white rounded-xl shadow-2xl animate-bounce-in border border-emerald-500 max-w-md">
-      <span class="material-symbols-outlined text-2xl flex-shrink-0" style="font-variation-settings:'FILL' 1">check_circle</span>
-      <p class="text-sm font-bold">{{ mensajeToast() }}</p>
-    </div>
-  }
-
 </div>

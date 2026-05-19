@@ -57,12 +57,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     status: 'active' as const
   });
 
-  stats = signal({
-    totalDocentes: 124,
-    totalAlumnos: 2845,
-    totalMaterias: 312,
-    materiasActivas: 287
-  });
 
   // ── Progreso del periodo activo ──────────────────────────────────────────
   periodProgress = computed(() => {

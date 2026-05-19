@@ -8,7 +8,7 @@ interface Periodo {
   name: string; // e.g. "Primavera 2026"
   startDate: string;
   endDate: string;
-  status: 'active' | 'planning' | 'closed';
+  activo: boolean;
 }
 
 @Component({
@@ -43,28 +43,28 @@ export class PeriodosComponent {
       name: 'Primavera 2026',
       startDate: '2026-01-05',
       endDate: '2026-05-22',
-      status: 'active'
+      activo: true
     },
     {
       id: '2',
       name: 'Verano 2026',
       startDate: '2026-06-15',
       endDate: '2026-07-24',
-      status: 'planning'
+      activo: false
     },
     {
       id: '3',
       name: 'Otoño 2026',
       startDate: '2026-08-10',
       endDate: '2026-12-11',
-      status: 'planning'
+      activo: false
     },
     {
       id: '4',
       name: 'Otoño 2025',
       startDate: '2025-08-11',
       endDate: '2025-12-12',
-      status: 'closed'
+      activo: false
     }
   ]);
 
@@ -77,7 +77,7 @@ export class PeriodosComponent {
   periodoName = '';
   periodoStartDate = '';
   periodoEndDate = '';
-  periodoStatus: 'active' | 'planning' | 'closed' = 'planning';
+  periodoActivo = false;
 
   // Alertas / Toasts
   toastMessage = signal<string>('');
@@ -85,7 +85,7 @@ export class PeriodosComponent {
 
   // Obtener periodo actualmente activo (Computed)
   activePeriodo = computed(() => {
-    return this.periodosList().find(p => p.status === 'active');
+    return this.periodosList().find(p => p.activo);
   });
 
   // Calcular el progreso visual del periodo activo
@@ -108,7 +108,7 @@ export class PeriodosComponent {
 
   // Obtener periodos que no están activos
   otherPeriodos = computed(() => {
-    return this.periodosList().filter(p => p.status !== 'active');
+    return this.periodosList().filter(p => !p.activo);
   });
 
   // Abrir Modal de Creación
@@ -118,7 +118,7 @@ export class PeriodosComponent {
     this.periodoName = '';
     this.periodoStartDate = '';
     this.periodoEndDate = '';
-    this.periodoStatus = 'planning';
+    this.periodoActivo = false;
     this.showModal.set(true);
   }
 
@@ -129,7 +129,7 @@ export class PeriodosComponent {
     this.periodoName = periodo.name;
     this.periodoStartDate = periodo.startDate;
     this.periodoEndDate = periodo.endDate;
-    this.periodoStatus = periodo.status;
+    this.periodoActivo = periodo.activo;
     this.showModal.set(true);
   }
 
@@ -148,14 +148,14 @@ export class PeriodosComponent {
       return;
     }
 
-    const targetStatus = this.periodoStatus;
+    const targetStatus = this.periodoActivo;
 
     if (this.isEditing()) {
       // Si estamos editando y cambiamos a Activo, desactivar los demás
       this.periodosList.update(list => {
         let updatedList = list;
-        if (targetStatus === 'active') {
-          updatedList = list.map((p): Periodo => p.status === 'active' ? { ...p, status: 'closed' } : p);
+        if (targetStatus) {
+          updatedList = list.map((p): Periodo => p.activo ? { ...p, activo: false } : p);
         }
         return updatedList.map((p): Periodo => p.id === this.periodoId 
           ? {
@@ -163,7 +163,7 @@ export class PeriodosComponent {
               name: this.periodoName,
               startDate: this.periodoStartDate,
               endDate: this.periodoEndDate,
-              status: this.periodoStatus
+              activo: this.periodoActivo
             }
           : p
         );
@@ -176,13 +176,13 @@ export class PeriodosComponent {
         name: this.periodoName,
         startDate: this.periodoStartDate,
         endDate: this.periodoEndDate,
-        status: this.periodoStatus
+        activo: this.periodoActivo
       };
 
       this.periodosList.update(list => {
         let updatedList = list;
-        if (targetStatus === 'active') {
-          updatedList = list.map((p): Periodo => p.status === 'active' ? { ...p, status: 'closed' } : p);
+        if (targetStatus) {
+          updatedList = list.map((p): Periodo => p.activo ? { ...p, activo: false } : p);
         }
         return [newPeriodo, ...updatedList];
       });
@@ -195,17 +195,17 @@ export class PeriodosComponent {
   // Activar directamente un periodo de la lista
   setAsActive(periodo: Periodo) {
     this.periodosList.update(list => {
-      // Poner el actual activo a cerrado
-      const deactivated = list.map((p): Periodo => p.status === 'active' ? { ...p, status: 'closed' } : p);
+      // Poner el actual activo a inactivo
+      const deactivated = list.map((p): Periodo => p.activo ? { ...p, activo: false } : p);
       // Activar el periodo seleccionado
-      return deactivated.map((p): Periodo => p.id === periodo.id ? { ...p, status: 'active' } : p);
+      return deactivated.map((p): Periodo => p.id === periodo.id ? { ...p, activo: true } : p);
     });
     this.triggerToast(`Se ha activado el periodo académico: ${periodo.name}`);
   }
 
   // Eliminar periodo
   deletePeriodo(periodo: Periodo) {
-    if (periodo.status === 'active') {
+    if (periodo.activo) {
       this.triggerToast('No se puede eliminar el periodo actualmente activo. Primero activa otro.');
       return;
     }

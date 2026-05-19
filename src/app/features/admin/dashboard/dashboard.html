@@ -70,65 +70,6 @@
     </div>
   </div>
 
-  <!-- ── Tarjetas de Estadísticas ──────────────────────────────────────── -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-
-    <!-- Docentes -->
-    <div class="animate-card delay-3 bg-white rounded-2xl border border-outline-variant/20 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
-      <div class="flex items-center justify-between">
-        <div class="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
-          <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">person_book</span>
-        </div>
-        <span class="text-[10px] font-black text-secondary bg-secondary/10 px-2 py-0.5 rounded-full uppercase">Docentes</span>
-      </div>
-      <div>
-        <p class="text-3xl font-black text-primary tabular-nums">{{ stats().totalDocentes }}</p>
-        <p class="text-xs text-outline font-medium mt-0.5">Registrados en el sistema</p>
-      </div>
-    </div>
-
-    <!-- Alumnos -->
-    <div class="animate-card delay-3 bg-white rounded-2xl border border-outline-variant/20 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
-      <div class="flex items-center justify-between">
-        <div class="w-10 h-10 rounded-xl bg-[#4f46e5]/10 flex items-center justify-center">
-          <span class="material-symbols-outlined text-[#4f46e5]" style="font-variation-settings: 'FILL' 1;">school</span>
-        </div>
-        <span class="text-[10px] font-black text-[#4f46e5] bg-[#4f46e5]/10 px-2 py-0.5 rounded-full uppercase">Alumnos</span>
-      </div>
-      <div>
-        <p class="text-3xl font-black text-primary tabular-nums">{{ stats().totalAlumnos | number }}</p>
-        <p class="text-xs text-outline font-medium mt-0.5">Inscritos en el periodo</p>
-      </div>
-    </div>
-
-    <!-- Materias totales -->
-    <div class="animate-card delay-4 bg-white rounded-2xl border border-outline-variant/20 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all">
-      <div class="flex items-center justify-between">
-        <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-          <span class="material-symbols-outlined text-amber-600" style="font-variation-settings: 'FILL' 1;">menu_book</span>
-        </div>
-        <span class="text-[10px] font-black text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-full uppercase">Materias</span>
-      </div>
-      <div>
-        <p class="text-3xl font-black text-primary tabular-nums">{{ stats().totalMaterias }}</p>
-        <p class="text-xs text-outline font-medium mt-0.5">{{ stats().materiasActivas }} activas este periodo</p>
-      </div>
-    </div>
-
-    <!-- Estado del sistema -->
-    <div class="animate-card delay-4 bg-gradient-to-br from-primary to-[#006782] rounded-2xl shadow-lg p-5 flex flex-col gap-3 text-white">
-      <div class="flex items-center justify-between">
-        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified</span>
-        </div>
-        <span class="text-[10px] font-black bg-emerald-400/20 text-emerald-300 px-2 py-0.5 rounded-full uppercase">Operativo</span>
-      </div>
-      <div>
-        <p class="text-xl font-black tabular-nums">Sistema en línea</p>
-        <p class="text-xs text-white/60 font-medium mt-0.5">Todos los microservicios activos</p>
-      </div>
-    </div>
-  </div>
 
   <!-- ── Acciones Rápidas + Actividad Reciente ─────────────────────────── -->
   <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">

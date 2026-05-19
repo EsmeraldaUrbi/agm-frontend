@@ -79,7 +79,7 @@
         *ngFor="let per of otherPeriodos()" 
         [title]="per.name"
         [subtitle]="per.startDate + ' al ' + per.endDate"
-        [accent]="per.status === 'planning'"
+        [accent]="false"
         [hoverable]="true"
         customClass="bg-white border-outline-variant/15 shadow-md flex flex-col justify-between"
         bodyClass="p-5 flex flex-col justify-between h-full"
@@ -88,12 +88,8 @@
         <div class="space-y-4 flex-grow">
           <!-- Status pill -->
           <div>
-            <span 
-              [class]="per.status === 'planning' 
-                ? 'px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-[9px] font-extrabold uppercase'
-                : 'px-2 py-0.5 rounded-full bg-outline/10 text-outline text-[9px] font-bold uppercase'"
-            >
-              {{ per.status === 'planning' ? 'Planificación' : 'Histórico (Cerrado)' }}
+            <span class="px-2 py-0.5 rounded-full bg-outline/10 text-outline text-[9px] font-bold uppercase">
+              Inactivo
             </span>
           </div>
 
@@ -108,14 +104,12 @@
           <!-- Activation for planning period -->
           <div>
             <agm-button 
-              *ngIf="per.status === 'planning'" 
               (agmClick)="setAsActive(per)" 
               size="sm" 
               variant="outline"
             >
               Activar Periodo
             </agm-button>
-            <span *ngIf="per.status === 'closed'" class="text-[10px] text-outline font-bold uppercase tracking-wider">Histórico</span>
           </div>
 
           <!-- Edit & Delete utility icons -->
@@ -201,17 +195,17 @@
         </agm-input>
 
         <!-- Status selector -->
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[10px] font-bold text-outline uppercase tracking-wider">Estado Inicial del Periodo</label>
-          <select 
-            [(ngModel)]="periodoStatus" 
-            name="status" 
-            class="w-full h-9 px-3 text-xs font-semibold bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface cursor-pointer"
+        <div class="flex items-center gap-2 mt-4">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="periodoActivo" 
+            name="activo" 
+            id="periodoActivoCheck"
+            class="w-4 h-4 text-primary bg-surface-variant border-outline-variant rounded focus:ring-primary focus:ring-2 cursor-pointer"
           >
-            <option value="planning">Planificación</option>
-            <option value="active">Activo (Desactivará el periodo actual)</option>
-            <option value="closed">Cerrado / Histórico</option>
-          </select>
+          <label for="periodoActivoCheck" class="text-xs font-bold text-outline cursor-pointer">
+            Marcar como Periodo Activo (Desactivará el actual)
+          </label>
         </div>
 
         <!-- Modal Actions Footer -->
