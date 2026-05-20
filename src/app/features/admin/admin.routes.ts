@@ -18,6 +18,10 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () => import('../docente/importar-materias/importar-materias.component').then(m => m.ImportarMateriasComponent)
   },
   {
+    path: 'importar-docentes',
+    loadComponent: () => import('./importar-docentes/importar-docentes').then(m => m.ImportarDocentesComponent)
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'
