@@ -1,6 +1,25 @@
 <!-- Padding inferior para no tapar contenido con la barra fija -->
 <div class="max-w-7xl mx-auto pb-24 font-['Inter'] space-y-6">
 
+  <!-- ===== Selector Dinámico de Materia Activa ===== -->
+  <div class="bg-white p-5 rounded-2xl border border-[#c2c7ce] shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div class="flex items-center gap-3 text-sm font-bold text-[#003b5c]">
+      <div class="w-10 h-10 rounded-xl bg-[#003b5c]/10 flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-xl">qr_code_scanner</span>
+      </div>
+      <div>
+        <span class="block text-[10px] text-[#72787e] uppercase tracking-wider">Historial de Asistencias</span>
+        <span class="text-base font-black font-['Public_Sans']">Seleccionar Materia Activa:</span>
+      </div>
+    </div>
+    <select [ngModel]="materiaSeleccionadaNrc()" (ngModelChange)="cambiarMateria($event)"
+      class="bg-[#f8f9fa] border-2 border-[#003b5c] rounded-xl px-4 py-2.5 text-sm font-bold text-[#003b5c] focus:border-[#00566d] outline-none cursor-pointer w-full md:w-auto shadow-sm">
+      @for (m of listaMateriasDisponibles; track m.nrc) {
+        <option [value]="m.nrc">{{ m.nombre }} (NRC: {{ m.nrc }} - Sec: {{ m.seccion }})</option>
+      }
+    </select>
+  </div>
+
   <!-- ===== Header de Materia (Banner) ===== -->
   <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden">
     <div class="p-8 bg-gradient-to-r from-[#003B5C] to-[#00566d] text-white">
@@ -26,32 +45,28 @@
             </div>
           </div>
         </div>
-        <div class="flex gap-3 flex-shrink-0">
-          <button class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg text-sm font-bold transition-all">
-            <span class="material-symbols-outlined text-sm">file_download</span>
-            Sílabo
-          </button>
-          <button class="flex items-center gap-2 px-4 py-2 bg-white text-[#003b5c] rounded-lg text-sm font-bold shadow-lg hover:opacity-90 transition-all">
-            <span class="material-symbols-outlined text-sm">edit</span>
-            Editar Datos
-          </button>
-        </div>
       </div>
     </div>
-
-    <!-- Tabs de navegación -->
-    <nav class="flex border-b border-slate-100 bg-white px-6 overflow-x-auto">
-      @for (tab of tabs; track tab) {
-        <a class="px-5 py-4 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 cursor-pointer"
-          [routerLink]="['/docente/materias', materia.nrc, tab.toLowerCase()]"
-          [ngClass]="tab === 'Asistencias'
-            ? 'text-[#003b5c] border-[#003b5c]'
-            : 'text-slate-500 hover:text-[#003b5c] border-transparent'">
-          {{ tab }}
-        </a>
-      }
-    </nav>
   </div>
+
+  <!-- Alertas de estado -->
+  @if (mensajeExito()) {
+    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 text-emerald-800 animate-fade-in shadow-sm">
+      <span class="material-symbols-outlined text-emerald-600 text-2xl flex-shrink-0" style="font-variation-settings:'FILL' 1">info</span>
+      <div>
+        <h4 class="text-sm font-bold">{{ mensajeExito() }}</h4>
+      </div>
+    </div>
+  }
+
+  @if (guardando()) {
+    <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-4 text-blue-800 animate-fade-in shadow-sm">
+      <div class="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+      <div>
+        <h4 class="text-sm font-bold">Procesando y sincronizando con MS-Asistencias...</h4>
+      </div>
+    </div>
+  }
 
   <div class="grid grid-cols-12 gap-6">
 
@@ -68,19 +83,12 @@
         </h3>
         <div class="space-y-4">
           <div>
-            <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">Materia</label>
-            <select [(ngModel)]="materiaSeleccionada"
-              class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-4 py-2 text-sm text-[#191c1d] focus:border-[#00253b] focus:ring-1 focus:ring-[#00253b] outline-none transition-all">
-              <option *ngFor="let m of materias">{{ m }}</option>
-            </select>
-          </div>
-          <div>
             <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">Fecha de Registro</label>
             <input type="date" [(ngModel)]="fechaSeleccionada"
               class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-4 py-2 text-sm text-[#191c1d] focus:border-[#00253b] focus:ring-1 focus:ring-[#00253b] outline-none transition-all"/>
           </div>
           <button class="w-full mt-2 bg-[#1a4a6c] text-white py-2.5 rounded-lg font-bold text-sm shadow-sm hover:bg-[#003b5c] transition-all">
-            Actualizar Vista
+            Consultar Fecha
           </button>
         </div>
       </div>
@@ -146,7 +154,10 @@
 
         <!-- Tabla Header -->
         <div class="p-5 border-b border-[#c2c7ce] flex justify-between items-center bg-[#f3f4f5]/50">
-          <h3 class="font-black text-[#00253b] font-['Public_Sans']">Listado de Alumnos</h3>
+          <div>
+            <h3 class="font-black text-[#00253b] font-['Public_Sans']">Listado de Alumnos (Pase de lista QR)</h3>
+            <p class="text-xs text-[#72787e] mt-1">Sincronizado en tiempo real con MS-Asistencias.</p>
+          </div>
           <div class="flex gap-2">
             <div class="relative">
               <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#72787e] text-sm">search</span>
@@ -167,8 +178,9 @@
               <tr>
                 <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider">Matrícula</th>
                 <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider">Nombre del Alumno</th>
-                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider">Hora</th>
-                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider">Estado de Asistencia</th>
+                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider">Hora Escaneo</th>
+                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider text-center">Estado Oficial</th>
+                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider text-center">Acciones</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[#c2c7ce]/50">
@@ -189,30 +201,34 @@
 
                   <td class="px-6 py-4 text-xs text-[#42474e] font-mono">{{ alumno.hora }}</td>
 
-                  <!-- Toggle de estado -->
-                  <td class="px-6 py-4">
-                    <div class="flex bg-[#e7e8e9] p-1 rounded-lg w-fit gap-0.5">
-                      <button (click)="setEstado(alumno.matricula, 'presente')"
-                        class="px-3 py-1 text-[10px] font-bold rounded-md transition-all"
-                        [ngClass]="btnClass(alumno.estado, 'presente')">
-                        Presente
+                  <!-- Estado en Badge (Solo lectura visual) -->
+                  <td class="px-6 py-4 text-center">
+                    <span class="px-3 py-1 rounded-md text-xs font-bold tracking-wide shadow-sm flex items-center justify-center w-28 mx-auto"
+                      [ngClass]="{
+                        'bg-emerald-50 text-emerald-700 border border-emerald-200': alumno.estado === 'presente',
+                        'bg-amber-50 text-amber-700 border border-amber-200': alumno.estado === 'retardo',
+                        'bg-red-50 text-red-700 border border-red-200': alumno.estado === 'falta',
+                        'bg-blue-50 text-blue-700 border border-blue-200': alumno.estado === 'justificado'
+                      }">
+                      {{ alumno.estado | uppercase }}
+                    </span>
+                  </td>
+
+                  <!-- Acciones (Justificar) -->
+                  <td class="px-6 py-4 text-center">
+                    @if (alumno.estado === 'falta' || alumno.estado === 'retardo') {
+                      <button (click)="justificarFalta(alumno.matricula)" 
+                        class="text-xs font-bold text-[#0070A8] bg-[#0070A8]/10 hover:bg-[#0070A8]/20 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 mx-auto">
+                        <span class="material-symbols-outlined text-[16px]">health_and_safety</span>
+                        Justificar
                       </button>
-                      <button (click)="setEstado(alumno.matricula, 'retardo')"
-                        class="px-3 py-1 text-[10px] font-bold rounded-md transition-all"
-                        [ngClass]="btnClass(alumno.estado, 'retardo')">
-                        Retardo
-                      </button>
-                      <button (click)="setEstado(alumno.matricula, 'falta')"
-                        class="px-3 py-1 text-[10px] font-bold rounded-md transition-all"
-                        [ngClass]="btnClass(alumno.estado, 'falta')">
-                        Falta
-                      </button>
-                      <button (click)="setEstado(alumno.matricula, 'justificado')"
-                        class="px-3 py-1 text-[10px] font-bold rounded-md transition-all"
-                        [ngClass]="btnClass(alumno.estado, 'justificado')">
-                        Just.
-                      </button>
-                    </div>
+                    } @else if (alumno.estado === 'justificado') {
+                      <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">done</span> Justificado
+                      </span>
+                    } @else {
+                      <span class="text-[10px] text-slate-300">-</span>
+                    }
                   </td>
 
                 </tr>
@@ -223,18 +239,7 @@
 
         <!-- Paginación -->
         <div class="p-4 border-t border-[#c2c7ce] bg-[#f3f4f5]/50 flex justify-between items-center">
-          <span class="text-xs text-[#42474e] font-medium">Mostrando {{ alumnos().length }} de 35 alumnos</span>
-          <div class="flex gap-1">
-            <button class="w-8 h-8 flex items-center justify-center rounded border border-[#c2c7ce] bg-white text-[#42474e] hover:bg-[#edeeef] transition-colors">
-              <span class="material-symbols-outlined text-sm">chevron_left</span>
-            </button>
-            <button class="w-8 h-8 flex items-center justify-center rounded border border-[#00253b] bg-[#00253b] text-white font-bold text-xs shadow-sm">1</button>
-            <button class="w-8 h-8 flex items-center justify-center rounded border border-[#c2c7ce] bg-white text-[#42474e] hover:bg-[#edeeef] transition-colors text-xs">2</button>
-            <button class="w-8 h-8 flex items-center justify-center rounded border border-[#c2c7ce] bg-white text-[#42474e] hover:bg-[#edeeef] transition-colors text-xs">3</button>
-            <button class="w-8 h-8 flex items-center justify-center rounded border border-[#c2c7ce] bg-white text-[#42474e] hover:bg-[#edeeef] transition-colors">
-              <span class="material-symbols-outlined text-sm">chevron_right</span>
-            </button>
-          </div>
+          <span class="text-xs text-[#42474e] font-medium">Mostrando {{ alumnos().length }} alumnos listados</span>
         </div>
 
       </div>
@@ -247,38 +252,28 @@
 <!-- ============================================================ -->
 <!-- BARRA DE ACCIONES FIJA (bottom)                             -->
 <!-- ============================================================ -->
-<div class="fixed bottom-0 left-[240px] right-0 bg-white/80 backdrop-blur-md border-t border-[#c2c7ce] py-4 px-8 flex justify-between items-center z-30">
+<div class="fixed bottom-0 left-[240px] right-0 bg-white/80 backdrop-blur-md border-t border-[#c2c7ce] py-4 px-8 flex justify-between items-center z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
 
-  <!-- Leyenda de resumen -->
-  <div class="flex items-center gap-6">
-    <div class="flex items-center gap-2">
-      <span class="w-3 h-3 rounded-full bg-green-500"></span>
-      <span class="text-xs font-bold text-[#42474e]">{{ resumen().presentes }} Presentes</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="w-3 h-3 rounded-full bg-red-500"></span>
-      <span class="text-xs font-bold text-[#42474e]">{{ resumen().faltas }} Faltas</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="w-3 h-3 rounded-full bg-amber-500"></span>
-      <span class="text-xs font-bold text-[#42474e]">{{ resumen().retardos }} Retardos</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="w-3 h-3 rounded-full bg-blue-500"></span>
-      <span class="text-xs font-bold text-[#42474e]">{{ resumen().justificados }} Justificados</span>
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[#003b5c]">verified_user</span>
+    <div>
+      <h4 class="text-sm font-bold text-[#00253b]">Validación de Pase de Lista</h4>
+      <p class="text-xs text-[#72787e]">Revise la información y apruebe la lista definitiva para esta sesión.</p>
     </div>
   </div>
 
   <!-- Botones de acción -->
   <div class="flex gap-3">
-    <button (click)="descartarCambios()"
-      class="px-6 py-2.5 rounded-lg font-bold text-[#42474e] hover:bg-[#edeeef] transition-colors text-sm">
-      Descartar Cambios
+    <button (click)="solicitarDeNuevo()" [disabled]="guardando()"
+      class="px-6 py-2.5 rounded-lg border border-red-200 bg-red-50 text-red-700 font-bold hover:bg-red-100 transition-colors text-sm flex items-center gap-2">
+      <span class="material-symbols-outlined text-base">restart_alt</span>
+      Descartar y Solicitar de Nuevo
     </button>
-    <button (click)="guardarCambios()"
+    
+    <button (click)="confirmarAsistencia()" [disabled]="guardando()"
       class="flex items-center gap-2 bg-[#00253b] text-white px-8 py-2.5 rounded-lg font-bold shadow-md hover:bg-[#003b5c] transition-all text-sm">
-      <span class="material-symbols-outlined text-lg">save</span>
-      Guardar Cambios Manuales
+      <span class="material-symbols-outlined text-base">done_all</span>
+      Confirmar Asistencia Oficial
     </button>
   </div>
 

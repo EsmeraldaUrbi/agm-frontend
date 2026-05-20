@@ -26,7 +26,7 @@ export const DOCENTE_ROUTES: Routes = [
     loadComponent: () => import('./cierre-materia/cierre-materia.component').then(m => m.CierreMateriaComponent)
   },
   {
-    path: 'materias/:id/asistencias',
+    path: 'historial-asistencias',
     loadComponent: () => import('./historial-asistencias/historial-asistencias.component').then(m => m.HistorialAsistenciasComponent)
   },
   {

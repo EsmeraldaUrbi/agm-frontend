@@ -47,13 +47,25 @@
     @for (curso of cursos; track curso.nrc) {
       <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-all group">
         <div class="p-6 flex-1">
-          <!-- NRC & Sección badges -->
-          <div class="flex justify-between items-start mb-4">
+          <!-- NRC, Sección & Estado badges -->
+          <div class="flex flex-wrap items-center gap-2 mb-4">
             <span class="bg-[#baeaff] text-[#001f29] text-[10px] font-black px-2.5 py-1 rounded uppercase tracking-widest">
               NRC: {{ curso.nrc }}
             </span>
             <span class="bg-[#e1e3e4] text-[#42474e] text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-widest">
               Sección: {{ curso.seccion }}
+            </span>
+            <span class="ml-auto text-[10px] font-black px-2.5 py-1 rounded uppercase tracking-widest flex items-center gap-1.5"
+              [ngClass]="{
+                'bg-emerald-100 text-emerald-800 border border-emerald-200': curso.estado === 'ACTIVA',
+                'bg-slate-200 text-slate-600 border border-slate-300': curso.estado === 'CERRADA'
+              }">
+              @if (curso.estado === 'ACTIVA') {
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              } @else {
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+              }
+              {{ curso.estado }}
             </span>
           </div>
 
