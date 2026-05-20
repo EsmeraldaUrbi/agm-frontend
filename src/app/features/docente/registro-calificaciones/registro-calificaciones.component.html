@@ -25,16 +25,7 @@
             </div>
           </div>
         </div>
-        <div class="flex gap-3 flex-shrink-0">
-          <button class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg text-sm font-bold transition-all">
-            <span class="material-symbols-outlined text-sm">file_download</span>
-            Sílabo
-          </button>
-          <button class="flex items-center gap-2 px-4 py-2 bg-white text-[#003b5c] rounded-lg text-sm font-bold shadow-lg hover:opacity-90 transition-all">
-            <span class="material-symbols-outlined text-sm">edit</span>
-            Editar Datos
-          </button>
-        </div>
+
       </div>
     </div>
 
@@ -113,8 +104,6 @@
               <th class="py-4 px-6">ALUMNO</th>
               <th class="py-4 px-6">CORREO INSTITUCIONAL</th>
               <th class="py-4 px-6 text-center w-36" title="Calificación registrada para esta actividad">CALIFICACIÓN REGISTRADA</th>
-              <th class="py-4 px-6 text-center w-36" title="Promedio parcial acumulado">PROMEDIO ACTUAL</th>
-              <th class="py-4 px-6 text-center w-36" title="Promedio proyectado final">PROMEDIO FINAL</th>
               <th class="py-4 px-6 text-center w-36">ACCIONES</th>
             </tr>
           </thead>
@@ -136,20 +125,6 @@
                       Sin Calificar
                     </span>
                   }
-                </td>
-
-                <!-- Promedio Actual -->
-                <td class="py-3 px-6 text-center font-bold text-[#003b5c] bg-slate-50/20 group-hover:bg-white transition-colors">
-                  <span class="px-3 py-1 bg-[#baeaff]/40 rounded-lg border border-[#003b5c]/10 text-sm inline-block w-24">
-                    {{ item.promedio_actual | number:'1.1-1' }} / 10
-                  </span>
-                </td>
-
-                <!-- Promedio Final -->
-                <td class="py-3 px-6 text-center font-bold text-[#003b5c] bg-slate-50/20 group-hover:bg-white transition-colors">
-                  <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 text-sm inline-block w-24">
-                    {{ item.promedio_final | number:'1.1-1' }} / 10
-                  </span>
                 </td>
 
                 <!-- Acciones (Calificar Manualmente) -->

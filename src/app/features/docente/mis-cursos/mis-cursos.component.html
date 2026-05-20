@@ -83,23 +83,6 @@
               <span class="font-bold text-[#00253b]">{{ curso.alumnos }}</span>
             </div>
 
-            <!-- Progress -->
-            <div class="space-y-2">
-              <div class="flex items-center justify-between text-sm">
-                <div class="flex items-center gap-2 text-[#42474e]">
-                  <span class="material-symbols-outlined text-lg">task_alt</span>
-                  <span>Progreso de Evaluación:</span>
-                </div>
-                <span class="font-bold text-[#00253b]">{{ curso.progreso }}%</span>
-              </div>
-              <div class="w-full bg-[#e7e8e9] rounded-full h-2">
-                <div
-                  class="h-2 rounded-full transition-all duration-500"
-                  [ngClass]="curso.progresoColor"
-                  [style.width]="curso.progreso + '%'">
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
