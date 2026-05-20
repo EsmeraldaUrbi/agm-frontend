@@ -59,8 +59,82 @@
           </p>
         </div>
 
+        <div class="mt-8 pt-8 border-t border-outline-variant/10 flex justify-end">
+          <button 
+            (click)="showPasswordModal.set(true)"
+            class="flex items-center gap-2 px-6 py-2.5 bg-white border-2 border-primary text-primary hover:bg-primary/5 rounded-xl font-bold text-sm transition-all"
+          >
+            <span class="material-symbols-outlined text-lg">lock_reset</span>
+            Pedir Cambio de Contraseña
+          </button>
+        </div>
+
       </div>
     </div>
 
   </div>
+
+  <!-- Modal de Cambio de Contraseña -->
+  <div 
+    *ngIf="showPasswordModal()" 
+    class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+  >
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-outline-variant/10 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-outline-variant/10 flex justify-between items-center bg-surface-variant/5">
+        <div>
+          <h3 class="text-base font-black text-primary font-headline">
+            Recuperar Contraseña
+          </h3>
+          <p class="text-[10px] text-outline font-semibold mt-0.5">Te enviaremos un código para crear una nueva.</p>
+        </div>
+        <button 
+          (click)="showPasswordModal.set(false)" 
+          class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:bg-surface-variant/20 hover:text-on-surface transition-all"
+        >
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-4">
+        <p class="text-xs text-on-surface-variant font-medium">
+          Se enviará un correo con instrucciones para restablecer tu contraseña a:
+        </p>
+        
+        <div class="flex items-center gap-3 bg-surface-variant/20 border border-outline-variant/30 rounded-xl px-4 py-3">
+          <span class="material-symbols-outlined text-primary text-xl">mail</span>
+          <span class="text-sm font-bold text-on-surface">{{ usuario.email }}</span>
+        </div>
+
+        <!-- Modal Actions Footer -->
+        <div class="flex justify-end gap-3 pt-6 border-t border-outline-variant/10 mt-6">
+          <button 
+            (click)="showPasswordModal.set(false)"
+            class="px-5 py-2.5 rounded-xl font-bold text-sm text-outline border border-outline-variant/30 hover:bg-surface-variant/20 transition-all"
+          >
+            Cancelar
+          </button>
+          
+          <button 
+            (click)="requestPasswordChange()"
+            class="px-5 py-2.5 bg-primary text-white hover:bg-primary/90 rounded-xl font-bold text-sm shadow-md transition-all"
+          >
+            Enviar Enlace
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div 
+    *ngIf="showToast()" 
+    class="fixed bottom-6 right-6 px-4 py-3 rounded-2xl bg-secondary-container text-secondary border border-secondary/15 flex items-center gap-3 shadow-lg z-50"
+  >
+    <span class="material-symbols-outlined text-lg">check_circle</span>
+    <span class="text-xs font-bold leading-none">{{ toastMessage() }}</span>
+  </div>
+
 </div>

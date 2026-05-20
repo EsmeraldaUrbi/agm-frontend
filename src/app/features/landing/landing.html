@@ -2,9 +2,13 @@
   
   <!-- TopNavBar -->
   <nav class="flex justify-between items-center h-16 px-8 w-full sticky top-0 z-40 bg-white border-b border-outline-variant/20 shadow-[0_2px_12px_rgba(0,59,92,0.03)] font-headline text-sm font-medium">
-    <div class="flex items-center gap-4">
-      <span class="text-sm font-extrabold text-primary-container tracking-tight uppercase">
-        AGM — Academic Grade Management
+    <div class="flex items-center gap-3">
+      <!-- AGM Placeholder Badge -->
+      <div class="w-9 h-9 bg-gradient-to-br from-[#003b5c] to-[#00a3cc] text-white rounded-xl shadow-md flex items-center justify-center font-black text-sm tracking-tighter border-[1.5px] border-white ring-2 ring-[#003b5c]/10">
+        AGM
+      </div>
+      <span class="text-sm font-extrabold text-primary-container tracking-tight uppercase hidden sm:block">
+        Academic Grade Management
       </span>
     </div>
     
@@ -20,11 +24,6 @@
         <span iconRight class="material-symbols-outlined text-base">login</span>
       </agm-button>
 
-      <!-- Utility Icons -->
-      <div class="flex gap-2">
-        <span class="material-symbols-outlined text-outline cursor-pointer hover:text-primary transition-colors">notifications</span>
-        <span class="material-symbols-outlined text-outline cursor-pointer hover:text-primary transition-colors">settings</span>
-      </div>
     </div>
   </nav>
 

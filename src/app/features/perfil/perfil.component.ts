@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService, UserProfile } from '../../core/services/auth.service';
 
@@ -41,6 +41,11 @@ export class PerfilComponent implements OnInit {
     });
   }
 
+  // Modal y Toasts
+  showPasswordModal = signal(false);
+  showToast = signal(false);
+  toastMessage = signal('');
+
   // Helper para generar iniciales
   getInitials(name: string): string {
     if (!name) return '';
@@ -48,5 +53,16 @@ export class PerfilComponent implements OnInit {
     if (parts.length === 0) return '';
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
     return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+  }
+
+  requestPasswordChange() {
+    // Simulamos la llamada a authService.recoverPassword
+    this.showPasswordModal.set(false);
+    this.toastMessage.set('Se ha enviado un enlace de recuperación a tu correo institucional.');
+    this.showToast.set(true);
+    
+    setTimeout(() => {
+      this.showToast.set(false);
+    }, 4000);
   }
 }
