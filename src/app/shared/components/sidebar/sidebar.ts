@@ -57,7 +57,7 @@ export class SidebarComponent implements OnInit {
       { label: 'Mis Cursos',          route: '/docente/mis-cursos',       icon: 'school' },
       // ── Asistencias ────────────────────────────────────────
       { label: 'Pase de Lista (QR)',  route: '/docente/pase-lista',       icon: 'qr_code_scanner',    section: 'Asistencias' },
-      { label: 'Historial',           route: '/docente/materias/15842/asistencias', icon: 'calendar_month' },
+      { label: 'Historial',           route: '/docente/historial-asistencias', icon: 'calendar_month' },
       // ── Reportes ───────────────────────────────────────────
       { label: 'Reportes y estadísticas',  route: '/docente/materias/15842/reportes',    icon: 'analytics',          section: 'Reportes' },
       // ── Cuenta ─────────────────────────────────────────────
