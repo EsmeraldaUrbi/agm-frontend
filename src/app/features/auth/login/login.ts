@@ -32,7 +32,7 @@ export class LoginComponent {
   onLogin() {
     // Simulamos una validación simple
     if (this.email && this.password) {
-      this.authService.login(this.email, this.password).subscribe({
+      this.authService.login(this.email, this.password, this.selectedRole()).subscribe({
         next: (res) => {
           const role = res.user.rol.toLowerCase();
           if (role === 'administrador' || role === 'admin') {

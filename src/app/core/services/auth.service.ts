@@ -44,18 +44,40 @@ export class AuthService {
     }
   }
 
-  login(email: string, contrasena: string): Observable<LoginResponse> {
-    const url = `${environment.msAuthUrl}/auth/login`;
-    return this.http.post<LoginResponse>(url, { email, contrasena }).pipe(
-      tap(res => {
-        localStorage.setItem('agm_token', res.access_token);
-        if (res.refresh_token) {
-          localStorage.setItem('agm_refresh_token', res.refresh_token);
-        }
-        localStorage.setItem('agm_user', JSON.stringify(res.user));
-        this.currentUser.set(res.user);
-      })
-    );
+  login(email: string, contrasena: string, requestedRole?: string): Observable<LoginResponse> {
+    // const url = `${environment.msAuthUrl}/auth/login`;
+    // Código original comentado para saltar la validación real
+    // return this.http.post<LoginResponse>(url, { email, contrasena }).pipe(...)
+
+    let role = requestedRole || 'alumno'; 
+    let name = 'Usuario de Prueba';
+    if (role === 'admin') { name = 'Administrador Global'; }
+    if (role === 'docente') { name = 'Docente de Prueba'; }
+    if (role === 'alumno') { name = 'Alumno de Prueba'; }
+
+    const mockResponse: LoginResponse = {
+      access_token: 'mock-jwt-token',
+      token_type: 'bearer',
+      refresh_token: 'mock-refresh-token',
+      user: {
+        user_id: '123',
+        nombre_completo: name,
+        email: email || `${role}@buap.mx`,
+        rol: role,
+        activo: true
+      }
+    };
+
+    return new Observable<LoginResponse>(subscriber => {
+      setTimeout(() => {
+        localStorage.setItem('agm_token', mockResponse.access_token);
+        localStorage.setItem('agm_refresh_token', mockResponse.refresh_token);
+        localStorage.setItem('agm_user', JSON.stringify(mockResponse.user));
+        this.currentUser.set(mockResponse.user);
+        subscriber.next(mockResponse);
+        subscriber.complete();
+      }, 500);
+    });
   }
 
   logout() {
