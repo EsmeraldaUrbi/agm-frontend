@@ -12,35 +12,6 @@
     </div>
   </div>
 
-  <!-- Badge de rol activo -->
-  <div class="mx-2 mb-5 px-3 py-2 rounded-lg flex items-center gap-2"
-    [ngClass]="{
-      'bg-[#003b5c]/8 border border-[#003b5c]/20': userRole() === 'docente',
-      'bg-amber-50 border border-amber-200':         userRole() === 'admin',
-      'bg-emerald-50 border border-emerald-200':     userRole() === 'alumno'
-    }">
-    <span class="material-symbols-outlined text-[18px]"
-      [ngClass]="{
-        'text-[#003b5c]': userRole() === 'docente',
-        'text-amber-600': userRole() === 'admin',
-        'text-emerald-600': userRole() === 'alumno'
-      }"
-      style="font-variation-settings:'FILL' 1">
-      {{ userRole() === 'admin' ? 'shield_person' : (userRole() === 'docente' ? 'person_book' : 'school') }}
-    </span>
-    <div>
-      <p class="text-[10px] font-black uppercase tracking-wider"
-        [ngClass]="{
-          'text-[#003b5c]': userRole() === 'docente',
-          'text-amber-700': userRole() === 'admin',
-          'text-emerald-700': userRole() === 'alumno'
-        }">
-        {{ userRole() === 'admin' ? 'Administrador' : (userRole() === 'docente' ? 'Docente' : 'Alumno') }}
-      </p>
-      <p class="text-[9px] text-[#72787e] font-medium">Sesión activa</p>
-    </div>
-  </div>
-
   <!-- Navigation Menu -->
   <nav class="flex-1 space-y-0.5 overflow-y-auto">
     @for (item of menuItems(); track item.route) {

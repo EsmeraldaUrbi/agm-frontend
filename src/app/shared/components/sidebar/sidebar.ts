@@ -46,6 +46,7 @@ export class SidebarComponent implements OnInit {
       { label: 'Periodos',            route: '/admin/periodos',           icon: 'calendar_month' },
       // ── Gestión de Datos ───────────────────────────────────
       { label: 'Importar Materias',   route: '/admin/importar-materias',  icon: 'upload_file',        section: 'Gestión de Datos' },
+      { label: 'Importar Docentes',   route: '/admin/importar-docentes',  icon: 'group_add' },
       // ── Cuenta ─────────────────────────────────────────────
       { label: 'Mi Perfil',           route: '/profile',                  icon: 'person',             section: 'Cuenta' },
     ];

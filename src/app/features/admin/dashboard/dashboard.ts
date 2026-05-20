@@ -83,66 +83,39 @@ export class DashboardComponent implements OnInit, OnDestroy {
       description: 'Crear, editar y activar ciclos escolares',
       icon: 'calendar_month',
       route: '/admin/periodos',
+      color: 'bg-indigo-500/10 text-indigo-600 hover:bg-indigo-500/20'
+    },
+    {
+      label: 'Directorio de Docentes',
+      description: 'Consultar y administrar padrón académico',
+      icon: 'supervisor_account',
+      route: '/admin/usuarios',
       color: 'bg-primary/10 text-primary hover:bg-primary/20'
     },
     {
-      label: 'Directorio de Usuarios',
-      description: 'Consultar y administrar docentes y alumnos',
-      icon: 'supervisor_account',
-      route: '/admin/usuarios',
-      color: 'bg-secondary/10 text-secondary hover:bg-secondary/20'
+      label: 'Importar Docentes',
+      description: 'Carga masiva por CSV/PDF',
+      icon: 'group_add',
+      route: '/admin/importar-docentes',
+      color: 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20'
     },
     {
       label: 'Importar Materias',
-      description: 'Cargar PDF de programación académica',
+      description: 'Cargar programación académica',
       icon: 'upload_file',
       route: '/admin/importar-materias',
       color: 'bg-[#4f46e5]/10 text-[#4f46e5] hover:bg-[#4f46e5]/20'
     },
     {
       label: 'Mi Perfil',
-      description: 'Ver datos personales y cambiar contraseña',
+      description: 'Ver datos y cambiar contraseña',
       icon: 'manage_accounts',
       route: '/profile',
       color: 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20'
     }
   ];
 
-  // ── Actividad Reciente ───────────────────────────────────────────────────
-  recentActivity: ActivityItem[] = [
-    {
-      icon: 'upload_file',
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
-      title: 'Importación de Materias Completada',
-      description: '312 materias asignadas al periodo Primavera 2026.',
-      time: 'Hace 2 horas'
-    },
-    {
-      icon: 'person_add',
-      iconBg: 'bg-emerald-50',
-      iconColor: 'text-emerald-600',
-      title: 'Directorio de Docentes Actualizado',
-      description: '124 docentes importados desde el PDF institucional.',
-      time: 'Hace 5 horas'
-    },
-    {
-      icon: 'calendar_month',
-      iconBg: 'bg-primary/10',
-      iconColor: 'text-primary',
-      title: 'Periodo Primavera 2026 Activado',
-      description: 'El ciclo escolar fue marcado como activo.',
-      time: 'Hace 1 día'
-    },
-    {
-      icon: 'warning',
-      iconBg: 'bg-amber-50',
-      iconColor: 'text-amber-600',
-      title: 'Alerta: 25 materias sin docente asignado',
-      description: 'Revisar la programación de Secretaría Académica.',
-      time: 'Hace 1 día'
-    }
-  ];
+  // La sección Actividad Reciente fue removida por no contar con soporte en el backend actual.
 
   ngOnInit() {
     this.updateClock();

@@ -7,47 +7,20 @@
     </span>
   </div>
 
-  <!-- Right Side: Search, Actions, Profile -->
-  <div class="flex items-center gap-6">
-    <!-- Search Bar -->
-    <div class="relative hidden md:block">
-      <input 
-        class="pl-10 pr-4 py-1.5 bg-surface-container-low border border-outline-variant/30 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-xs w-64 text-on-surface placeholder:text-outline transition-all duration-300" 
-        placeholder="Buscar registros..." 
-        type="text"
-      />
-      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">search</span>
-    </div>
-
-    <!-- Actions & User Profile -->
-    <div class="flex items-center gap-3">
-      <!-- Notifications -->
-      <button class="p-2 text-outline hover:text-primary hover:bg-surface-container rounded-full transition-all relative group">
-        <span class="material-symbols-outlined">notifications</span>
-        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-white"></span>
-      </button>
-      
-      <!-- Settings -->
-      <button class="p-2 text-outline hover:text-primary hover:bg-surface-container rounded-full transition-all">
-        <span class="material-symbols-outlined">settings</span>
-      </button>
-      
-      <!-- Divider -->
-      <div class="h-8 w-[1px] bg-outline-variant/25 mx-1"></div>
-      
-      <!-- User Profile Dropdown / Card -->
-      <div class="flex items-center gap-3 p-1.5 rounded-xl hover:bg-surface-container transition-all group duration-200">
-        <div class="text-right hidden sm:block">
-          <p class="text-xs font-black text-primary-container leading-none">{{ userName() }}</p>
-          <p class="text-[9px] text-outline font-bold uppercase tracking-wider mt-1">{{ roleLabel() }}</p>
-        </div>
-        
-        <!-- Avatar Circle -->
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#003B5C] to-[#00253B] flex items-center justify-center text-white text-xs font-black shadow-md relative overflow-hidden transform group-hover:scale-105 transition-transform duration-200">
-          {{ userInitials() }}
-          <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        </div>
+  <!-- Right Side: Profile only -->
+  <div class="flex items-center gap-3">
+    <!-- User Profile — clickable, navigates to /profile -->
+    <a routerLink="/profile" class="flex items-center gap-3 p-1.5 rounded-xl hover:bg-surface-container transition-all group duration-200 cursor-pointer no-underline">
+      <div class="text-right hidden sm:block">
+        <p class="text-xs font-black text-primary-container leading-none">{{ userName() }}</p>
+        <p class="text-[9px] text-outline font-bold uppercase tracking-wider mt-1">{{ roleLabel() }}</p>
       </div>
-    </div>
+      
+      <!-- Avatar Circle -->
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#003B5C] to-[#00253B] flex items-center justify-center text-white text-xs font-black shadow-md relative overflow-hidden transform group-hover:scale-105 transition-transform duration-200">
+        {{ userInitials() }}
+        <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      </div>
+    </a>
   </div>
 </header>

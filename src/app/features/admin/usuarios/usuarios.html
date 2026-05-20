@@ -3,32 +3,34 @@
   <!-- Page Header -->
   <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
     <div>
-      <h1 class="text-2xl font-black text-primary font-headline tracking-tight">Directorio de Usuarios</h1>
-      <p class="text-xs text-outline font-medium">Administra el padrón académico de estudiantes, docentes y personal de la FCC-BUAP.</p>
+      <h1 class="text-2xl font-black text-primary font-headline tracking-tight">Directorio de Docentes</h1>
+      <p class="text-xs text-outline font-medium">Administra el padrón académico de docentes de la FCC-BUAP.</p>
     </div>
     <agm-button (agmClick)="openCreateModal()" size="md">
       <span class="material-symbols-outlined text-base mr-1.5">person_add</span>
-      Agregar Usuario
+      Agregar Docente
     </agm-button>
   </div>
 
   <!-- Metric Summary Cards -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-    <div class="bg-white p-4 rounded-2xl border border-outline-variant/15 shadow-sm">
-      <p class="text-[10px] text-outline font-bold tracking-widest uppercase mb-1">Total Usuarios</p>
-      <p class="text-2xl font-black text-primary">{{ usersList().length }}</p>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-white p-4 rounded-2xl border border-outline-variant/15 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] text-outline font-bold tracking-widest uppercase mb-1">Total Docentes Registrados</p>
+        <p class="text-3xl font-black text-primary">{{ usersList().length }}</p>
+      </div>
+      <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+        <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">groups</span>
+      </div>
     </div>
-    <div class="bg-white p-4 rounded-2xl border border-outline-variant/15 shadow-sm">
-      <p class="text-[10px] text-outline font-bold tracking-widest uppercase mb-1">Administradores</p>
-      <p class="text-2xl font-black text-secondary">{{ usersList().filter(u => u.role === 'admin').length }}</p>
-    </div>
-    <div class="bg-white p-4 rounded-2xl border border-outline-variant/15 shadow-sm">
-      <p class="text-[10px] text-outline font-bold tracking-widest uppercase mb-1">Docentes</p>
-      <p class="text-2xl font-black text-emerald-600">{{ usersList().filter(u => u.role === 'docente').length }}</p>
-    </div>
-    <div class="bg-white p-4 rounded-2xl border border-outline-variant/15 shadow-sm">
-      <p class="text-[10px] text-outline font-bold tracking-widest uppercase mb-1">Alumnos</p>
-      <p class="text-2xl font-black text-amber-600">{{ usersList().filter(u => u.role === 'alumno').length }}</p>
+    <div class="bg-white p-4 rounded-2xl border border-outline-variant/15 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] text-outline font-bold tracking-widest uppercase mb-1">Docentes Activos</p>
+        <p class="text-3xl font-black text-emerald-600">{{ usersList().filter(u => u.status === 'active').length }}</p>
+      </div>
+      <div class="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600">
+        <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+      </div>
     </div>
   </div>
 
@@ -38,40 +40,9 @@
     <!-- Filters & Action Bar -->
     <div class="p-5 border-b border-outline-variant/15 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
       
-      <!-- Tab Controls -->
-      <div class="flex border-b border-outline-variant/15 md:border-b-0 -mb-5 md:mb-0 gap-1 overflow-x-auto pb-2 md:pb-0">
-        <button 
-          (click)="selectedRoleTab.set('all')" 
-          [class]="selectedRoleTab() === 'all' 
-            ? 'px-4 py-2 text-xs font-bold border-b-2 border-primary text-primary transition-all'
-            : 'px-4 py-2 text-xs font-semibold text-outline hover:text-on-surface transition-all'"
-        >
-          Todos
-        </button>
-        <button 
-          (click)="selectedRoleTab.set('admin')" 
-          [class]="selectedRoleTab() === 'admin' 
-            ? 'px-4 py-2 text-xs font-bold border-b-2 border-primary text-primary transition-all'
-            : 'px-4 py-2 text-xs font-semibold text-outline hover:text-on-surface transition-all'"
-        >
-          Administradores
-        </button>
-        <button 
-          (click)="selectedRoleTab.set('docente')" 
-          [class]="selectedRoleTab() === 'docente' 
-            ? 'px-4 py-2 text-xs font-bold border-b-2 border-primary text-primary transition-all'
-            : 'px-4 py-2 text-xs font-semibold text-outline hover:text-on-surface transition-all'"
-        >
-          Docentes
-        </button>
-        <button 
-          (click)="selectedRoleTab.set('alumno')" 
-          [class]="selectedRoleTab() === 'alumno' 
-            ? 'px-4 py-2 text-xs font-bold border-b-2 border-primary text-primary transition-all'
-            : 'px-4 py-2 text-xs font-semibold text-outline hover:text-on-surface transition-all'"
-        >
-          Alumnos
-        </button>
+      <!-- Title -->
+      <div class="flex items-center">
+        <h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Listado de Docentes</h2>
       </div>
 
       <!-- Search and Status Selection -->
@@ -81,9 +52,9 @@
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">search</span>
           <input 
             type="text" 
-            [placeholder]="'Buscar por nombre, correo...'"
+            [placeholder]="'Buscar por nombre, correo, cubículo...'"
             [ngModel]="searchQuery()"
-            (ngModelChange)="searchQuery.set($event || '')"
+            (ngModelChange)="searchQuery.set($event || ''); resetPagination()"
             class="w-full h-9 pl-9 pr-4 text-xs font-medium bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary focus:bg-white transition-all text-on-surface"
           />
         </div>
@@ -91,7 +62,7 @@
         <!-- Status Filter -->
         <select 
           [ngModel]="selectedStatusFilter()" 
-          (ngModelChange)="selectedStatusFilter.set($event)" 
+          (ngModelChange)="selectedStatusFilter.set($event); resetPagination()" 
           class="h-9 px-3 text-xs font-semibold bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface cursor-pointer"
         >
           <option value="all">Cualquier Estado</option>
@@ -107,8 +78,7 @@
         <thead>
           <tr class="bg-surface-variant/10 text-outline text-[10px] uppercase font-bold tracking-wider border-b border-outline-variant/15">
             <th class="py-3 px-6">Usuario</th>
-            <th class="py-3 px-6">Identificación</th>
-            <th class="py-3 px-6">Rol</th>
+            <th class="py-3 px-6">Cubículo</th>
             <th class="py-3 px-6">Estado</th>
             <th class="py-3 px-6">Fecha Registro</th>
             <th class="py-3 px-6 text-right">Acciones</th>
@@ -117,25 +87,19 @@
         <tbody class="divide-y divide-outline-variant/10 text-xs font-medium">
           
           <tr *ngIf="filteredUsers().length === 0" class="text-center text-outline py-8 block">
-            <td colspan="6" class="py-8 text-center text-outline">
-              No se encontraron usuarios que coincidan con la búsqueda.
+            <td colspan="5" class="py-8 text-center text-outline w-full block">
+              No se encontraron docentes que coincidan con la búsqueda.
             </td>
           </tr>
 
           <tr 
-            *ngFor="let user of filteredUsers()" 
+            *ngFor="let user of paginatedUsers()" 
             class="hover:bg-surface-variant/5 transition-colors group"
           >
             <!-- User Profile card -->
             <td class="py-4 px-6 flex items-center gap-3">
               <!-- Custom Avatar -->
-              <div 
-                [class]="user.role === 'admin' 
-                  ? 'w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase'
-                  : user.role === 'docente'
-                    ? 'w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs uppercase'
-                    : 'w-9 h-9 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold text-xs uppercase'"
-              >
+              <div class="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs uppercase">
                 {{ user.name.split(' ')[0][0] }}{{ user.name.split(' ')[1] ? user.name.split(' ')[1][0] : '' }}
               </div>
               <div>
@@ -144,22 +108,9 @@
               </div>
             </td>
 
-            <!-- Identifier (Matrícula) -->
-            <td class="py-4 px-6 text-on-surface-variant">
-              <code>{{ user.identifier }}</code>
-            </td>
-
-            <!-- Role Badge -->
-            <td class="py-4 px-6">
-              <span 
-                [class]="user.role === 'admin' 
-                  ? 'px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-extrabold uppercase'
-                  : user.role === 'docente'
-                    ? 'px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[9px] font-extrabold uppercase'
-                    : 'px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-[9px] font-extrabold uppercase'"
-              >
-                {{ user.role === 'admin' ? 'Administrador' : user.role === 'docente' ? 'Docente' : 'Alumno' }}
-              </span>
+            <!-- Cubículo -->
+            <td class="py-4 px-6 text-on-surface-variant font-medium">
+              {{ user.cubiculo }}
             </td>
 
             <!-- Status Badge with active dot -->
@@ -211,7 +162,7 @@
                 <!-- Delete button -->
                 <button 
                   (click)="deleteUser(user)"
-                  title="Eliminar usuario"
+                  title="Eliminar docente"
                   class="p-1.5 rounded-lg text-outline hover:bg-error-container/10 hover:text-error transition-all"
                 >
                   <span class="material-symbols-outlined text-base">delete</span>
@@ -222,6 +173,32 @@
 
         </tbody>
       </table>
+    </div>
+
+    <!-- Paginación -->
+    <div *ngIf="filteredUsers().length > 0" class="p-4 border-t border-outline-variant/15 flex items-center justify-between text-xs font-semibold text-outline">
+      <div>
+        Mostrando {{ (currentPage() - 1) * pageSize() + 1 }} a {{ Math.min(currentPage() * pageSize(), filteredUsers().length) }} de {{ filteredUsers().length }} docentes
+      </div>
+      <div class="flex gap-2">
+        <button 
+          (click)="prevPage()" 
+          [disabled]="currentPage() === 1"
+          class="px-3 py-1.5 rounded-lg border border-outline-variant/30 hover:bg-surface-variant/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        >
+          Anterior
+        </button>
+        <div class="px-3 py-1.5 font-bold text-on-surface">
+          Página {{ currentPage() }} de {{ totalPages() }}
+        </div>
+        <button 
+          (click)="nextPage()" 
+          [disabled]="currentPage() === totalPages()"
+          class="px-3 py-1.5 rounded-lg border border-outline-variant/30 hover:bg-surface-variant/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        >
+          Siguiente
+        </button>
+      </div>
     </div>
 
   </agm-card>
@@ -237,9 +214,9 @@
       <div class="p-6 border-b border-outline-variant/10 flex justify-between items-center bg-surface-variant/5">
         <div>
           <h3 class="text-base font-black text-primary font-headline">
-            {{ isEditing() ? 'Editar Usuario' : 'Nuevo Usuario' }}
+            {{ isEditing() ? 'Editar Docente' : 'Nuevo Docente' }}
           </h3>
-          <p class="text-[10px] text-outline font-semibold mt-0.5">Ingresa los datos generales del usuario.</p>
+          <p class="text-[10px] text-outline font-semibold mt-0.5">Ingresa los datos generales del docente.</p>
         </div>
         <button 
           (click)="showModal.set(false)" 
@@ -259,6 +236,7 @@
           [(ngModel)]="userName" 
           name="name" 
           [required]="true"
+          [hasLeftIcon]="true"
         >
           <span iconLeft class="material-symbols-outlined text-base">person</span>
         </agm-input>
@@ -266,43 +244,30 @@
         <!-- Email -->
         <agm-input 
           label="Correo Electrónico" 
-          placeholder="Ej. usuario@buap.mx" 
+          placeholder="Ej. docente@buap.mx" 
           [(ngModel)]="userEmail" 
           name="email" 
           type="email" 
           [required]="true"
+          [hasLeftIcon]="true"
         >
           <span iconLeft class="material-symbols-outlined text-base">mail</span>
         </agm-input>
 
-        <!-- Identifier (Matrícula) -->
+        <!-- Cubículo (Replaces Identifier) -->
         <agm-input 
-          label="Matrícula / ID de Nómina" 
-          placeholder="Ej. 202245382" 
-          [(ngModel)]="userIdentifier" 
-          name="identifier" 
+          label="Cubículo" 
+          placeholder="Ej. Edificio 1, Cubículo 104" 
+          [(ngModel)]="userCubiculo" 
+          name="cubiculo" 
           [required]="true"
+          [hasLeftIcon]="true"
         >
-          <span iconLeft class="material-symbols-outlined text-base">badge</span>
+          <span iconLeft class="material-symbols-outlined text-base">door_front</span>
         </agm-input>
 
-        <!-- Role & Status selectors -->
-        <div class="grid grid-cols-2 gap-4 pt-1">
-          <!-- Role selector -->
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] font-bold text-outline uppercase tracking-wider">Rol de Sistema</label>
-            <select 
-              [(ngModel)]="userRole" 
-              name="role" 
-              class="h-9 px-3 text-xs font-semibold bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface cursor-pointer"
-            >
-              <option value="alumno">Alumno</option>
-              <option value="docente">Docente</option>
-              <option value="admin">Administrador</option>
-            </select>
-          </div>
-
-          <!-- Status selector -->
+        <!-- Status selector -->
+        <div class="grid grid-cols-1 gap-4 pt-1">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] font-bold text-outline uppercase tracking-wider">Estado Inicial</label>
             <select 
@@ -327,7 +292,7 @@
           </agm-button>
           
           <agm-button type="submit">
-            {{ isEditing() ? 'Guardar Cambios' : 'Registrar Usuario' }}
+            {{ isEditing() ? 'Guardar Cambios' : 'Registrar Docente' }}
           </agm-button>
         </div>
 

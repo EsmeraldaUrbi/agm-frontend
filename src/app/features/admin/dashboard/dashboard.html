@@ -58,61 +58,44 @@
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- CTA del periodo -->
+    <!-- Placeholder cuando no hay periodo activo (sin conexión al backend) -->
+    <div class="relative z-10" *ngIf="!activePeriod()">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] font-black uppercase tracking-widest">Sin Periodo Activo</span>
+        <div class="w-2 h-2 rounded-full bg-amber-400"></div>
+      </div>
+      <p class="text-white/60 text-sm font-medium">No hay un ciclo escolar activo en este momento o no hay conexión con el servidor.</p>
       <a
         routerLink="/admin/periodos"
-        class="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-2xl transition-all border border-white/10"
+        class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-xl transition-all border border-white/10"
       >
-        <span class="material-symbols-outlined text-sm">settings</span>
-        Gestionar Periodos
+        <span class="material-symbols-outlined text-sm">add_circle</span>
+        Crear o activar un periodo
       </a>
     </div>
   </div>
 
 
-  <!-- ── Acciones Rápidas + Actividad Reciente ─────────────────────────── -->
-  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-    <!-- Acciones Rápidas (3/5) -->
-    <div class="lg:col-span-3 animate-card delay-5 space-y-4">
-      <h3 class="text-sm font-black text-primary font-headline uppercase tracking-wider">Accesos Rápidos</h3>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <a
-          *ngFor="let action of quickActions"
-          [routerLink]="action.route"
-          class="group flex items-start gap-4 p-5 bg-white rounded-2xl border border-outline-variant/20 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
-        >
-          <div [ngClass]="['w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-all', action.color]">
-            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">{{ action.icon }}</span>
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">{{ action.label }}</p>
-            <p class="text-xs text-outline mt-0.5 leading-snug">{{ action.description }}</p>
-          </div>
-          <span class="material-symbols-outlined text-outline/40 group-hover:text-primary group-hover:translate-x-1 transition-all self-center shrink-0">arrow_forward</span>
-        </a>
-      </div>
-    </div>
-
-    <!-- Actividad Reciente (2/5) -->
-    <div class="lg:col-span-2 animate-card delay-6">
-      <h3 class="text-sm font-black text-primary font-headline uppercase tracking-wider mb-4">Actividad Reciente</h3>
-      <div class="bg-white rounded-2xl border border-outline-variant/20 shadow-sm divide-y divide-outline-variant/10">
-        <div *ngFor="let item of recentActivity; let last = last" class="flex gap-3 p-4">
-          <!-- Icon -->
-          <div [ngClass]="['w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5', item.iconBg]">
-            <span [ngClass]="['material-symbols-outlined text-base', item.iconColor]">{{ item.icon }}</span>
-          </div>
-          <!-- Text -->
-          <div class="flex-1 min-w-0">
-            <p class="text-xs font-bold text-on-surface leading-tight">{{ item.title }}</p>
-            <p class="text-[11px] text-outline mt-0.5 leading-snug">{{ item.description }}</p>
-            <p class="text-[10px] text-outline/60 font-semibold mt-1 uppercase tracking-wide">{{ item.time }}</p>
-          </div>
+  <!-- ── Acciones Rápidas ─────────────────────────── -->
+  <div class="animate-card delay-5 space-y-4">
+    <h3 class="text-sm font-black text-primary font-headline uppercase tracking-wider">Accesos Rápidos</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <a
+        *ngFor="let action of quickActions"
+        [routerLink]="action.route"
+        class="group flex items-start gap-4 p-5 bg-white rounded-2xl border border-outline-variant/20 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
+      >
+        <div [ngClass]="['w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-all', action.color]">
+          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">{{ action.icon }}</span>
         </div>
-      </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">{{ action.label }}</p>
+          <p class="text-xs text-outline mt-0.5 leading-snug">{{ action.description }}</p>
+        </div>
+        <span class="material-symbols-outlined text-outline/40 group-hover:text-primary group-hover:translate-x-1 transition-all self-center shrink-0">arrow_forward</span>
+      </a>
     </div>
-
   </div>
 </div>
