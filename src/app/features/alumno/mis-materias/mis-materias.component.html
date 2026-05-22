@@ -1,0 +1,85 @@
+<div class="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in-up">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-xl shadow-[0px_2px_4px_rgba(0,59,92,0.05)] border border-slate-100">
+        <div>
+            <h1 class="text-2xl font-extrabold text-[#00253B]">Mis Materias</h1>
+            <p class="text-sm text-slate-500 font-medium mt-1">Gestiona tu carga académica del periodo actual</p>
+        </div>
+        <button (click)="abrirHorario()" class="bg-[#003B5C] hover:bg-[#00253B] text-white px-6 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-md">
+            <span class="material-symbols-outlined text-base">calendar_month</span>
+            Ver Mi Horario
+        </button>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-xl shadow-[0px_2px_4px_rgba(0,59,92,0.05)] border border-slate-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-[#F1F3F5] text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <tr>
+                        <th class="px-6 py-4">NRC</th>
+                        <th class="px-6 py-4">Materia</th>
+                        <th class="px-6 py-4 hidden md:table-cell">Docente</th>
+                        <th class="px-6 py-4 text-center">Créditos</th>
+                        <th class="px-6 py-4 text-center hidden sm:table-cell">Promedio</th>
+                        <th class="px-6 py-4 text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @for (mat of materias; track mat.nrc) {
+                    <tr class="hover:bg-slate-50 transition-colors group">
+                        <td class="px-6 py-4 font-black text-slate-400">{{ mat.nrc }}</td>
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-[#003B5C]">{{ mat.nombre }}</div>
+                            <div class="text-xs text-slate-500 md:hidden mt-1">{{ mat.docente }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-600 hidden md:table-cell">{{ mat.docente }}</td>
+                        <td class="px-6 py-4 text-center text-sm font-medium">{{ mat.creditos }}</td>
+                        <td class="px-6 py-4 text-center hidden sm:table-cell">
+                            <span class="bg-blue-50 text-secondary px-3 py-1.5 rounded text-sm font-black">{{ mat.promedio }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex justify-end gap-2">
+                                <a routerLink="/alumno/calificaciones" class="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-[#003B5C] bg-[#003B5C]/5 hover:bg-[#003B5C]/10 rounded-lg transition-colors border border-[#003B5C]/10" title="Ver Detalles">
+                                    <span class="material-symbols-outlined text-[16px]">visibility</span>
+                                    <span class="hidden xl:inline">Detalles</span>
+                                </a>
+                                <a routerLink="/alumno/solicitar-baja" class="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-100" title="Solicitar Baja">
+                                    <span class="material-symbols-outlined text-[16px]">cancel</span>
+                                    <span class="hidden xl:inline">Baja</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Mi Horario -->
+    @if (mostrarHorarioModal) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in-up">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col relative animate-scale-up">
+            <!-- Modal Header -->
+            <div class="sticky top-0 z-10 flex justify-between items-center bg-white px-8 py-5 border-b border-slate-100 shadow-sm">
+                <div>
+                    <h2 class="text-xl font-black text-[#003B5C] flex items-center gap-3">
+                        <span class="material-symbols-outlined text-2xl text-secondary">calendar_today</span>
+                        Horario de Clases
+                    </h2>
+                    <p class="text-xs text-slate-500 font-medium mt-1">Periodo Otoño 2024</p>
+                </div>
+                <button (click)="cerrarHorario()" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <!-- Modal Content (App Horario) -->
+            <div class="p-8 overflow-y-auto bg-slate-50/30">
+                <app-horario></app-horario>
+            </div>
+        </div>
+    </div>
+    }
+</div>

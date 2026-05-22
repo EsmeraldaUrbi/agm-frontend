@@ -7,6 +7,7 @@ import { CalificacionesComponent } from './calificaciones/calificaciones.compone
 import { SolicitarBajaComponent } from './solicitar-baja/solicitar-baja.component';
 import { NotificacionesComponent } from './notificaciones/notificaciones.component';
 import { ReportesComponent } from './reportes/reportes.component';
+import { MisMateriasComponent } from './mis-materias/mis-materias.component';
 
 export const ALUMNO_ROUTES: Routes = [
   {
@@ -21,6 +22,10 @@ export const ALUMNO_ROUTES: Routes = [
   {
     path: 'estados-vacios',
     component: GalleryComponent
+  },
+  {
+    path: 'materias',
+    component: MisMateriasComponent
   },
   {
     path: 'horario',
