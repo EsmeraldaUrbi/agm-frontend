@@ -1,11 +1,18 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService, UserProfile } from '../../core/services/auth.service';
+
+interface PeriodoAcademico {
+  id: string;
+  nombre: string;
+  materias: { nrc: string; nombre: string; rol: string }[];
+}
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './perfil.component.html'
 })
 export class PerfilComponent implements OnInit {
@@ -18,6 +25,33 @@ export class PerfilComponent implements OnInit {
     rol: 'Cargando...',
     activo: true
   };
+
+  periodosMock: PeriodoAcademico[] = [
+    {
+      id: 'p-actual',
+      nombre: 'Primavera 2026',
+      materias: [
+        { nrc: '15842', nombre: 'Web Services Architecture', rol: 'Docente Titular' },
+        { nrc: '28491', nombre: 'Sistemas Distribuidos', rol: 'Docente Titular' },
+        { nrc: '31022', nombre: 'Advanced Databases', rol: 'Docente Titular' },
+        { nrc: '22310', nombre: 'Mobile Development', rol: 'Docente Titular' }
+      ]
+    },
+    {
+      id: 'p-prev',
+      nombre: 'Otoño 2025',
+      materias: [
+        { nrc: '12411', nombre: 'Sistemas Distribuidos', rol: 'Docente Titular' },
+        { nrc: '13552', nombre: 'Seguridad Informática', rol: 'Docente Adjunto' }
+      ]
+    }
+  ];
+
+  selectedPeriodoId = signal<string>(this.periodosMock[0].id);
+
+  get currentPeriodoData() {
+    return this.periodosMock.find(p => p.id === this.selectedPeriodoId()) || this.periodosMock[0];
+  }
 
   ngOnInit() {
     this.authService.getProfile().subscribe({

@@ -238,8 +238,7 @@
             <th class="py-4 px-6">ALUMNO</th>
             <th class="py-4 px-6 text-center">PROMEDIO ACTUAL</th>
             <th class="py-4 px-6 text-center">PROMEDIO FINAL</th>
-            <th class="py-4 px-6 text-center">PROMEDIO PONDERADO REAL</th>
-            <th class="py-4 px-6 text-center">PROMEDIO REDONDEADO OFICIAL</th>
+            <th class="py-4 px-6 text-center">PROMEDIO PONDERADO (REAL / OFICIAL)</th>
             <th class="py-4 px-6 text-center">% ASISTENCIA</th>
             <th class="py-4 px-6">ESTATUS ACADÉMICO</th>
           </tr>
@@ -252,30 +251,29 @@
               
               <!-- Promedio Actual -->
               <td class="py-4 px-6 text-center font-bold text-[#42474e]">
-                <span class="px-3 py-1 bg-slate-50 text-slate-700 rounded-lg border border-slate-200 text-sm inline-block w-28 shadow-sm font-mono">
-                  {{ item.promedioActual | number:'1.1-1' }} / 10
+                <span class="px-3 py-1 bg-slate-50 text-slate-700 rounded-lg border border-slate-200 text-sm inline-block w-16 shadow-sm font-mono">
+                  {{ item.promedioActual | number:'1.1-1' }}
                 </span>
               </td>
 
               <!-- Promedio Final -->
               <td class="py-4 px-6 text-center font-bold text-[#42474e]">
-                <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-200 text-sm inline-block w-28 shadow-sm font-mono">
-                  {{ item.promedioFinal | number:'1.1-1' }} / 10
+                <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-200 text-sm inline-block w-16 shadow-sm font-mono">
+                  {{ item.promedioFinal | number:'1.1-1' }}
                 </span>
               </td>
 
-              <!-- Promedio Ponderado Real -->
+              <!-- Promedios Ponderados (Real / Oficial) -->
               <td class="py-4 px-6 text-center font-bold text-[#003b5c]">
-                <span class="px-3 py-1 bg-[#baeaff]/40 rounded-lg border border-[#003b5c]/10 text-sm inline-block w-28 shadow-sm font-mono">
-                  {{ item.promedioPonderadoReal | number:'1.1-1' }} / 10
-                </span>
-              </td>
-
-              <!-- Promedio Redondeado Oficial -->
-              <td class="py-4 px-6 text-center font-bold text-[#003b5c]">
-                <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 text-sm inline-block w-28 shadow-sm font-mono font-black">
-                  {{ item.promedioRedondeadoOficial | number:'1.1-1' }} / 10
-                </span>
+                <div class="flex items-center justify-center gap-2">
+                  <span class="px-3 py-1 bg-[#baeaff]/40 rounded-lg border border-[#003b5c]/10 text-sm w-16 shadow-sm font-mono" title="Ponderado Real">
+                    {{ item.promedioPonderadoReal | number:'1.1-1' }}
+                  </span>
+                  <span class="text-slate-300">/</span>
+                  <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200 text-sm w-16 shadow-sm font-mono font-black" title="Redondeado Oficial">
+                    {{ item.promedioRedondeadoOficial | number:'1.1-1' }}
+                  </span>
+                </div>
               </td>
 
               <!-- Asistencia -->

@@ -29,4 +29,24 @@ export class MisCursosComponent {
   get totalAlumnos(): number {
     return this.cursos.reduce((sum, c) => sum + c.alumnos, 0);
   }
+
+  isCierreModalOpen = false;
+  cursoToClose: Curso | null = null;
+
+  abrirModalCierre(curso: Curso) {
+    this.cursoToClose = curso;
+    this.isCierreModalOpen = true;
+  }
+
+  cerrarModalCierre() {
+    this.isCierreModalOpen = false;
+    this.cursoToClose = null;
+  }
+
+  confirmarCierre() {
+    if(this.cursoToClose) {
+      this.cursoToClose.estado = 'CERRADA';
+    }
+    this.cerrarModalCierre();
+  }
 }

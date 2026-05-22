@@ -89,8 +89,10 @@
             Administrar Materia
           </button>
           <button
-            [routerLink]="['../materias', curso.nrc, 'cierre']"
-            class="px-4 py-2.5 border-2 border-amber-500 text-amber-600 hover:bg-amber-50 rounded-lg text-sm font-bold transition-colors flex items-center gap-1.5 flex-shrink-0"
+            (click)="abrirModalCierre(curso)"
+            [disabled]="curso.estado === 'CERRADA'"
+            [ngClass]="curso.estado === 'CERRADA' ? 'opacity-50 cursor-not-allowed border-slate-300 text-slate-500 hover:bg-transparent' : 'border-amber-500 text-amber-600 hover:bg-amber-50'"
+            class="px-4 py-2.5 border-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-1.5 flex-shrink-0"
             title="Cerrar Materia">
             <span class="material-symbols-outlined text-[18px]">lock_reset</span>
             Cierre
@@ -107,7 +109,7 @@
         <div class="space-y-5">
           <div class="flex items-end gap-3">
             <span class="text-5xl font-black">{{ cursos.length }}</span>
-            <span class="text-sm text-[#7aa5cc] pb-1.5">Cursos Activos</span>
+            <span class="text-sm text-[#7aa5cc] pb-1.5">Cursos Totales</span>
           </div>
           <div class="flex items-end gap-3">
             <span class="text-5xl font-black">{{ totalAlumnos }}</span>
@@ -130,5 +132,43 @@
 
   </div>
 
+</div>
 
+<!-- Modal de Cierre de Materia -->
+<div *ngIf="isCierreModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col transform transition-all">
+    <!-- Header -->
+    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+      <h3 class="text-lg font-black text-[#00253b] flex items-center gap-2">
+        <span class="material-symbols-outlined text-amber-500">warning</span>
+        Cierre de Materia
+      </h3>
+      <button (click)="cerrarModalCierre()" class="text-slate-400 hover:text-slate-600 transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    
+    <!-- Body -->
+    <div class="p-6">
+      <p class="text-[#42474e] mb-4 text-sm">
+        ¿Estás seguro que deseas cerrar la materia <span class="font-bold">{{ cursoToClose?.nombre }}</span> (NRC: {{ cursoToClose?.nrc }})?
+      </p>
+      <p class="text-xs text-[#003b5c] bg-[#baeaff]/30 p-3 rounded-lg border border-[#003b5c]/20 mb-3">
+        <span class="font-bold">Notificación:</span> Al cerrar la materia, el sistema notificará automáticamente por correo a todos los alumnos inscritos.
+      </p>
+      <p class="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
+        <span class="font-bold">Importante:</span> Una materia cerrada aún puede recibir modificaciones de calificaciones o asistencias. Sin embargo, al imprimir la <strong>Lista Final</strong>, ya no se permitirán más cambios y quedará bloqueada definitivamente.
+      </p>
+    </div>
+    
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+      <button (click)="cerrarModalCierre()" class="px-4 py-2 text-[#42474e] hover:bg-slate-200 rounded-lg text-sm font-bold transition-colors">
+        Cancelar
+      </button>
+      <button (click)="confirmarCierre()" class="px-4 py-2 bg-amber-500 text-white hover:bg-amber-600 rounded-lg text-sm font-bold transition-colors shadow-sm">
+        Confirmar Cierre
+      </button>
+    </div>
+  </div>
 </div>
