@@ -25,7 +25,12 @@
             </div>
           </div>
         </div>
-
+        <div class="flex gap-3 flex-shrink-0">
+          <button class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg text-sm font-bold transition-all">
+            <span class="material-symbols-outlined text-sm">download</span>
+            Exportar Concentrado
+          </button>
+        </div>
       </div>
     </div>
 
@@ -72,10 +77,7 @@
           <span class="material-symbols-outlined text-sm">upload_file</span>
           Importar Excel
         </button>
-        <button class="flex items-center gap-2 px-4 py-2.5 border-2 border-[#c2c7ce] text-[#42474e] hover:bg-[#f3f4f5] rounded-lg font-bold text-sm transition-colors shadow-sm flex-1 md:flex-none justify-center">
-          <span class="material-symbols-outlined text-sm">download</span>
-          Exportar Concentrado
-        </button>
+
         <button (click)="guardarCalificaciones()"
           class="flex items-center gap-2 px-6 py-2.5 bg-[#003b5c] text-white hover:bg-[#00253b] rounded-lg font-bold text-sm shadow-md transition-all flex-1 md:flex-none justify-center">
           <span class="material-symbols-outlined text-sm">save</span>

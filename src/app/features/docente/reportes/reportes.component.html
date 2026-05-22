@@ -44,7 +44,12 @@
             </div>
           </div>
         </div>
-
+        <div class="flex gap-3 flex-shrink-0">
+          <button class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg text-sm font-bold transition-all">
+            <span class="material-symbols-outlined text-sm">download</span>
+            Exportar Concentrado
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -231,6 +236,8 @@
           <tr class="bg-slate-50/50 border-b border-[#c2c7ce]/40 text-[11px] font-extrabold text-[#72787e] uppercase tracking-widest">
             <th class="py-4 px-6">MATRÍCULA</th>
             <th class="py-4 px-6">ALUMNO</th>
+            <th class="py-4 px-6 text-center">PROMEDIO ACTUAL</th>
+            <th class="py-4 px-6 text-center">PROMEDIO FINAL</th>
             <th class="py-4 px-6 text-center">PROMEDIO PONDERADO REAL</th>
             <th class="py-4 px-6 text-center">PROMEDIO REDONDEADO OFICIAL</th>
             <th class="py-4 px-6 text-center">% ASISTENCIA</th>
@@ -238,11 +245,25 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 font-medium text-sm">
-          @for (item of alumnos(); track item.matricula) {
+          @for (item of paginatedAlumnos(); track item.matricula) {
             <tr class="hover:bg-[#f3f4f5]/40 transition-colors group">
               <td class="py-4 px-6 font-mono font-bold text-[#003b5c]">{{ item.matricula }}</td>
               <td class="py-4 px-6 font-bold text-[#42474e]">{{ item.nombre }}</td>
               
+              <!-- Promedio Actual -->
+              <td class="py-4 px-6 text-center font-bold text-[#42474e]">
+                <span class="px-3 py-1 bg-slate-50 text-slate-700 rounded-lg border border-slate-200 text-sm inline-block w-28 shadow-sm font-mono">
+                  {{ item.promedioActual | number:'1.1-1' }} / 10
+                </span>
+              </td>
+
+              <!-- Promedio Final -->
+              <td class="py-4 px-6 text-center font-bold text-[#42474e]">
+                <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg border border-indigo-200 text-sm inline-block w-28 shadow-sm font-mono">
+                  {{ item.promedioFinal | number:'1.1-1' }} / 10
+                </span>
+              </td>
+
               <!-- Promedio Ponderado Real -->
               <td class="py-4 px-6 text-center font-bold text-[#003b5c]">
                 <span class="px-3 py-1 bg-[#baeaff]/40 rounded-lg border border-[#003b5c]/10 text-sm inline-block w-28 shadow-sm font-mono">
@@ -273,6 +294,21 @@
           }
         </tbody>
       </table>
+    </div>
+    
+    <!-- Paginación -->
+    <div class="bg-[#f3f4f5] px-6 py-4 border-t border-[#c2c7ce]/60 flex justify-between items-center text-sm">
+      <span class="text-[#72787e] font-semibold">Página {{ currentPage() }} de {{ totalPages() }}</span>
+      <div class="flex gap-2">
+        <button (click)="prevPage()" [disabled]="currentPage() === 1" 
+                class="px-4 py-2 border border-[#c2c7ce] text-[#003b5c] font-bold rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          Anterior
+        </button>
+        <button (click)="nextPage()" [disabled]="currentPage() === totalPages()" 
+                class="px-4 py-2 border border-[#c2c7ce] text-[#003b5c] font-bold rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          Siguiente
+        </button>
+      </div>
     </div>
   </div>
 

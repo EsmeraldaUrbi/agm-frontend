@@ -25,7 +25,12 @@
             </div>
           </div>
         </div>
-
+        <div class="flex gap-3 flex-shrink-0">
+          <button class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg text-sm font-bold transition-all">
+            <span class="material-symbols-outlined text-sm">download</span>
+            Exportar Concentrado
+          </button>
+        </div>
       </div>
     </div>
 
@@ -67,10 +72,7 @@
             <p class="text-sm text-[#42474e] mt-0.5">Define los porcentajes para el cálculo de la nota final.</p>
           </div>
           <div class="flex gap-2 flex-shrink-0">
-            <button class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-[#003b5c] hover:bg-[#f3f4f5] rounded-lg transition-colors border border-[#c2c7ce]">
-              <span class="material-symbols-outlined text-sm">upload_file</span>
-              Importar desde Excel
-            </button>
+
             <button (click)="agregarCriterio()"
               class="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-sm hover:bg-[#00253b] transition-colors">
               <span class="material-symbols-outlined text-sm">add</span>
