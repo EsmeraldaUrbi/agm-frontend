@@ -4,176 +4,234 @@
     <div class="flex items-center justify-between relative">
       <!-- Progress Bar Background -->
       <div class="absolute top-1/2 left-0 w-full h-0.5 bg-slate-200 -translate-y-1/2 z-0"></div>
+      
       <!-- Progress Bar Active -->
-      <div class="absolute top-1/2 left-0 w-[66%] h-0.5 bg-primary-container -translate-y-1/2 z-0 transition-all duration-500"></div>
+      <div class="absolute top-1/2 left-0 h-0.5 bg-primary-container -translate-y-1/2 z-0 transition-all duration-500"
+           [style.width]="currentStep() === 1 ? '0%' : (currentStep() === 2 ? '33%' : '66%')"></div>
+           
       <!-- Step 1: Upload -->
       <div class="relative z-10 flex flex-col items-center">
-        <div class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center shadow-md">
-          <span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+        <div [ngClass]="currentStep() > 1 ? 'bg-primary-container text-white border-primary-container' : (currentStep() === 1 ? 'bg-white border-4 border-primary-container text-primary-container ring-4 ring-white' : 'bg-white border-2 border-slate-300 text-slate-400')"
+             class="w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all">
+          <span *ngIf="currentStep() > 1" class="material-symbols-outlined text-sm">check</span>
+          <span *ngIf="currentStep() <= 1" class="text-sm font-bold">1</span>
         </div>
-        <span class="mt-2 text-xs font-bold text-primary-container uppercase tracking-tighter">Upload PDF</span>
+        <span [ngClass]="currentStep() >= 1 ? 'text-primary-container' : 'text-slate-400'"
+              class="mt-2 text-xs font-bold uppercase tracking-tighter">Subir PDF</span>
       </div>
+      
       <!-- Step 2: Processing -->
       <div class="relative z-10 flex flex-col items-center">
-        <div class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center shadow-md">
-          <span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+        <div [ngClass]="currentStep() > 2 ? 'bg-primary-container text-white border-primary-container' : (currentStep() === 2 ? 'bg-white border-4 border-primary-container text-primary-container ring-4 ring-white' : 'bg-white border-2 border-slate-300 text-slate-400')"
+             class="w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all">
+          <span *ngIf="currentStep() > 2" class="material-symbols-outlined text-sm">check</span>
+          <span *ngIf="currentStep() <= 2" class="text-sm font-bold">2</span>
         </div>
-        <span class="mt-2 text-xs font-bold text-primary-container uppercase tracking-tighter">Processing</span>
+        <span [ngClass]="currentStep() >= 2 ? 'text-primary-container' : 'text-slate-400'"
+              class="mt-2 text-xs font-bold uppercase tracking-tighter">Procesando</span>
       </div>
-      <!-- Step 3: Preview (Active) -->
+      
+      <!-- Step 3: Preview -->
       <div class="relative z-10 flex flex-col items-center">
-        <div class="w-10 h-10 rounded-full bg-white border-4 border-primary-container text-primary-container flex items-center justify-center shadow-lg ring-4 ring-white">
+        <div [ngClass]="currentStep() === 3 ? 'bg-white border-4 border-primary-container text-primary-container ring-4 ring-white' : 'bg-white border-2 border-slate-300 text-slate-400'"
+             class="w-10 h-10 rounded-full flex items-center justify-center transition-all">
           <span class="text-sm font-bold">3</span>
         </div>
-        <span class="mt-2 text-xs font-bold text-primary-container uppercase tracking-tighter">Preview Data</span>
+        <span [ngClass]="currentStep() >= 3 ? 'text-primary-container' : 'text-slate-400'"
+              class="mt-2 text-xs font-bold uppercase tracking-tighter">Vista Previa</span>
       </div>
+      
       <!-- Step 4: Confirm -->
       <div class="relative z-10 flex flex-col items-center">
-        <div class="w-10 h-10 rounded-full bg-white border-2 border-slate-300 text-slate-400 flex items-center justify-center">
+        <div class="w-10 h-10 rounded-full bg-white border-2 border-slate-300 text-slate-400 flex items-center justify-center transition-all">
           <span class="text-sm font-bold">4</span>
         </div>
-        <span class="mt-2 text-xs font-bold text-slate-400 uppercase tracking-tighter">Confirm</span>
+        <span class="mt-2 text-xs font-bold text-slate-400 uppercase tracking-tighter">Confirmar</span>
       </div>
     </div>
   </div>
   
-  <!-- Preview Card -->
-  <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden font-sans">
-    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-      <div>
-        <h2 class="text-lg font-bold text-[#003B5C] font-['Public_Sans']">Verification Required</h2>
-        <p class="text-sm text-slate-500">We found 12 valid entries and 2 rows with errors. Please review the extracted data.</p>
-      </div>
-      <div class="flex gap-2">
-        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full flex items-center gap-1">
-          <span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
-          12 Valid
-        </span>
-        <span class="px-3 py-1 bg-[#ffdad6] text-[#93000a] text-xs font-bold rounded-full flex items-center gap-1">
-          <span class="material-symbols-outlined text-sm" data-icon="error">error</span>
-          2 Errors
-        </span>
-      </div>
+  <!-- ALERTA DE ERROR 409 (Duplicado) -->
+  <div *ngIf="showDuplicateError()" class="mb-6 bg-[#ffdad6] border border-[#93000a]/20 rounded-xl p-5 flex items-start gap-4 animate-fade-in shadow-sm">
+    <div class="w-10 h-10 rounded-full bg-[#93000a]/10 text-[#93000a] flex items-center justify-center shrink-0">
+      <span class="material-symbols-outlined">warning</span>
     </div>
-    <div class="overflow-x-auto">
-      <table class="w-full border-collapse">
-        <thead>
-          <tr class="bg-slate-50 text-left">
-            <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">NRC</th>
-            <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Subject Name</th>
-            <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Section</th>
-            <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Teacher</th>
-            <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Schedule</th>
-            <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Status</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr class="hover:bg-slate-50 transition-colors">
-            <td class="px-6 py-4 text-sm font-mono text-[#003b5c]">28491</td>
-            <td class="px-6 py-4 text-sm font-semibold text-slate-800">Web Services Architecture</td>
-            <td class="px-6 py-4 text-sm text-slate-600">101</td>
-            <td class="px-6 py-4 text-sm text-slate-600">Dr. Roberto Sanchez</td>
-            <td class="px-6 py-4 text-sm text-slate-500">Mon/Wed 09:00 - 11:00</td>
-            <td class="px-6 py-4">
-              <span class="text-emerald-600 material-symbols-outlined" data-icon="verified">verified</span>
-            </td>
-          </tr>
-          <tr class="hover:bg-slate-50 transition-colors">
-            <td class="px-6 py-4 text-sm font-mono text-[#003b5c]">31022</td>
-            <td class="px-6 py-4 text-sm font-semibold text-slate-800">Advanced Databases</td>
-            <td class="px-6 py-4 text-sm text-slate-600">202</td>
-            <td class="px-6 py-4 text-sm text-slate-600">Mtra. Elena Gomez</td>
-            <td class="px-6 py-4 text-sm text-slate-500">Tue/Thu 13:00 - 15:00</td>
-            <td class="px-6 py-4">
-              <span class="text-emerald-600 material-symbols-outlined" data-icon="verified">verified</span>
-            </td>
-          </tr>
-          <tr class="bg-red-50/30 hover:bg-red-50/50 transition-colors">
-            <td class="px-6 py-4 text-sm font-mono text-[#ba1a1a] font-bold">MISSING</td>
-            <td class="px-6 py-4 text-sm font-semibold text-slate-800">Parallel Computing</td>
-            <td class="px-6 py-4 text-sm text-slate-600">301</td>
-            <td class="px-6 py-4 text-sm text-slate-600">Ing. Julian Herrera</td>
-            <td class="px-6 py-4 text-sm text-slate-500">Fri 08:00 - 12:00</td>
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-2 text-[#ba1a1a]">
-                <span class="material-symbols-outlined text-[20px]" data-icon="warning">warning</span>
-                <span class="text-[11px] font-bold uppercase">NRC Required</span>
-              </div>
-            </td>
-          </tr>
-          <tr class="hover:bg-slate-50 transition-colors">
-            <td class="px-6 py-4 text-sm font-mono text-[#003b5c]">29554</td>
-            <td class="px-6 py-4 text-sm font-semibold text-slate-800">Software Engineering II</td>
-            <td class="px-6 py-4 text-sm text-slate-600">104</td>
-            <td class="px-6 py-4 text-sm text-slate-600">Dr. Marco Antonio Ruiz</td>
-            <td class="px-6 py-4 text-sm text-slate-500">Mon/Wed 11:00 - 13:00</td>
-            <td class="px-6 py-4">
-              <span class="text-emerald-600 material-symbols-outlined" data-icon="verified">verified</span>
-            </td>
-          </tr>
-          <tr class="bg-red-50/30 hover:bg-red-50/50 transition-colors">
-            <td class="px-6 py-4 text-sm font-mono text-[#003b5c]">22310</td>
-            <td class="px-6 py-4 text-sm font-semibold text-slate-800">Mobile Development</td>
-            <td class="px-6 py-4 text-sm text-slate-600">105</td>
-            <td class="px-6 py-4 text-sm text-[#ba1a1a] font-bold italic">Unrecognized Format</td>
-            <td class="px-6 py-4 text-sm text-slate-500">Tue 09:00 - 13:00</td>
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-2 text-[#ba1a1a]">
-                <span class="material-symbols-outlined text-[20px]" data-icon="report">report</span>
-                <span class="text-[11px] font-bold uppercase">Invalid Teacher</span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div>
+      <h3 class="text-[#93000a] font-bold text-base font-headline">Archivo Duplicado (Error 409)</h3>
+      <p class="text-[#93000a]/80 text-sm mt-1">Este documento PDF ya fue procesado anteriormente en este periodo. El sistema ha bloqueado la carga para evitar materias duplicadas.</p>
     </div>
-    <div class="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-      <button routerLink="/docente/dashboard" class="flex items-center gap-2 text-slate-600 font-bold text-sm hover:text-[#003b5c] transition-colors">
-        <span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
-        Back to Dashboard
+  </div>
+
+  <!-- PASO 1: ZONA DE CARGA (Upload) -->
+  <div *ngIf="currentStep() === 1" class="animate-fade-in">
+    <div 
+      class="border-2 border-dashed border-primary-container/30 rounded-2xl bg-primary-container/5 hover:bg-primary-container/10 transition-colors flex flex-col items-center justify-center py-20 px-6 cursor-pointer relative"
+      (dragover)="onDragOver($event)"
+      (drop)="onDrop($event)"
+      (click)="fileInput.click()">
+      
+      <input #fileInput type="file" accept="application/pdf" class="hidden" (change)="onFileSelected($event)">
+      
+      <div class="w-20 h-20 bg-white rounded-full shadow-md flex items-center justify-center text-primary-container mb-6">
+        <span class="material-symbols-outlined text-4xl">cloud_upload</span>
+      </div>
+      <h3 class="text-xl font-black text-[#003B5C] font-headline text-center mb-2">Sube tu PDF Académico</h3>
+      <p class="text-slate-500 text-sm text-center max-w-sm mb-6">Arrastra y suelta el archivo PDF de programación escolar aquí, o haz clic para explorar en tu computadora.</p>
+      
+      <button class="px-6 py-2.5 bg-primary-container text-white font-bold text-sm rounded-xl shadow-md pointer-events-none">
+        Seleccionar Archivo
       </button>
-      <div class="flex gap-4">
-        <button class="px-6 py-2.5 rounded-lg border border-slate-300 text-slate-600 font-bold text-sm hover:bg-slate-100 transition-all">
-          Cancel Import
-        </button>
-        <button class="px-8 py-2.5 rounded-lg bg-[#003b5c] text-white font-bold text-sm shadow-md hover:opacity-90 active:scale-[0.98] transition-all flex items-center gap-2">
-          Confirm and Import 12 Records
-          <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
-        </button>
-      </div>
     </div>
   </div>
-  
-  <!-- Summary Bento Grid Section -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 font-sans">
-    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm col-span-1">
-      <div class="w-10 h-10 rounded-lg bg-blue-50 text-[#003B5C] flex items-center justify-center mb-4">
-        <span class="material-symbols-outlined" data-icon="description">description</span>
-      </div>
-      <h3 class="text-sm font-bold text-[#003B5C] mb-1">Source File</h3>
-      <p class="text-xl font-black text-slate-800">fall_2024_it_dept.pdf</p>
-      <p class="text-xs text-slate-500 mt-2">Uploaded 4 minutes ago • 1.2 MB</p>
-    </div>
-    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm col-span-1">
-      <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
-        <span class="material-symbols-outlined" data-icon="person_search">person_search</span>
-      </div>
-      <h3 class="text-sm font-bold text-[#003B5C] mb-1">Conflict Check</h3>
-      <p class="text-xl font-black text-slate-800">4 Duplicate NRCs</p>
-      <p class="text-xs text-slate-500 mt-2">Automatically resolved by system</p>
-    </div>
-    <div class="bg-[#003b5c] p-6 rounded-xl shadow-lg col-span-1 text-white relative overflow-hidden">
-      <div class="relative z-10">
-        <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center mb-4">
-          <span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+
+  <!-- PASO 2: PROCESANDO (Loading) -->
+  <div *ngIf="currentStep() === 2" class="animate-fade-in flex flex-col items-center justify-center py-32">
+    <div class="w-16 h-16 border-4 border-slate-200 border-t-primary-container rounded-full animate-spin mb-6"></div>
+    <h3 class="text-xl font-black text-[#003B5C] font-headline text-center mb-2">Procesando Documento...</h3>
+    <p class="text-slate-500 text-sm text-center">Analizando el PDF y extrayendo los datos de las materias. Por favor espera.</p>
+  </div>
+
+  <!-- PASO 3: VISTA PREVIA (Preview) -->
+  <div *ngIf="currentStep() === 3" class="animate-fade-in">
+    <!-- Preview Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden font-sans">
+      <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div>
+          <h2 class="text-lg font-bold text-[#003B5C] font-['Public_Sans']">Verificación Requerida</h2>
+          <p class="text-sm text-slate-500">Encontramos 12 registros válidos y 2 con errores. Revisa la información extraída.</p>
         </div>
-        <h3 class="text-sm font-bold text-[#7aa5cc] mb-1">Auto-Mapping</h3>
-        <p class="text-xl font-black">94% Accuracy</p>
-        <p class="text-xs text-[#7aa5cc] mt-2">OCR Engine: BUAP Academic AI v2</p>
+        <div class="flex gap-2">
+          <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">check_circle</span>
+            12 Válidos
+          </span>
+          <span class="px-3 py-1 bg-[#ffdad6] text-[#93000a] text-xs font-bold rounded-full flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">error</span>
+            2 Errores
+          </span>
+        </div>
       </div>
-      <div class="absolute -right-4 -bottom-4 opacity-10">
-        <span class="material-symbols-outlined text-9xl" data-icon="psychology">psychology</span>
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-left">
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">NRC</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Materia</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Sección</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Docente</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Horario</th>
+              <th class="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Estado</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-6 py-4 text-sm font-mono text-[#003b5c]">28491</td>
+              <td class="px-6 py-4 text-sm font-semibold text-slate-800">Arquitectura de Servicios Web</td>
+              <td class="px-6 py-4 text-sm text-slate-600">101</td>
+              <td class="px-6 py-4 text-sm text-slate-600">Dr. Roberto Sanchez</td>
+              <td class="px-6 py-4">
+                <button (click)="openScheduleModal('Lu/Mi 09:00 - 11:00')" class="px-3 py-1.5 bg-slate-100 hover:bg-[#003b5c] text-slate-600 hover:text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[14px]">visibility</span>
+                  Ver
+                </button>
+              </td>
+              <td class="px-6 py-4"><span class="text-emerald-600 material-symbols-outlined">verified</span></td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-6 py-4 text-sm font-mono text-[#003b5c]">31022</td>
+              <td class="px-6 py-4 text-sm font-semibold text-slate-800">Bases de Datos Avanzadas</td>
+              <td class="px-6 py-4 text-sm text-slate-600">202</td>
+              <td class="px-6 py-4 text-sm text-slate-600">Mtra. Elena Gomez</td>
+              <td class="px-6 py-4">
+                <button (click)="openScheduleModal('Ma/Ju 13:00 - 15:00')" class="px-3 py-1.5 bg-slate-100 hover:bg-[#003b5c] text-slate-600 hover:text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[14px]">visibility</span>
+                  Ver
+                </button>
+              </td>
+              <td class="px-6 py-4"><span class="text-emerald-600 material-symbols-outlined">verified</span></td>
+            </tr>
+            <tr class="bg-red-50/30 hover:bg-red-50/50 transition-colors">
+              <td class="px-6 py-4 text-sm font-mono text-[#ba1a1a] font-bold">FALTA</td>
+              <td class="px-6 py-4 text-sm font-semibold text-slate-800">Cómputo Paralelo</td>
+              <td class="px-6 py-4 text-sm text-slate-600">301</td>
+              <td class="px-6 py-4 text-sm text-slate-600">Ing. Julian Herrera</td>
+              <td class="px-6 py-4">
+                <button (click)="openScheduleModal('Vi 08:00 - 12:00')" class="px-3 py-1.5 bg-slate-100 hover:bg-[#003b5c] text-slate-600 hover:text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[14px]">visibility</span>
+                  Ver
+                </button>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2 text-[#ba1a1a]">
+                  <span class="material-symbols-outlined text-[20px]">warning</span>
+                  <span class="text-[11px] font-bold uppercase">Error</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+        <button (click)="cancelImport()" class="flex items-center gap-2 text-slate-600 font-bold text-sm hover:text-[#003b5c] transition-colors">
+          <span class="material-symbols-outlined">arrow_back</span>
+          Cancelar y volver
+        </button>
+        <div class="flex gap-4">
+          <button (click)="cancelImport()" class="px-6 py-2.5 rounded-lg border border-slate-300 text-slate-600 font-bold text-sm hover:bg-slate-100 transition-all">
+            Rechazar Archivo
+          </button>
+          <button (click)="confirmImport()" class="px-8 py-2.5 rounded-lg bg-[#003b5c] text-white font-bold text-sm shadow-md hover:opacity-90 active:scale-[0.98] transition-all flex items-center gap-2">
+            Confirmar e Importar (12)
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Summary Section -->
+    <div class="mt-12 font-sans max-w-sm">
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <div class="w-10 h-10 rounded-lg bg-blue-50 text-[#003B5C] flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined">description</span>
+        </div>
+        <h3 class="text-sm font-bold text-[#003B5C] mb-1">Archivo Fuente</h3>
+        <p class="text-xl font-black text-slate-800">{{ selectedFile()?.name || 'materias_2026.pdf' }}</p>
+        <p class="text-xs text-slate-500 mt-2">Leído correctamente</p>
       </div>
     </div>
   </div>
+
+  <!-- MODAL DE HORARIO -->
+  <div *ngIf="showScheduleModal()" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-sm border border-outline-variant/10">
+      <div class="p-5 border-b border-outline-variant/10 flex justify-between items-center bg-slate-50">
+        <div class="flex items-center gap-2 text-[#003b5c]">
+          <span class="material-symbols-outlined">calendar_month</span>
+          <h3 class="font-bold font-headline">Detalle de Horario</h3>
+        </div>
+        <button (click)="closeScheduleModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 transition-colors text-slate-500">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="mb-4">
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Días de Clase</p>
+          <p class="text-base font-semibold text-slate-800">{{ selectedSchedule()?.days }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Bloque de Tiempo</p>
+          <div class="flex items-center gap-2 text-[#003b5c] bg-blue-50 px-3 py-2 rounded-lg w-fit">
+            <span class="material-symbols-outlined text-[18px]">schedule</span>
+            <p class="text-sm font-bold">{{ selectedSchedule()?.time }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-t border-outline-variant/10 flex justify-end">
+        <button (click)="closeScheduleModal()" class="px-5 py-2 bg-[#003b5c] text-white text-sm font-bold rounded-lg hover:opacity-90 transition-opacity shadow-sm">
+          Aceptar
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>

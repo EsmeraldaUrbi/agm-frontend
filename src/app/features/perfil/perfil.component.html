@@ -61,11 +61,11 @@
 
         <div class="mt-8 pt-8 border-t border-outline-variant/10 flex justify-end">
           <button 
-            (click)="showPasswordModal.set(true)"
+            (click)="openPasswordModal()"
             class="flex items-center gap-2 px-6 py-2.5 bg-white border-2 border-primary text-primary hover:bg-primary/5 rounded-xl font-bold text-sm transition-all"
           >
             <span class="material-symbols-outlined text-lg">lock_reset</span>
-            Pedir Cambio de Contraseña
+            Cambiar Contraseña
           </button>
         </div>
 
@@ -146,20 +146,22 @@
       <div class="p-6 border-b border-outline-variant/10 flex justify-between items-center bg-surface-variant/5">
         <div>
           <h3 class="text-base font-black text-primary font-headline">
-            Recuperar Contraseña
+            {{ passwordModalStep() === 1 ? 'Recuperar Contraseña' : 'Nueva Contraseña' }}
           </h3>
-          <p class="text-[10px] text-outline font-semibold mt-0.5">Te enviaremos un código para crear una nueva.</p>
+          <p class="text-[10px] text-outline font-semibold mt-0.5">
+            {{ passwordModalStep() === 1 ? 'Te enviaremos un código para crear una nueva.' : 'Ingresa el código que enviamos a tu correo.' }}
+          </p>
         </div>
         <button 
-          (click)="showPasswordModal.set(false)" 
+          (click)="closePasswordModal()" 
           class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:bg-surface-variant/20 hover:text-on-surface transition-all"
         >
           <span class="material-symbols-outlined text-lg">close</span>
         </button>
       </div>
 
-      <!-- Modal Body -->
-      <div class="p-6 space-y-4">
+      <!-- Modal Body - Paso 1: Enviar Correo -->
+      <div *ngIf="passwordModalStep() === 1" class="p-6 space-y-4">
         <p class="text-xs text-on-surface-variant font-medium">
           Se enviará un correo con instrucciones para restablecer tu contraseña a:
         </p>
@@ -172,7 +174,7 @@
         <!-- Modal Actions Footer -->
         <div class="flex justify-end gap-3 pt-6 border-t border-outline-variant/10 mt-6">
           <button 
-            (click)="showPasswordModal.set(false)"
+            (click)="closePasswordModal()"
             class="px-5 py-2.5 rounded-xl font-bold text-sm text-outline border border-outline-variant/30 hover:bg-surface-variant/20 transition-all"
           >
             Cancelar
@@ -180,12 +182,60 @@
           
           <button 
             (click)="requestPasswordChange()"
-            class="px-5 py-2.5 bg-primary text-white hover:bg-primary/90 rounded-xl font-bold text-sm shadow-md transition-all"
+            class="px-5 py-2.5 bg-primary text-white hover:bg-primary/90 rounded-xl font-bold text-sm shadow-md transition-all flex items-center gap-2"
           >
-            Enviar Enlace
+            Enviar Enlace <span class="material-symbols-outlined text-sm">send</span>
           </button>
         </div>
       </div>
+
+      <!-- Modal Body - Paso 2: Ingresar Código y Nueva Contraseña -->
+      <div *ngIf="passwordModalStep() === 2" class="p-6 space-y-4">
+        
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-extrabold text-outline uppercase tracking-wider block">Contraseña Temporal (Código)</label>
+          <div class="flex items-center border border-outline-variant rounded-lg px-4 py-3 bg-white focus-within:border-primary transition-all">
+            <span class="material-symbols-outlined text-outline mr-3 text-lg">pin</span>
+            <input 
+              [(ngModel)]="tempPassword"
+              class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm placeholder:text-outline-variant" 
+              placeholder="Ej. 123456" 
+              type="text"/>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-extrabold text-outline uppercase tracking-wider block">Nueva Contraseña</label>
+          <div class="flex items-center border border-outline-variant rounded-lg px-4 py-3 bg-white focus-within:border-primary transition-all">
+            <span class="material-symbols-outlined text-outline mr-3 text-lg">lock</span>
+            <input 
+              [(ngModel)]="newPassword"
+              class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm placeholder:text-outline-variant" 
+              placeholder="••••••••••••" 
+              type="password"/>
+          </div>
+        </div>
+
+        <!-- Modal Actions Footer -->
+        <div class="flex justify-end gap-3 pt-6 border-t border-outline-variant/10 mt-6">
+          <button 
+            (click)="closePasswordModal()"
+            class="px-5 py-2.5 rounded-xl font-bold text-sm text-outline border border-outline-variant/30 hover:bg-surface-variant/20 transition-all"
+          >
+            Cancelar
+          </button>
+          
+          <button 
+            (click)="confirmNewPassword()"
+            [disabled]="!tempPassword() || !newPassword()"
+            [class.opacity-50]="!tempPassword() || !newPassword()"
+            class="px-5 py-2.5 bg-primary text-white hover:bg-primary/90 rounded-xl font-bold text-sm shadow-md transition-all flex items-center gap-2"
+          >
+            Confirmar Cambio <span class="material-symbols-outlined text-sm">check_circle</span>
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 

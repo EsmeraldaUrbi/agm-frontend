@@ -88,6 +88,10 @@ export class PerfilComponent implements OnInit {
 
   // Modal y Toasts
   showPasswordModal = signal(false);
+  passwordModalStep = signal<1 | 2>(1);
+  tempPassword = signal('');
+  newPassword = signal('');
+
   showToast = signal(false);
   toastMessage = signal('');
 
@@ -100,10 +104,32 @@ export class PerfilComponent implements OnInit {
     return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
   }
 
-  requestPasswordChange() {
-    // Simulamos la llamada a authService.recoverPassword
+  openPasswordModal() {
+    this.passwordModalStep.set(1);
+    this.tempPassword.set('');
+    this.newPassword.set('');
+    this.showPasswordModal.set(true);
+  }
+
+  closePasswordModal() {
     this.showPasswordModal.set(false);
-    this.toastMessage.set('Se ha enviado un enlace de recuperación a tu correo institucional.');
+    setTimeout(() => this.passwordModalStep.set(1), 300); // Reset after animation
+  }
+
+  requestPasswordChange() {
+    // Simulamos que se envió el correo con éxito y avanzamos al Paso 2
+    this.passwordModalStep.set(2);
+  }
+
+  confirmNewPassword() {
+    // Validamos que los campos no estén vacíos
+    if (!this.tempPassword() || !this.newPassword()) {
+      return;
+    }
+
+    // Simulamos la confirmación del cambio
+    this.closePasswordModal();
+    this.toastMessage.set('Contraseña actualizada correctamente.');
     this.showToast.set(true);
     
     setTimeout(() => {
