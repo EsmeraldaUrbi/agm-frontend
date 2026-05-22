@@ -1,4 +1,4 @@
-<div class="max-w-[1440px] mx-auto font-['Inter']">
+<div class="w-full font-['Inter']">
 
   <!-- Page Header & Filter Bar -->
   <div class="mb-8">
@@ -14,6 +14,7 @@
       <div class="flex-1 min-w-[300px] relative">
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#72787e]">search</span>
         <input
+          [(ngModel)]="searchTerm"
           class="w-full pl-10 pr-4 py-2 rounded-lg border border-[#c2c7ce] focus:ring-2 focus:ring-[#42d0fe] focus:border-[#006782] outline-none transition-all text-sm"
           placeholder="Buscar por NRC, materia o sección..."
           type="text"
@@ -26,9 +27,10 @@
           <option>Licenciatura</option>
           <option>Maestría</option>
         </select>
-        <select class="bg-[#f3f4f5] border border-[#c2c7ce] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#00253b]">
-          <option>Estatus: Activo</option>
-          <option>Estatus: Concluido</option>
+        <select [(ngModel)]="statusFilter" class="bg-[#f3f4f5] border border-[#c2c7ce] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#00253b]">
+          <option value="Todos">Todos los Estados</option>
+          <option value="ACTIVA">Estatus: Activo</option>
+          <option value="CERRADA">Estatus: Concluido</option>
         </select>
       </div>
     </div>
@@ -38,7 +40,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
     <!-- Course Cards -->
-    @for (curso of cursos; track curso.nrc) {
+    @for (curso of filteredCursos(); track curso.nrc) {
       <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-all group">
         <div class="p-6 flex-1">
           <!-- NRC, Sección & Estado badges -->

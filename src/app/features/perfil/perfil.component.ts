@@ -54,23 +54,34 @@ export class PerfilComponent implements OnInit {
   }
 
   ngOnInit() {
+    // 1. Set local user immediately so UI doesn't get stuck on "Cargando..."
+    const localUser = this.authService.currentUser();
+    if (localUser) {
+      this.usuario = {
+        user_id: localUser.user_id,
+        nombre_completo: localUser.nombre_completo || 'Usuario de Prueba',
+        email: localUser.email,
+        rol: localUser.rol || 'DOCENTE',
+        activo: true
+      };
+    } else {
+      // Si no hay local user, forzamos uno para poder ver el mock de docente
+      this.usuario = {
+        user_id: '123',
+        nombre_completo: 'Docente de Prueba',
+        email: 'docente@buap.mx',
+        rol: 'DOCENTE',
+        activo: true
+      };
+    }
+
+    // 2. Fetch real data if backend is available
     this.authService.getProfile().subscribe({
       next: (profile) => {
         this.usuario = profile;
       },
       error: (err) => {
         console.error('Error al obtener perfil:', err);
-        // Fallback en caso de error o desarrollo local sin backend
-        const localUser = this.authService.currentUser();
-        if (localUser) {
-          this.usuario = {
-            user_id: localUser.user_id,
-            nombre_completo: 'Usuario Local (Offline)',
-            email: localUser.email,
-            rol: localUser.rol,
-            activo: true
-          };
-        }
       }
     });
   }

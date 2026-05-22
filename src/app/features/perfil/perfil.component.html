@@ -72,64 +72,66 @@
       </div>
     </div>
 
-    <!-- Historial Académico -->
-    <div class="bg-white rounded-3xl shadow-sm border border-[#c2c7ce] overflow-hidden mt-8">
-      <div class="px-8 py-6 border-b border-[#c2c7ce]/60 flex flex-col md:flex-row justify-between md:items-center gap-4 bg-[#f3f4f5]/30">
-        <div>
-          <h2 class="text-xl font-black text-[#003b5c] flex items-center gap-2">
-            <span class="material-symbols-outlined text-[#003b5c]">history_edu</span>
-            Historial Académico
-          </h2>
-          <p class="text-xs text-[#72787e] mt-1">Consulta las materias que has impartido por periodo académico.</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <label class="text-xs font-bold text-[#003b5c] uppercase">Periodo:</label>
-          <select 
-            [(ngModel)]="selectedPeriodoId"
-            class="bg-white border border-[#c2c7ce] text-[#003b5c] text-sm font-bold rounded-lg px-4 py-2 outline-none focus:border-[#003b5c] focus:ring-1 focus:ring-[#003b5c] transition-all cursor-pointer">
-            @for (periodo of periodosMock; track periodo.id) {
-              <option [value]="periodo.id">{{ periodo.nombre }}</option>
-            }
-          </select>
-        </div>
-      </div>
-
-      <div class="p-8">
-        @if (currentPeriodoData) {
-          <div class="overflow-x-auto rounded-xl border border-[#c2c7ce]/60">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="bg-slate-50 border-b border-[#c2c7ce]/40 text-[11px] font-extrabold text-[#72787e] uppercase tracking-widest">
-                  <th class="py-4 px-6">NRC</th>
-                  <th class="py-4 px-6">MATERIA</th>
-                  <th class="py-4 px-6">ROL ASIGNADO</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100 text-sm">
-                @for (materia of currentPeriodoData.materias; track materia.nrc) {
-                  <tr class="hover:bg-[#f3f4f5]/40 transition-colors">
-                    <td class="py-4 px-6 font-mono font-bold text-[#003b5c]">{{ materia.nrc }}</td>
-                    <td class="py-4 px-6 font-bold text-[#42474e]">{{ materia.nombre }}</td>
-                    <td class="py-4 px-6">
-                      <span class="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-xs font-bold shadow-sm inline-block">
-                        {{ materia.rol }}
-                      </span>
-                    </td>
-                  </tr>
-                }
-                @if (currentPeriodoData.materias.length === 0) {
-                  <tr>
-                    <td colspan="3" class="py-8 text-center text-[#72787e] text-sm font-medium">
-                      No hay materias registradas para este periodo.
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+    <!-- Historial Académico (Solo para Docentes) -->
+    @if (usuario.rol.toUpperCase().includes('DOCENTE')) {
+      <div class="bg-white rounded-3xl shadow-sm border border-[#c2c7ce] overflow-hidden mt-8">
+        <div class="px-8 py-6 border-b border-[#c2c7ce]/60 flex flex-col md:flex-row justify-between md:items-center gap-4 bg-[#f3f4f5]/30">
+          <div>
+            <h2 class="text-xl font-black text-[#003b5c] flex items-center gap-2">
+              <span class="material-symbols-outlined text-[#003b5c]">history_edu</span>
+              Historial Académico
+            </h2>
+            <p class="text-xs text-[#72787e] mt-1">Consulta las materias que has impartido por periodo académico.</p>
           </div>
-        }
+          <div class="flex items-center gap-3">
+            <label class="text-xs font-bold text-[#003b5c] uppercase">Periodo:</label>
+            <select 
+              [(ngModel)]="selectedPeriodoId"
+              class="bg-white border border-[#c2c7ce] text-[#003b5c] text-sm font-bold rounded-lg px-4 py-2 outline-none focus:border-[#003b5c] focus:ring-1 focus:ring-[#003b5c] transition-all cursor-pointer">
+              @for (periodo of periodosMock; track periodo.id) {
+                <option [value]="periodo.id">{{ periodo.nombre }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="p-8">
+          @if (currentPeriodoData) {
+            <div class="overflow-x-auto rounded-xl border border-[#c2c7ce]/60">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-[#c2c7ce]/40 text-[11px] font-extrabold text-[#72787e] uppercase tracking-widest">
+                    <th class="py-4 px-6">NRC</th>
+                    <th class="py-4 px-6">MATERIA</th>
+                    <th class="py-4 px-6">ROL ASIGNADO</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-sm">
+                  @for (materia of currentPeriodoData.materias; track materia.nrc) {
+                    <tr class="hover:bg-[#f3f4f5]/40 transition-colors">
+                      <td class="py-4 px-6 font-mono font-bold text-[#003b5c]">{{ materia.nrc }}</td>
+                      <td class="py-4 px-6 font-bold text-[#42474e]">{{ materia.nombre }}</td>
+                      <td class="py-4 px-6">
+                        <span class="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-xs font-bold shadow-sm inline-block">
+                          {{ materia.rol }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                  @if (currentPeriodoData.materias.length === 0) {
+                    <tr>
+                      <td colspan="3" class="py-8 text-center text-[#72787e] text-sm font-medium">
+                        No hay materias registradas para este periodo.
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
       </div>
-    </div>
+    }
 
   </div>
 

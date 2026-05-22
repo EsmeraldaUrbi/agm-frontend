@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 interface Curso {
   nrc: string;
@@ -15,7 +16,7 @@ interface Curso {
 @Component({
   selector: 'app-mis-cursos',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './mis-cursos.component.html'
 })
 export class MisCursosComponent {
@@ -25,6 +26,22 @@ export class MisCursosComponent {
     { nrc: '16021', seccion: '101', nombre: 'Programación Paralela', alumnos: 22, progreso: 12, progresoColor: 'bg-[#ba1a1a]', estado: 'ACTIVA' },
     { nrc: '16110', seccion: '104', nombre: 'Seguridad de la Información', alumnos: 40, progreso: 45, progresoColor: 'bg-[#42d0fe]', estado: 'ACTIVA' },
   ];
+
+  searchTerm = signal('');
+  statusFilter = signal('Todos');
+
+  filteredCursos = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    const status = this.statusFilter();
+    
+    return this.cursos.filter(curso => {
+      const matchesSearch = curso.nrc.toLowerCase().includes(term) || 
+                            curso.nombre.toLowerCase().includes(term) || 
+                            curso.seccion.toLowerCase().includes(term);
+      const matchesStatus = status === 'Todos' || curso.estado === status;
+      return matchesSearch && matchesStatus;
+    });
+  });
 
   get totalAlumnos(): number {
     return this.cursos.reduce((sum, c) => sum + c.alumnos, 0);
