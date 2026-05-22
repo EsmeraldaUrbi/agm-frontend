@@ -13,21 +13,14 @@
     <div class="bg-white p-4 rounded-xl shadow-sm border border-[#c2c7ce] flex flex-wrap items-center gap-4">
       <div class="flex-1 min-w-[300px] relative">
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#72787e]">search</span>
-        <input
-          [(ngModel)]="searchTerm"
+        <input [(ngModel)]="searchTerm"
           class="w-full pl-10 pr-4 py-2 rounded-lg border border-[#c2c7ce] focus:ring-2 focus:ring-[#42d0fe] focus:border-[#006782] outline-none transition-all text-sm"
-          placeholder="Buscar por NRC, materia o sección..."
-          type="text"
-        />
+          placeholder="Buscar por NRC, materia o sección..." type="text" />
       </div>
       <div class="flex items-center gap-2">
         <span class="text-sm font-bold text-[#00253b] px-2">Filtrar por:</span>
-        <select class="bg-[#f3f4f5] border border-[#c2c7ce] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#00253b]">
-          <option>Todos los Niveles</option>
-          <option>Licenciatura</option>
-          <option>Maestría</option>
-        </select>
-        <select [(ngModel)]="statusFilter" class="bg-[#f3f4f5] border border-[#c2c7ce] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#00253b]">
+        <select [(ngModel)]="statusFilter"
+          class="bg-[#f3f4f5] border border-[#c2c7ce] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#00253b]">
           <option value="Todos">Todos los Estados</option>
           <option value="ACTIVA">Estatus: Activo</option>
           <option value="CERRADA">Estatus: Concluido</option>
@@ -41,73 +34,75 @@
 
     <!-- Course Cards -->
     @for (curso of filteredCursos(); track curso.nrc) {
-      <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-all group">
-        <div class="p-6 flex-1">
-          <!-- NRC, Sección & Estado badges -->
-          <div class="flex flex-wrap items-center gap-2 mb-4">
-            <span class="bg-[#baeaff] text-[#001f29] text-[10px] font-black px-2.5 py-1 rounded uppercase tracking-widest">
-              NRC: {{ curso.nrc }}
-            </span>
-            <span class="bg-[#e1e3e4] text-[#42474e] text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-widest">
-              Sección: {{ curso.seccion }}
-            </span>
-            <span class="ml-auto text-[10px] font-black px-2.5 py-1 rounded uppercase tracking-widest flex items-center gap-1.5"
-              [ngClass]="{
+    <div
+      class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-all group">
+      <div class="p-6 flex-1">
+        <!-- NRC, Sección & Estado badges -->
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+          <span
+            class="bg-[#baeaff] text-[#001f29] text-[10px] font-black px-2.5 py-1 rounded uppercase tracking-widest">
+            NRC: {{ curso.nrc }}
+          </span>
+          <span class="bg-[#e1e3e4] text-[#42474e] text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-widest">
+            Sección: {{ curso.seccion }}
+          </span>
+          <span
+            class="ml-auto text-[10px] font-black px-2.5 py-1 rounded uppercase tracking-widest flex items-center gap-1.5"
+            [ngClass]="{
                 'bg-emerald-100 text-emerald-800 border border-emerald-200': curso.estado === 'ACTIVA',
                 'bg-slate-200 text-slate-600 border border-slate-300': curso.estado === 'CERRADA'
               }">
-              @if (curso.estado === 'ACTIVA') {
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              } @else {
-                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-              }
-              {{ curso.estado }}
-            </span>
-          </div>
-
-          <!-- Course Name -->
-          <h3 class="text-xl font-black text-[#00253b] leading-tight mb-5 font-['Public_Sans']">{{ curso.nombre }}</h3>
-
-          <!-- Stats -->
-          <div class="space-y-4">
-            <!-- Alumnos -->
-            <div class="flex items-center justify-between text-sm">
-              <div class="flex items-center gap-2 text-[#42474e]">
-                <span class="material-symbols-outlined text-lg">group</span>
-                <span>Estudiantes Inscritos:</span>
-              </div>
-              <span class="font-bold text-[#00253b]">{{ curso.alumnos }}</span>
-            </div>
-
-          </div>
+            @if (curso.estado === 'ACTIVA') {
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            } @else {
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+            }
+            {{ curso.estado }}
+          </span>
         </div>
 
-        <!-- Card Footer Actions -->
-        <div class="border-t border-[#c2c7ce] p-4 bg-[#f3f4f5] flex gap-3">
-          <button
-            [routerLink]="['../materias', curso.nrc, 'actividades']"
-            class="flex-1 bg-[#003b5c] text-white py-2.5 rounded-lg text-sm font-bold hover:bg-[#00253b] transition-colors flex items-center justify-center gap-2 shadow-sm truncate">
-            <span class="material-symbols-outlined text-[18px]">manage_accounts</span>
-            Administrar Materia
-          </button>
-          <button
-            (click)="abrirModalCierre(curso)"
-            [disabled]="curso.estado === 'CERRADA'"
-            [ngClass]="curso.estado === 'CERRADA' ? 'opacity-50 cursor-not-allowed border-slate-300 text-slate-500 hover:bg-transparent' : 'border-amber-500 text-amber-600 hover:bg-amber-50'"
-            class="px-4 py-2.5 border-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-1.5 flex-shrink-0"
-            title="Cerrar Materia">
-            <span class="material-symbols-outlined text-[18px]">lock_reset</span>
-            Cierre
-          </button>
+        <!-- Course Name -->
+        <h3 class="text-xl font-black text-[#00253b] leading-tight mb-5 font-['Public_Sans']">{{ curso.nombre }}</h3>
+
+        <!-- Stats -->
+        <div class="space-y-4">
+          <!-- Alumnos -->
+          <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center gap-2 text-[#42474e]">
+              <span class="material-symbols-outlined text-lg">group</span>
+              <span>Estudiantes Inscritos:</span>
+            </div>
+            <span class="font-bold text-[#00253b]">{{ curso.alumnos }}</span>
+          </div>
+
         </div>
       </div>
+
+      <!-- Card Footer Actions -->
+      <div class="border-t border-[#c2c7ce] p-4 bg-[#f3f4f5] flex gap-3">
+        <button [routerLink]="['../materias', curso.nrc, 'actividades']"
+          class="flex-1 bg-[#003b5c] text-white py-2.5 rounded-lg text-sm font-bold hover:bg-[#00253b] transition-colors flex items-center justify-center gap-2 shadow-sm truncate">
+          <span class="material-symbols-outlined text-[18px]">manage_accounts</span>
+          Administrar Materia
+        </button>
+        <button (click)="abrirModalCierre(curso)" [disabled]="curso.estado === 'CERRADA'"
+          [ngClass]="curso.estado === 'CERRADA' ? 'opacity-50 cursor-not-allowed border-slate-300 text-slate-500 hover:bg-transparent' : 'border-amber-500 text-amber-600 hover:bg-amber-50'"
+          class="px-4 py-2.5 border-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-1.5 flex-shrink-0"
+          title="Cerrar Materia">
+          <span class="material-symbols-outlined text-[18px]">lock_reset</span>
+          Cierre
+        </button>
+      </div>
+    </div>
     }
 
     <!-- Resumen Académico (Summary Card) -->
-    <div class="bg-[#003b5c] text-white rounded-xl p-8 border border-[#003b5c] shadow-md flex flex-col justify-between relative overflow-hidden">
+    <div
+      class="bg-[#003b5c] text-white rounded-xl p-8 border border-[#003b5c] shadow-md flex flex-col justify-between relative overflow-hidden">
       <div class="relative z-10">
         <h4 class="text-lg font-black mb-2 font-['Public_Sans']">Resumen Académico</h4>
-        <p class="text-[#7aa5cc] text-sm mb-8 leading-relaxed">Estado actual de sus cursos asignados para este periodo lectivo.</p>
+        <p class="text-[#7aa5cc] text-sm mb-8 leading-relaxed">Estado actual de sus cursos asignados para este periodo
+          lectivo.</p>
         <div class="space-y-5">
           <div class="flex items-end gap-3">
             <span class="text-5xl font-black">{{ cursos.length }}</span>
@@ -120,8 +115,7 @@
         </div>
       </div>
       <div class="mt-8 relative z-10">
-        <button
-          routerLink="../dashboard"
+        <button routerLink="../dashboard"
           class="w-full py-3 bg-white text-[#003b5c] rounded-lg font-black uppercase text-xs tracking-widest hover:bg-[#f3f4f5] transition-colors">
           Ver Asistencias Globales
         </button>
@@ -137,7 +131,8 @@
 </div>
 
 <!-- Modal de Cierre de Materia -->
-<div *ngIf="isCierreModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
+<div *ngIf="isCierreModalOpen"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col transform transition-all">
     <!-- Header -->
     <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -149,26 +144,32 @@
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
-    
+
     <!-- Body -->
     <div class="p-6">
       <p class="text-[#42474e] mb-4 text-sm">
-        ¿Estás seguro que deseas cerrar la materia <span class="font-bold">{{ cursoToClose?.nombre }}</span> (NRC: {{ cursoToClose?.nrc }})?
+        ¿Estás seguro que deseas cerrar la materia <span class="font-bold">{{ cursoToClose?.nombre }}</span> (NRC: {{
+        cursoToClose?.nrc }})?
       </p>
       <p class="text-xs text-[#003b5c] bg-[#baeaff]/30 p-3 rounded-lg border border-[#003b5c]/20 mb-3">
-        <span class="font-bold">Notificación:</span> Al cerrar la materia, el sistema notificará automáticamente por correo a todos los alumnos inscritos.
+        <span class="font-bold">Notificación:</span> Al cerrar la materia, el sistema notificará automáticamente por
+        correo a todos los alumnos inscritos.
       </p>
       <p class="text-xs text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
-        <span class="font-bold">Importante:</span> Una materia cerrada aún puede recibir modificaciones de calificaciones o asistencias. Sin embargo, al imprimir la <strong>Lista Final</strong>, ya no se permitirán más cambios y quedará bloqueada definitivamente.
+        <span class="font-bold">Importante:</span> Una materia cerrada aún puede recibir modificaciones de
+        calificaciones o asistencias. Sin embargo, al imprimir la <strong>Lista Final</strong>, ya no se permitirán más
+        cambios y quedará bloqueada definitivamente.
       </p>
     </div>
-    
+
     <!-- Footer -->
     <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-      <button (click)="cerrarModalCierre()" class="px-4 py-2 text-[#42474e] hover:bg-slate-200 rounded-lg text-sm font-bold transition-colors">
+      <button (click)="cerrarModalCierre()"
+        class="px-4 py-2 text-[#42474e] hover:bg-slate-200 rounded-lg text-sm font-bold transition-colors">
         Cancelar
       </button>
-      <button (click)="confirmarCierre()" class="px-4 py-2 bg-amber-500 text-white hover:bg-amber-600 rounded-lg text-sm font-bold transition-colors shadow-sm">
+      <button (click)="confirmarCierre()"
+        class="px-4 py-2 bg-amber-500 text-white hover:bg-amber-600 rounded-lg text-sm font-bold transition-colors shadow-sm">
         Confirmar Cierre
       </button>
     </div>
