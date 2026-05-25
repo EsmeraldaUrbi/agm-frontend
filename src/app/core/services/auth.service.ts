@@ -45,39 +45,17 @@ export class AuthService {
   }
 
   login(email: string, contrasena: string, requestedRole?: string): Observable<LoginResponse> {
-    // const url = `${environment.msAuthUrl}/auth/login`;
-    // Código original comentado para saltar la validación real
-    // return this.http.post<LoginResponse>(url, { email, contrasena }).pipe(...)
+    const url = `${environment.msAuthUrl}/auth/login`;
 
-    let role = requestedRole || 'alumno'; 
-    let name = 'Usuario de Prueba';
-    if (role === 'admin') { name = 'Administrador Global'; }
-    if (role === 'docente') { name = 'Docente de Prueba'; }
-    if (role === 'alumno') { name = 'Alumno de Prueba'; }
-
-    const mockResponse: LoginResponse = {
-      access_token: 'mock-jwt-token',
-      token_type: 'bearer',
-      refresh_token: 'mock-refresh-token',
-      user: {
-        user_id: '123',
-        nombre_completo: name,
-        email: email || `${role}@buap.mx`,
-        rol: role,
-        activo: true
-      }
-    };
-
-    return new Observable<LoginResponse>(subscriber => {
-      setTimeout(() => {
-        localStorage.setItem('agm_token', mockResponse.access_token);
-        localStorage.setItem('agm_refresh_token', mockResponse.refresh_token);
-        localStorage.setItem('agm_user', JSON.stringify(mockResponse.user));
-        this.currentUser.set(mockResponse.user);
-        subscriber.next(mockResponse);
-        subscriber.complete();
-      }, 500);
-    });
+    return this.http.post<{ data: LoginResponse; message: string }>(url, { email, contrasena }).pipe(
+      map(res => res.data),
+      tap(response => {
+        localStorage.setItem('agm_token', response.access_token);
+        localStorage.setItem('agm_refresh_token', response.refresh_token);
+        localStorage.setItem('agm_user', JSON.stringify(response.user));
+        this.currentUser.set(response.user);
+      })
+    );
   }
 
   logout() {

@@ -1,67 +1,125 @@
+<!-- Selector de Sesión de Prueba / Integración -->
+<section class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 mb-6 font-['Inter']">
+  <label class="text-xs font-black text-[#003B5C] uppercase tracking-widest flex items-center gap-2">
+    <span class="material-symbols-outlined text-[18px]">key</span>
+    Sesión de Asistencia Activa
+  </label>
+  <p class="text-xs text-[#72787e] leading-relaxed">
+    Para generar tu código de asistencia dinámico, introduce el ID de sesión proporcionado por tu docente.
+  </p>
+  <div class="flex gap-2">
+    <input type="number" [(ngModel)]="idSesionInput" placeholder="Ej. 1" 
+           class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#003b5c]/20 outline-none transition-all" />
+    <button (click)="establecerSesion()" 
+            class="bg-[#003b5c] text-white px-5 py-3 rounded-xl text-xs font-black active:scale-95 transition-transform shadow-md font-['Public_Sans'] uppercase tracking-wider">
+      Generar QR
+    </button>
+  </div>
+  @if (errorMsg()) {
+    <p class="text-xs text-red-500 font-bold flex items-center gap-1">
+      <span class="material-symbols-outlined text-sm">error</span>
+      {{ errorMsg() }}
+    </p>
+  }
+</section>
+
 <!-- Subject Selector Section -->
-<section class="space-y-3">
-<label class="text-sm font-semibold text-on-surface-variant flex items-center gap-2">
-<span class="material-symbols-outlined text-[18px]">school</span>
-                Materia Actual
-            </label>
-<div class="relative">
-<select class="w-full bg-white border-outline-variant rounded-lg py-3 px-4 appearance-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-on-surface font-medium shadow-sm">
-<option selected="">Sistemas Distribuidos - Sec. 001</option>
-<option>Ingeniería de Software - Sec. 003</option>
-<option>Inteligencia Artificial - Sec. 002</option>
-</select>
-<div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">
-<span class="material-symbols-outlined">expand_more</span>
-</div>
-</div>
-<div class="flex items-center gap-2 text-[12px] text-secondary font-medium px-1">
-<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">sensors</span>
-                Conectado con: Dr. Ricardo Méndez
-            </div>
+<section class="space-y-3 font-['Inter']">
+  <label class="text-sm font-semibold text-[#42474e] flex items-center gap-2">
+    <span class="material-symbols-outlined text-[18px]">school</span>
+    Materia Seleccionada
+  </label>
+  <div class="relative">
+    <select class="w-full bg-white border border-[#c2c7ce] rounded-xl py-3.5 px-4 appearance-none focus:ring-2 focus:ring-[#003b5c] focus:border-[#003b5c] transition-all text-[#191c1d] font-semibold shadow-sm">
+      <option selected>Sistemas Distribuidos - Sec. 001</option>
+      <option>Ingeniería de Software - Sec. 003</option>
+      <option>Inteligencia Artificial - Sec. 002</option>
+    </select>
+    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#72787e]">
+      <span class="material-symbols-outlined">expand_more</span>
+    </div>
+  </div>
+  @if (idSesion()) {
+    <div class="flex items-center gap-2 text-[12px] text-emerald-600 font-bold px-1 animate-pulse">
+      <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">sensors</span>
+      Conectado a la sesión ID: {{ idSesion() }}
+    </div>
+  } @else {
+    <div class="flex items-center gap-2 text-[12px] text-[#72787e] font-medium px-1">
+      <span class="material-symbols-outlined text-[14px]">sensors_off</span>
+      Sin conexión a una sesión activa
+    </div>
+  }
 </section>
+
 <!-- QR Display Section -->
-<section class="flex flex-col items-center mt-8">
-<div class="relative w-full max-w-[300px] aspect-square bg-white rounded-xl shadow-[0px_4px_12px_rgba(0,59,92,0.05)] border border-slate-100 p-6 flex flex-col items-center justify-center">
-<!-- QR Code Rendering Area -->
-<div class="relative group">
-<div class="absolute -inset-2 bg-gradient-to-tr from-primary/10 to-secondary/10 rounded-lg opacity-50"></div>
-<img alt="Dynamic QR Code" class="relative w-48 h-48 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEIISo9oXLgFn7QiQK-CmF33nPn3ThuDqZMvBGBPyHGa4vYXMfB2WCnJZopzGRUG9HzaX5OOId_wE_e56qm4IwKtsjztVN_CyvXQIF1j9XOucj-uGc_egunPz-8sqLsVknLSTf0sFlo8__YUhHTZ_5r4GYsi-VO3nKcf8w9fDejJFm347mi16SFkTvbaGsL1brZb9WxBnpYY8tUiHmmOCfnp7q4idhHBgXli7dVe3wgHvEmMbiCyzrt8FvZScHQWKKvQGYlXOWqcjh"/>
-</div>
-<!-- Pulse indicator -->
-<div class="mt-8 flex flex-col items-center gap-2">
-<div class="relative flex items-center justify-center">
-<svg class="w-12 h-12">
-<circle class="text-slate-100" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-width="3"></circle>
-<circle class="text-[#003B5C] qr-timer-ring" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-width="3" style="stroke-dashoffset: 56;"></circle>
-</svg>
-<span class="absolute text-xs font-bold text-primary">5s</span>
-</div>
-<p class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Regenerando código...</p>
-</div>
-</div>
-<div class="mt-6 flex items-center gap-3 bg-[#E1E3E4]/30 px-4 py-2 rounded-full border border-[#003B5C]/10">
-<div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-<span class="text-xs font-semibold text-primary">Sesión de asistencia activa</span>
-</div>
+<section class="flex flex-col items-center mt-8 font-['Inter']">
+  <div class="relative w-full max-w-[320px] bg-white rounded-2xl shadow-[0px_4px_20px_rgba(0,59,92,0.06)] border border-slate-100 p-6 flex flex-col items-center justify-center">
+    
+    <!-- QR Code Rendering Area -->
+    <div class="relative group p-4 bg-slate-50 rounded-xl border border-slate-100">
+      @if (tokenQr()) {
+        <div class="relative">
+          <qrcode [qrdata]="tokenQr()" [width]="192" [errorCorrectionLevel]="'M'"></qrcode>
+        </div>
+      } @else {
+        <div class="w-48 h-48 flex flex-col items-center justify-center text-slate-400">
+          <span class="material-symbols-outlined text-5xl mb-3 text-slate-300">qr_code_2</span>
+          <p class="text-xs text-center px-4 font-bold text-[#72787e]">Esperando sesión activa</p>
+        </div>
+      }
+    </div>
+
+    <!-- Pulse indicator -->
+    @if (tokenQr()) {
+      <div class="mt-8 flex flex-col items-center gap-3">
+        <div class="relative flex items-center justify-center">
+          <svg class="w-12 h-12 transform -rotate-90">
+            <circle class="text-slate-100" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-width="3.5"></circle>
+            <circle class="text-[#003B5C] transition-all duration-1000" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-width="3.5"
+                    [attr.stroke-dasharray]="125.6"
+                    [attr.stroke-dashoffset]="(15 - tiempoVidaRestante()) / 15 * 125.6"></circle>
+          </svg>
+          <span class="absolute text-xs font-black text-primary font-mono">{{ tiempoVidaRestante() }}s</span>
+        </div>
+        <p class="text-[11px] font-black text-[#003B5C] uppercase tracking-widest animate-pulse">Regenerando código...</p>
+      </div>
+
+      <div class="mt-6 flex items-center gap-3 bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100">
+        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+        <span class="text-xs font-bold text-emerald-700">Código QR dinámico en curso</span>
+      </div>
+    } @else {
+      <div class="mt-6 flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-full border border-slate-200">
+        <div class="w-2 h-2 rounded-full bg-slate-400"></div>
+        <span class="text-xs font-bold text-[#72787e]">Sesión no vinculada</span>
+      </div>
+    }
+  </div>
 </section>
+
 <!-- Security & Instructions -->
-<section class="grid grid-cols-1 gap-4 mt-8">
-<div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-4">
-<div class="w-10 h-10 rounded-lg bg-primary-fixed flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-[#003B5C]">security</span>
-</div>
-<div>
-<h3 class="text-sm font-bold text-primary">Seguridad Dinámica</h3>
-<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Este código expira cada 5 segundos para prevenir duplicados y garantizar tu asistencia real en el aula.</p>
-</div>
-</div>
-<div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-4">
-<div class="w-10 h-10 rounded-lg bg-secondary-fixed flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-secondary">info</span>
-</div>
-<div>
-<h3 class="text-sm font-bold text-secondary">Instrucciones</h3>
-<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Muestra este código al dispositivo del docente. Asegúrate de tener el brillo de tu pantalla al máximo.</p>
-</div>
-</div>
+<section class="grid grid-cols-1 gap-4 mt-8 font-['Inter']">
+  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-4">
+    <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0 border border-emerald-100">
+      <span class="material-symbols-outlined text-[#003B5C]" style="font-variation-settings: 'FILL' 1;">security</span>
+    </div>
+    <div>
+      <h3 class="text-sm font-bold text-primary font-['Public_Sans']">Seguridad Dinámica</h3>
+      <p class="text-xs text-[#42474e] mt-1 leading-relaxed">
+        Tu token se encripta con algoritmos de alta seguridad y expira cada 15 segundos para garantizar que estás presente en el aula.
+      </p>
+    </div>
+  </div>
+  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-4">
+    <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 border border-blue-100">
+      <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">info</span>
+    </div>
+    <div>
+      <h3 class="text-sm font-bold text-secondary font-['Public_Sans']">Instrucciones</h3>
+      <p class="text-xs text-[#42474e] mt-1 leading-relaxed">
+        Muestra este código al dispositivo del docente o proyector. Asegúrate de ajustar el brillo de tu pantalla al máximo.
+      </p>
+    </div>
+  </div>
 </section>

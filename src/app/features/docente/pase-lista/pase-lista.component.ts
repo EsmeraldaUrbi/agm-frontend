@@ -1,7 +1,8 @@
-import { Component, signal, computed, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { Component, signal, computed, OnDestroy, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { AsistenciasService } from '../../../core/services/asistencias.service';
 import jsQR from 'jsqr';
 
 interface AlumnoRegistrado {
@@ -23,17 +24,20 @@ export class PaseListaComponent implements OnDestroy {
   @ViewChild('videoEl', { static: false }) videoEl!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasEl', { static: false }) canvasEl!: ElementRef<HTMLCanvasElement>;
 
+  private asistenciasService = inject(AsistenciasService);
+
   estadoSesion = signal<EstadoSesion>('idle');
 
   materiaSeleccionada = '';
   materias = [
-    { nrc: '15842', nombre: 'Arquitectura de Servicios Web', seccion: '101' },
-    { nrc: '15845', nombre: 'Ingeniería de Software II',     seccion: '102' },
-    { nrc: '16021', nombre: 'Programación Paralela',         seccion: '101' },
-    { nrc: '16110', nombre: 'Seguridad de la Información',   seccion: '104' },
+    { id_materia: 1, nrc: '15842', nombre: 'Arquitectura de Servicios Web', seccion: '101' },
+    { id_materia: 2, nrc: '15845', nombre: 'Ingeniería de Software II',     seccion: '102' },
+    { id_materia: 3, nrc: '16021', nombre: 'Programación Paralela',         seccion: '101' },
+    { id_materia: 4, nrc: '16110', nombre: 'Seguridad de la Información',   seccion: '104' },
   ];
 
-  sessionId   = signal<string>('');
+  // Datos de sesión activa
+  sessionId = signal<number | null>(null);
   sessionToken = signal<string>('');
 
   tiempoRestante = signal(600);
@@ -63,31 +67,46 @@ export class PaseListaComponent implements OnDestroy {
 
   private stream: MediaStream | null = null;
   private rafId: number | null = null;
+  private lecturaBloqueada = false;
 
   iniciarSesion() {
     if (!this.materiaSeleccionada) return;
 
-    const mockSessionId    = 'sess-' + Math.random().toString(36).slice(2, 10);
-    const mockSessionToken = Math.random().toString(36).slice(2, 18).toUpperCase();
+    const idMateria = Number(this.materiaSeleccionada);
 
-    this.sessionId.set(mockSessionId);
-    this.sessionToken.set(mockSessionToken);
-    
-    // Iniciar countdown
-    this.tiempoRestante.set(600);
-    this.alumnosRegistrados.set([]);
-    this.estadoSesion.set('activa');
+    this.asistenciasService.iniciarSesion(idMateria).subscribe({
+      next: (sesion) => {
+        this.sessionId.set(sesion.id_sesion);
+        this.estadoSesion.set('activa');
 
-    this.timerInterval = setInterval(() => {
-      if (this.tiempoRestante() <= 0) {
-        this.finalizarSesion();
-        return;
+        const fechaFin = new Date(sesion.fecha_hora_fin).getTime();
+        const ahora = Date.now();
+        const segundosRestantes = Math.max(0, Math.floor((fechaFin - ahora) / 1000));
+
+        this.tiempoRestante.set(segundosRestantes);
+        this.alumnosRegistrados.set([]);
+
+        if (this.timerInterval) clearInterval(this.timerInterval);
+
+        this.timerInterval = setInterval(() => {
+          if (this.tiempoRestante() <= 0) {
+            this.finalizarSesion();
+            return;
+          }
+          this.tiempoRestante.update(t => t - 1);
+        }, 1000);
+
+        // Intentar cargar historial inicial por si existen alumnos registrados
+        this.cargarHistorial();
+
+        // Iniciar cámara web para el escaneo directo
+        setTimeout(() => this.iniciarCamara(), 100);
+      },
+      error: (error) => {
+        console.error('Error al iniciar sesión de asistencia:', error);
+        alert(error.error?.detail || 'No se pudo iniciar la sesión de asistencia.');
       }
-      this.tiempoRestante.update(t => t - 1);
-    }, 1000);
-
-    // Timeout to ensure DOM is updated to 'activa' before accessing videoEl
-    setTimeout(() => this.iniciarCamara(), 100);
+    });
   }
 
   async iniciarCamara() {
@@ -110,7 +129,7 @@ export class PaseListaComponent implements OnDestroy {
   }
 
   escanearFrame() {
-    if (!this.videoEl || !this.canvasEl) return;
+    if (!this.videoEl || !this.canvasEl || !this.escaneando()) return;
     const video = this.videoEl.nativeElement;
     const canvas = this.canvasEl.nativeElement;
     const ctx = canvas.getContext('2d')!;
@@ -125,7 +144,7 @@ export class PaseListaComponent implements OnDestroy {
         inversionAttempts: "dontInvert",
       });
 
-      if (code && code.data) {
+      if (code && code.data && !this.lecturaBloqueada) {
         this.procesarQR(code.data);
       }
     }
@@ -136,42 +155,123 @@ export class PaseListaComponent implements OnDestroy {
   }
 
   procesarQR(data: string) {
-    // Mock processing logic
-    // Extraemos matricula mock de la data o generamos una
-    const matriculaDetectada = data.match(/\d+/) ? data.match(/\d+/)![0] : '202100000';
-    
-    const yaRegistrado = this.alumnosRegistrados().some(a => a.matricula === matriculaDetectada);
-    if (yaRegistrado) return;
+    if (this.lecturaBloqueada) return;
+    this.lecturaBloqueada = true;
 
-    const ahora = new Date();
-    const hora = ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-    const minutosTranscurridos = Math.floor((600 - this.tiempoRestante()) / 60);
-    const estado: 'presente' | 'retardo' = minutosTranscurridos <= 5 ? 'presente' : 'retardo';
-
-    const nuevo: AlumnoRegistrado = {
-      nombre: 'Alumno Escaneado (' + matriculaDetectada.slice(-3) + ')',
-      matricula: matriculaDetectada,
-      hora,
-      estado
-    };
-
-    // Prepend to array
-    this.alumnosRegistrados.update(list => [nuevo, ...list]);
-    this.ultimoEscaneado.set(nuevo);
+    // Pausar frame loop de la cámara
     this.escaneando.set(false);
 
-    // Pausar escáner brevemente para mostrar feedback
-    setTimeout(() => {
-      this.ultimoEscaneado.set(null);
-      this.escaneando.set(true);
-      this.escanearFrame();
-    }, 1500);
+    this.asistenciasService.registrarAsistencia(data).subscribe({
+      next: (res) => {
+        // Consultar el historial para obtener la matrícula real del alumno escaneado
+        const idSesion = this.sessionId();
+        if (idSesion) {
+          this.asistenciasService.obtenerHistorial(idSesion).subscribe({
+            next: (historial: any[]) => {
+              const registroMatch = historial.find((h: any) => h.id_asistencia === res.id_asistencia);
+              const matricula = registroMatch ? registroMatch.matricula : 'Desconocida';
+
+              const nuevo: AlumnoRegistrado = {
+                nombre: `Alumno ${matricula}`,
+                matricula: matricula,
+                hora: new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+                estado: res.estado.toLowerCase() as 'presente' | 'retardo'
+              };
+
+              this.ultimoEscaneado.set(nuevo);
+
+              const listaMapeada: AlumnoRegistrado[] = historial.map((h: any) => ({
+                nombre: `Alumno ${h.matricula}`,
+                matricula: h.matricula,
+                hora: new Date(h.fecha_hora_registro).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+                estado: h.estado_asistencia.toLowerCase() as 'presente' | 'retardo'
+              }));
+              this.alumnosRegistrados.set(listaMapeada);
+
+              // Feedback visual de 1.5s y reiniciar cámara
+              setTimeout(() => {
+                this.ultimoEscaneado.set(null);
+                this.lecturaBloqueada = false;
+                this.escaneando.set(true);
+                this.escanearFrame();
+              }, 1500);
+            },
+            error: () => {
+              // Fallback básico
+              const nuevo: AlumnoRegistrado = {
+                nombre: 'Alumno Registrado',
+                matricula: 'Confirmado',
+                hora: new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+                estado: res.estado.toLowerCase() as 'presente' | 'retardo'
+              };
+              this.ultimoEscaneado.set(nuevo);
+              this.alumnosRegistrados.update(list => [nuevo, ...list]);
+
+              setTimeout(() => {
+                this.ultimoEscaneado.set(null);
+                this.lecturaBloqueada = false;
+                this.escaneando.set(true);
+                this.escanearFrame();
+              }, 1500);
+            }
+          });
+        }
+      },
+      error: (error) => {
+        const errorMsg = error.error?.detail || 'Error al procesar el código QR o asistencia ya registrada.';
+        alert(errorMsg);
+
+        setTimeout(() => {
+          this.lecturaBloqueada = false;
+          this.escaneando.set(true);
+          this.escanearFrame();
+        }, 1500);
+      }
+    });
+  }
+
+  cargarHistorial() {
+    const idSesion = this.sessionId();
+    if (!idSesion) return;
+
+    this.asistenciasService.obtenerHistorial(idSesion).subscribe({
+      next: (historial: any[]) => {
+        const listaMapeada: AlumnoRegistrado[] = historial.map((h: any) => ({
+          nombre: `Alumno ${h.matricula}`,
+          matricula: h.matricula,
+          hora: new Date(h.fecha_hora_registro).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+          estado: h.estado_asistencia.toLowerCase() as 'presente' | 'retardo'
+        }));
+        this.alumnosRegistrados.set(listaMapeada);
+      },
+      error: (err) => {
+        console.error('Error al cargar historial inicial:', err);
+      }
+    });
   }
 
   finalizarSesion() {
-    if (this.timerInterval) clearInterval(this.timerInterval);
-    this.detenerCamara();
-    this.estadoSesion.set('finalizada');
+    const idSesion = this.sessionId();
+    if (!idSesion) {
+      this.detenerCamara();
+      this.estadoSesion.set('finalizada');
+      return;
+    }
+
+    this.asistenciasService.cerrarSesion(idSesion).subscribe({
+      next: () => {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        this.detenerCamara();
+        this.estadoSesion.set('finalizada');
+      },
+      error: (error) => {
+        console.error('Error al cerrar sesión:', error);
+        // Fallback
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        this.detenerCamara();
+        this.estadoSesion.set('finalizada');
+      }
+    });
   }
 
   detenerCamara() {
@@ -193,7 +293,7 @@ export class PaseListaComponent implements OnDestroy {
   get esFinalizada(){ return this.estadoSesion() === 'finalizada'; }
 
   get materiaActual() {
-    return this.materias.find(m => m.nrc === this.materiaSeleccionada);
+    return this.materias.find(m => m.id_materia === Number(this.materiaSeleccionada));
   }
 
   ngOnDestroy() {
