@@ -6,7 +6,7 @@ import { AuthService, UserProfile } from '../../core/services/auth.service';
 interface PeriodoAcademico {
   id: string;
   nombre: string;
-  materias: { nrc: string; nombre: string; rol: string }[];
+  materias: { nrc: string; nombre: string; aprobacion: number }[];
 }
 
 @Component({
@@ -31,18 +31,18 @@ export class PerfilComponent implements OnInit {
       id: 'p-actual',
       nombre: 'Primavera 2026',
       materias: [
-        { nrc: '15842', nombre: 'Web Services Architecture', rol: 'Docente Titular' },
-        { nrc: '28491', nombre: 'Sistemas Distribuidos', rol: 'Docente Titular' },
-        { nrc: '31022', nombre: 'Advanced Databases', rol: 'Docente Titular' },
-        { nrc: '22310', nombre: 'Mobile Development', rol: 'Docente Titular' }
+        { nrc: '15842', nombre: 'Web Services Architecture', aprobacion: 92 },
+        { nrc: '28491', nombre: 'Sistemas Distribuidos', aprobacion: 85 },
+        { nrc: '31022', nombre: 'Advanced Databases', aprobacion: 78 },
+        { nrc: '22310', nombre: 'Mobile Development', aprobacion: 96 }
       ]
     },
     {
       id: 'p-prev',
       nombre: 'Otoño 2025',
       materias: [
-        { nrc: '12411', nombre: 'Sistemas Distribuidos', rol: 'Docente Titular' },
-        { nrc: '13552', nombre: 'Seguridad Informática', rol: 'Docente Adjunto' }
+        { nrc: '12411', nombre: 'Sistemas Distribuidos', aprobacion: 88 },
+        { nrc: '13552', nombre: 'Seguridad Informática', aprobacion: 90 }
       ]
     }
   ];

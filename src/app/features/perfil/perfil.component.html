@@ -103,7 +103,7 @@
                   <tr class="bg-slate-50 border-b border-[#c2c7ce]/40 text-[11px] font-extrabold text-[#72787e] uppercase tracking-widest">
                     <th class="py-4 px-6">NRC</th>
                     <th class="py-4 px-6">MATERIA</th>
-                    <th class="py-4 px-6">ROL ASIGNADO</th>
+                    <th class="py-4 px-6 text-center">APROBACIÓN (%)</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-sm">
@@ -111,9 +111,9 @@
                     <tr class="hover:bg-[#f3f4f5]/40 transition-colors">
                       <td class="py-4 px-6 font-mono font-bold text-[#003b5c]">{{ materia.nrc }}</td>
                       <td class="py-4 px-6 font-bold text-[#42474e]">{{ materia.nombre }}</td>
-                      <td class="py-4 px-6">
-                        <span class="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-xs font-bold shadow-sm inline-block">
-                          {{ materia.rol }}
+                      <td class="py-4 px-6 text-center">
+                        <span class="text-sm font-bold" [ngClass]="materia.aprobacion >= 80 ? 'text-[#2E7D32]' : 'text-amber-600'">
+                          {{ materia.aprobacion }}%
                         </span>
                       </td>
                     </tr>
