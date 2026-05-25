@@ -3,12 +3,12 @@
   <app-sidebar></app-sidebar>
 
   <!-- Contenido Principal -->
-  <main class="flex-1 ml-[240px]">
+  <main class="flex-1 w-full lg:ml-[240px] transition-all duration-300">
     <!-- TopNavBar compartido -->
     <app-navbar></app-navbar>
 
     <!-- Aquí se inyectarán las pantallas de los dashboards y módulos -->
-    <div class="p-8 max-w-[1440px] mx-auto">
+    <div class="p-4 sm:p-6 lg:p-8 max-w-[1440px] mx-auto w-full">
       <router-outlet></router-outlet>
     </div>
   </main>

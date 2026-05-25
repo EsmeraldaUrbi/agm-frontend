@@ -1,7 +1,8 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { LayoutService } from '../../../core/services/layout.service';
 
 @Component({
   selector: 'app-navbar',
@@ -29,10 +30,16 @@ export class NavbarComponent implements OnInit {
     return 'Usuario Institucional';
   });
 
+  private layoutService = inject(LayoutService);
+
   constructor(
     private authService: AuthService,
     private router: Router
   ) {}
+
+  toggleSidebar() {
+    this.layoutService.toggleSidebar();
+  }
 
   ngOnInit() {
     const user = this.authService.currentUser();

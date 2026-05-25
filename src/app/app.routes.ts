@@ -43,13 +43,6 @@ export const routes: Routes = [
     loadChildren: () => import('./features/alumno/alumno.routes').then(m => m.ALUMNO_ROUTES)
   },
   {
-    // Ruta del escáner QR — SIN main-layout (se usa desde el teléfono del docente)
-    path: 'docente/escaner',
-    canActivate: [authGuard],
-    data: { roles: ['docente'] },
-    loadComponent: () => import('./features/docente/escaner-qr/escaner-qr.component').then(m => m.EscanerQrComponent)
-  },
-  {
     path: '',
     component: MainLayoutComponent,
     canActivate: [authGuard],

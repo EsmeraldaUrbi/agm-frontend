@@ -1,7 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { LayoutService } from '../../../core/services/layout.service';
 
 interface NavItem {
   label: string;
@@ -25,10 +26,16 @@ export class SidebarComponent implements OnInit {
   menuItems = signal<NavItem[]>([]);
   userRole = signal<string>('');
 
+  layoutService = inject(LayoutService);
+
   constructor(
     private authService: AuthService,
     private router: Router
   ) {}
+
+  closeSidebar() {
+    this.layoutService.closeSidebar();
+  }
 
   ngOnInit() {
     // Escuchar el estado de autenticación reactivamente

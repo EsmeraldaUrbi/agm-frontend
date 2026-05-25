@@ -72,20 +72,73 @@
           </div>
         </div>
 
-        <!-- QR Code -->
-        <div class="bg-white rounded-2xl border border-[#c2c7ce] shadow-sm p-6 text-center">
-          <p class="text-xs font-bold text-[#42474e] uppercase tracking-wider mb-4">📱 Escanea con tu teléfono para abrir el escáner</p>
-          <div class="flex justify-center mb-4">
-            <qrcode
-              [qrdata]="qrUrl()"
-              [width]="220"
-              [margin]="2"
-              colorDark="#003b5c"
-              colorLight="#ffffff"
-              errorCorrectionLevel="M">
-            </qrcode>
-          </div>
-          <p class="text-[10px] text-[#72787e] break-all font-mono">{{ qrUrl() }}</p>
+        <!-- Área de cámara (Escáner Integrado) -->
+        <div class="relative bg-slate-900 rounded-2xl overflow-hidden shadow-sm border border-[#c2c7ce] aspect-square w-full flex-shrink-0 flex items-center justify-center">
+
+          <!-- Video de cámara (oculto visualmente pero usado por jsQR) -->
+          <video #videoEl class="w-full h-full object-cover"
+            [class.opacity-60]="!ultimoEscaneado()"
+            playsinline autoplay muted>
+          </video>
+
+          <!-- Canvas oculto para procesamiento -->
+          <canvas #canvasEl class="hidden"></canvas>
+
+          <!-- Overlay de marcos QR -->
+          @if (camaraActiva() && !ultimoEscaneado()) {
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="w-48 h-48 sm:w-56 sm:h-56 relative">
+                <!-- Esquinas del visor -->
+                <div class="absolute top-0 left-0 w-8 h-8 sm:w-10 sm:h-10 border-t-4 border-l-4 border-white rounded-tl-lg"></div>
+                <div class="absolute top-0 right-0 w-8 h-8 sm:w-10 sm:h-10 border-t-4 border-r-4 border-white rounded-tr-lg"></div>
+                <div class="absolute bottom-0 left-0 w-8 h-8 sm:w-10 sm:h-10 border-b-4 border-l-4 border-white rounded-bl-lg"></div>
+                <div class="absolute bottom-0 right-0 w-8 h-8 sm:w-10 sm:h-10 border-b-4 border-r-4 border-white rounded-br-lg"></div>
+                <!-- Línea de escaneo animada -->
+                <div class="absolute inset-x-2 top-2 h-0.5 bg-[#42d0fe]/70 animate-bounce"></div>
+              </div>
+            </div>
+            <div class="absolute bottom-4 left-0 right-0 flex justify-center">
+              <div class="bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
+                <span class="w-2 h-2 bg-[#ba1a1a] rounded-full animate-pulse"></span>
+                <span class="text-xs font-bold text-[#003b5c]">ESCANEO ACTIVO</span>
+              </div>
+            </div>
+          }
+
+          <!-- Confirmación de escaneo exitoso -->
+          @if (ultimoEscaneado()) {
+            <div class="absolute inset-0 flex items-center justify-center"
+              [ngClass]="ultimoEscaneado()?.estado === 'presente' ? 'bg-emerald-900/80' : 'bg-amber-900/80'">
+              <div class="text-center text-white p-6">
+                <span class="material-symbols-outlined text-6xl mb-3 block"
+                  style="font-variation-settings:'FILL' 1">
+                  {{ ultimoEscaneado()?.estado === 'presente' ? 'check_circle' : 'schedule' }}
+                </span>
+                <p class="font-black text-xl font-['Public_Sans']">{{ ultimoEscaneado()?.nombre }}</p>
+                <p class="text-sm opacity-80 mt-1">{{ ultimoEscaneado()?.matricula }}</p>
+                <div class="mt-3 px-4 py-1 rounded-full font-bold text-sm inline-block"
+                  [ngClass]="ultimoEscaneado()?.estado === 'presente'
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-amber-500 text-white'">
+                  {{ ultimoEscaneado()?.estado === 'presente' ? '✓ PRESENTE' : '⏱ RETARDO' }}
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Error de cámara -->
+          @if (errorCamara()) {
+            <div class="absolute inset-0 flex flex-col items-center justify-center bg-slate-800/90 p-6 text-center z-10">
+              <div class="text-white">
+                <span class="material-symbols-outlined text-4xl text-red-400 mb-3 block">no_photography</span>
+                <p class="font-bold text-sm">{{ errorCamara() }}</p>
+                <button (click)="iniciarCamara()"
+                  class="mt-4 px-4 py-2 bg-white text-[#003b5c] rounded-lg font-bold text-sm">
+                  Reintentar
+                </button>
+              </div>
+            </div>
+          }
         </div>
 
         <!-- Timer -->

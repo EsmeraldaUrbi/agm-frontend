@@ -1,9 +1,12 @@
 <header class="flex justify-between items-center h-16 px-8 w-full sticky top-0 z-40 bg-white border-b border-outline-variant/20 shadow-[0_2px_12px_rgba(0,59,92,0.03)] font-headline text-sm font-medium">
   
-  <!-- Left Side: System title -->
-  <div class="flex items-center gap-4">
-    <span class="text-sm font-extrabold text-primary-container tracking-tight uppercase">
-      Academic Grade Management — FCC
+  <!-- Left Side: System title & Menu Toggle -->
+  <div class="flex items-center gap-2 lg:gap-4">
+    <button (click)="toggleSidebar()" class="lg:hidden p-2 -ml-2 text-[#42474e] hover:bg-[#f3f4f5] rounded-lg transition-colors">
+      <span class="material-symbols-outlined block">menu</span>
+    </button>
+    <span class="text-[11px] sm:text-sm font-extrabold text-primary-container tracking-tight uppercase truncate">
+      Academic Grade Management <span class="hidden sm:inline">— FCC</span>
     </span>
   </div>
 
