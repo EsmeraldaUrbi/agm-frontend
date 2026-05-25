@@ -21,6 +21,7 @@ export class QrAsistenciaComponent implements OnInit, OnDestroy {
   // Token generado y TTL
   tokenQr = signal<string>('');
   tiempoVidaRestante = signal<number>(0);
+  ttlInicial = signal<number>(20);
   errorMsg = signal<string>('');
 
   private timerInterval: ReturnType<typeof setInterval> | null = null;
@@ -53,7 +54,9 @@ export class QrAsistenciaComponent implements OnInit, OnDestroy {
     this.asistenciasService.generarQr(id).subscribe({
       next: (res) => {
         this.tokenQr.set(res.token);
-        this.tiempoVidaRestante.set(res.tiempo_vida_segundos || 15);
+        const ttl = res.tiempo_vida_segundos || 20;
+        this.ttlInicial.set(ttl);
+        this.tiempoVidaRestante.set(ttl);
         this.errorMsg.set('');
       },
       error: (err) => {

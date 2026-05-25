@@ -39,17 +39,6 @@
       <span class="material-symbols-outlined">expand_more</span>
     </div>
   </div>
-  @if (idSesion()) {
-    <div class="flex items-center gap-2 text-[12px] text-emerald-600 font-bold px-1 animate-pulse">
-      <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">sensors</span>
-      Conectado a la sesión ID: {{ idSesion() }}
-    </div>
-  } @else {
-    <div class="flex items-center gap-2 text-[12px] text-[#72787e] font-medium px-1">
-      <span class="material-symbols-outlined text-[14px]">sensors_off</span>
-      Sin conexión a una sesión activa
-    </div>
-  }
 </section>
 
 <!-- QR Display Section -->
@@ -78,21 +67,11 @@
             <circle class="text-slate-100" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-width="3.5"></circle>
             <circle class="text-[#003B5C] transition-all duration-1000" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-width="3.5"
                     [attr.stroke-dasharray]="125.6"
-                    [attr.stroke-dashoffset]="(15 - tiempoVidaRestante()) / 15 * 125.6"></circle>
+                    [attr.stroke-dashoffset]="(ttlInicial() - tiempoVidaRestante()) / ttlInicial() * 125.6"></circle>
           </svg>
           <span class="absolute text-xs font-black text-primary font-mono">{{ tiempoVidaRestante() }}s</span>
         </div>
         <p class="text-[11px] font-black text-[#003B5C] uppercase tracking-widest animate-pulse">Regenerando código...</p>
-      </div>
-
-      <div class="mt-6 flex items-center gap-3 bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100">
-        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-        <span class="text-xs font-bold text-emerald-700">Código QR dinámico en curso</span>
-      </div>
-    } @else {
-      <div class="mt-6 flex items-center gap-3 bg-slate-100 px-4 py-2 rounded-full border border-slate-200">
-        <div class="w-2 h-2 rounded-full bg-slate-400"></div>
-        <span class="text-xs font-bold text-[#72787e]">Sesión no vinculada</span>
       </div>
     }
   </div>
@@ -107,7 +86,7 @@
     <div>
       <h3 class="text-sm font-bold text-primary font-['Public_Sans']">Seguridad Dinámica</h3>
       <p class="text-xs text-[#42474e] mt-1 leading-relaxed">
-        Tu token se encripta con algoritmos de alta seguridad y expira cada 15 segundos para garantizar que estás presente en el aula.
+        Tu token se encripta con algoritmos de alta seguridad y expira cada {{ ttlInicial() }} segundos para garantizar que estás presente en el aula.
       </p>
     </div>
   </div>

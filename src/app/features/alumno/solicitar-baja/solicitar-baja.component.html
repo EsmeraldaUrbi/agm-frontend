@@ -1,140 +1,67 @@
-<!-- Breadcrumbs -->
-<nav class="flex text-xs font-medium text-slate-400 mb-6 gap-2">
-<span>Académico</span>
-<span>/</span>
-<span>Mis Materias</span>
-<span>/</span>
-<span class="text-slate-600">Dar de Baja</span>
-</nav>
-<!-- Critical Confirmation Section -->
-<div class="bg-white rounded-xl shadow-[0px_2px_4px_rgba(0,59,92,0.05)] border border-slate-100 overflow-hidden">
-<!-- Header Alert Banner -->
-<div class="bg-error-container p-4 flex items-center gap-4">
-<div class="w-10 h-10 rounded-full bg-error text-white flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
-</div>
-<div>
-<h2 class="font-bold text-on-error-container text-lg leading-tight">Confirmación Crítica de Baja</h2>
-<p class="text-sm text-on-error-container opacity-90">Este proceso es permanente y afectará su historial académico vigente.</p>
-</div>
-</div>
-<div class="p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-<!-- Left Column: Course Details -->
-<div class="lg:col-span-7 space-y-6">
-<section>
-<h3 class="text-slate-400 text-[10px] uppercase font-bold tracking-widest mb-4">Resumen de la Materia</h3>
-<div class="bg-surface-container-low p-6 rounded-lg border border-slate-200">
-<div class="flex justify-between items-start mb-4">
-<div>
-<h4 class="text-xl font-extrabold text-primary">Arquitectura de Software</h4>
-<p class="text-sm text-slate-600">Clave: <span class="font-mono">COMP-450</span> | Sección: 102</p>
-</div>
-<div class="text-right">
-<span class="text-xs font-bold px-2 py-1 bg-primary-container text-white rounded">5 CRÉDITOS</span>
-</div>
-</div>
-<div class="grid grid-cols-2 gap-4 text-sm">
-<div class="p-3 bg-white rounded border border-slate-100">
-<span class="text-slate-400 block text-[11px] mb-1">Catedrático</span>
-<span class="font-semibold text-primary">Dr. Javier Ruiz Esparza</span>
-</div>
-<div class="p-3 bg-white rounded border border-slate-100">
-<span class="text-slate-400 block text-[11px] mb-1">Horario Actual</span>
-<span class="font-semibold text-primary">Lun-Mie 10:00 - 12:00</span>
-</div>
-</div>
-</div>
-</section>
-<section class="space-y-3">
-<h3 class="text-slate-400 text-[10px] uppercase font-bold tracking-widest mb-2">Advertencias Importantes</h3>
-<div class="flex gap-4 p-4 rounded-lg border border-yellow-100 bg-yellow-50/50">
-<span class="material-symbols-outlined text-yellow-700 shrink-0">report_problem</span>
-<div class="text-sm text-yellow-800 leading-relaxed">
-<strong class="block mb-1">Irreversibilidad</strong>
-                                    Una vez procesada la baja, no podrá ser revertida ni podrá inscribirse nuevamente a esta materia en el presente periodo escolar bajo ninguna circunstancia.
-                                </div>
-</div>
-<div class="flex gap-4 p-4 rounded-lg border border-red-100 bg-red-50/50">
-<span class="material-symbols-outlined text-red-700 shrink-0">history</span>
-<div class="text-sm text-red-800 leading-relaxed">
-<strong class="block mb-1">Límite de Oportunidad</strong>
-                                    Usted solo tiene derecho a **una sola baja académica** por periodo escolar. Al ejecutar esta acción, agotará su límite para el ciclo Otoño 2024.
-                                </div>
-</div>
-</section>
-</div>
-<!-- Right Column: Validation Form -->
-<div class="lg:col-span-5 flex flex-col">
-<div class="bg-[#F8F9FA] p-6 rounded-xl border border-slate-200 h-full flex flex-col">
-<h3 class="text-primary font-bold text-lg mb-4 text-center">Protocolo de Seguridad</h3>
-<p class="text-xs text-slate-500 text-center mb-6 px-4">
-                                Para evitar bajas accidentales, es necesario que verifique manualmente su intención de retiro.
-                            </p>
-<div class="space-y-6 flex-1">
-<div class="space-y-2">
-<label class="block text-xs font-bold text-slate-600 uppercase">Validación Requerida</label>
-<p class="text-xs text-slate-400 mb-2">Por favor, escriba la palabra <span class="font-mono font-bold text-red-600 px-1 bg-red-50">CONFIRMAR</span> a continuación:</p>
-<input class="w-full h-12 px-4 rounded-lg border-2 border-slate-200 focus:border-secondary outline-none transition-all font-mono tracking-widest uppercase" placeholder="Escriba aquí..." type="text"/>
-</div>
-<div class="p-4 bg-white rounded-lg border border-slate-200 shadow-sm">
-<div class="flex items-center gap-3 mb-2">
-<span class="material-symbols-outlined text-primary text-sm">info</span>
-<span class="text-xs font-bold text-primary uppercase">Nota Administrativa</span>
-</div>
-<p class="text-[11px] text-slate-500 leading-normal">
-                                        El sistema registrará su IP y fecha/hora exacta de la transacción como parte del registro de auditoría institucional.
-                                    </p>
-</div>
-</div>
-<div class="mt-8 space-y-3">
-<button routerLink="/alumno/dashboard" class="w-full h-12 bg-error text-white font-bold rounded-lg shadow-[0px_4px_12px_rgba(186,26,26,0.2)] hover:bg-red-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-sm">delete_forever</span>
-                                    EJECUTAR BAJA DEFINITIVA
-                                </button>
-<button routerLink="/alumno/calificaciones" class="w-full h-10 bg-transparent text-slate-500 font-semibold rounded-lg hover:bg-slate-100 transition-all text-sm underline">
-                                    Cancelar y volver a mis materias
-                                </button>
-</div>
-</div>
-</div>
-</div>
-<!-- Footer Stats -->
-<div class="border-t border-slate-100 p-4 bg-slate-50 flex justify-center gap-12 text-[11px] font-medium text-slate-400 uppercase tracking-widest flex-wrap">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-xs">calendar_today</span>
-                        Fecha Límite: 15 OCT 2024
+<div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in-up">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col relative animate-scale-up">
+        
+        <!-- Header Alert Banner -->
+        <div class="bg-error-container p-5 flex justify-between items-start">
+            <div class="flex gap-4">
+                <div class="w-10 h-10 rounded-full bg-error text-white flex items-center justify-center shrink-0 shadow-sm">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+                </div>
+                <div>
+                    <h2 class="font-bold text-on-error-container text-lg leading-tight">Confirmación Crítica de Baja</h2>
+                    <p class="text-sm text-on-error-container opacity-90 mt-1">Esta acción es permanente y afectará su historial.</p>
+                </div>
+            </div>
+            <button (click)="cancelar()" class="p-1 text-on-error-container/60 hover:text-on-error-container hover:bg-error/10 rounded-lg transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div class="p-6 space-y-6">
+            <!-- Advertencias (Provenientes del Documento Oficial) -->
+            <section class="space-y-3">
+                <h3 class="text-slate-400 text-[10px] uppercase font-bold tracking-widest">Advertencias Oficiales</h3>
+                <div class="flex gap-4 p-4 rounded-lg border border-yellow-100 bg-yellow-50/50">
+                    <span class="material-symbols-outlined text-yellow-700 shrink-0">report_problem</span>
+                    <div class="text-sm text-yellow-800 leading-relaxed">
+                        <strong class="block mb-1">Irreversibilidad y Pérdida de Acceso</strong>
+                        La operación es completamente irreversible y genera automáticamente una notificación por correo al docente. Una vez dado de baja, usted perderá todo acceso a los materiales y asistencias de esta materia.
                     </div>
-<div class="flex items-center gap-2 text-primary">
-<span class="material-symbols-outlined text-xs">verified_user</span>
-                        Transacción Encriptada
+                </div>
+                <div class="flex gap-4 p-4 rounded-lg border border-red-100 bg-red-50/50">
+                    <span class="material-symbols-outlined text-red-700 shrink-0">history</span>
+                    <div class="text-sm text-red-800 leading-relaxed">
+                        <strong class="block mb-1">Límite de Oportunidad Única</strong>
+                        De acuerdo al reglamento, el alumno puede darse de baja de una materia únicamente una vez en el periodo.
                     </div>
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-xs">update</span>
-                        Folio: BUAP-88219-X
+                </div>
+            </section>
+
+            <!-- Protocolo de Seguridad -->
+            <section class="bg-[#F8F9FA] p-6 rounded-xl border border-slate-200">
+                <h3 class="text-primary font-bold text-lg mb-2 text-center">Protocolo de Seguridad</h3>
+                <p class="text-xs text-slate-500 text-center mb-5">
+                    Para evitar bajas accidentales, verifique manualmente su intención de retiro.
+                </p>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Escriba la palabra <span class="font-mono font-bold text-red-600 px-1 bg-red-50">CONFIRMAR</span></label>
+                        <input class="w-full h-12 px-4 rounded-lg border-2 border-slate-200 focus:border-error focus:ring-1 focus:ring-error outline-none transition-all font-mono tracking-widest uppercase text-center" placeholder="CONFIRMAR" type="text" />
                     </div>
-</div>
-</div>
-<!-- Contextual Help -->
-<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-<div class="bg-white p-5 rounded-lg border border-slate-100 shadow-sm flex items-start gap-4">
-<span class="material-symbols-outlined text-blue-500">contact_support</span>
-<div>
-<h5 class="text-sm font-bold text-slate-700 mb-1">¿Dudas?</h5>
-<p class="text-xs text-slate-500">Contacte a Servicios Escolares antes de confirmar.</p>
-</div>
-</div>
-<div class="bg-white p-5 rounded-lg border border-slate-100 shadow-sm flex items-start gap-4">
-<span class="material-symbols-outlined text-blue-500">description</span>
-<div>
-<h5 class="text-sm font-bold text-slate-700 mb-1">Reglamento</h5>
-<p class="text-xs text-slate-500">Consulte el Artículo 42 sobre Retiro de Asignaturas.</p>
-</div>
-</div>
-<div class="bg-white p-5 rounded-lg border border-slate-100 shadow-sm flex items-start gap-4">
-<span class="material-symbols-outlined text-blue-500">mail</span>
-<div>
-<h5 class="text-sm font-bold text-slate-700 mb-1">Soporte Técnico</h5>
-<p class="text-xs text-slate-500">Reporte problemas con el sistema de validación.</p>
-</div>
-</div>
+                </div>
+            </section>
+
+            <!-- Actions -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <button (click)="cancelar()" class="w-full sm:w-1/2 h-12 border border-slate-300 text-slate-600 font-bold rounded-lg hover:bg-slate-50 transition-all text-sm">
+                    Cancelar
+                </button>
+                <button (click)="confirmarBaja()" class="w-full sm:w-1/2 h-12 bg-error text-white font-bold rounded-lg shadow-md hover:bg-red-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm">
+                    <span class="material-symbols-outlined text-base">delete_forever</span>
+                    Ejecutar Baja Definitiva
+                </button>
+            </div>
+        </div>
+    </div>
 </div>

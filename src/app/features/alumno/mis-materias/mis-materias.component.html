@@ -44,10 +44,10 @@
                                     <span class="material-symbols-outlined text-[16px]">visibility</span>
                                     <span class="hidden xl:inline">Detalles</span>
                                 </a>
-                                <a routerLink="/alumno/solicitar-baja" class="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-100" title="Solicitar Baja">
+                                <button (click)="abrirBaja()" class="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-100" title="Solicitar Baja">
                                     <span class="material-symbols-outlined text-[16px]">cancel</span>
                                     <span class="hidden xl:inline">Baja</span>
-                                </a>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -81,5 +81,10 @@
             </div>
         </div>
     </div>
+    }
+
+    <!-- Modal Solicitar Baja -->
+    @if (mostrarBajaModal) {
+        <app-solicitar-baja (cerrar)="cerrarBaja()"></app-solicitar-baja>
     }
 </div>

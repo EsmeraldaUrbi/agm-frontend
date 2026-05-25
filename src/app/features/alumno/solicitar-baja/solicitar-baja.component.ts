@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -9,5 +9,14 @@ import { RouterModule } from '@angular/router';
   styles: ``
 })
 export class SolicitarBajaComponent {
+  @Output() cerrar = new EventEmitter<void>();
 
+  cancelar() {
+    this.cerrar.emit();
+  }
+
+  confirmarBaja() {
+    // Lógica para enviar la baja
+    this.cerrar.emit();
+  }
 }

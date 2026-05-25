@@ -40,10 +40,6 @@ export const ALUMNO_ROUTES: Routes = [
     component: CalificacionesComponent
   },
   {
-    path: 'solicitar-baja',
-    component: SolicitarBajaComponent
-  },
-  {
     path: 'notificaciones',
     component: NotificacionesComponent
   },

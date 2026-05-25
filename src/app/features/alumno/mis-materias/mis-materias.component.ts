@@ -2,16 +2,18 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HorarioComponent } from '../horario/horario.component';
+import { SolicitarBajaComponent } from '../solicitar-baja/solicitar-baja.component';
 
 @Component({
   selector: 'app-mis-materias',
   standalone: true,
-  imports: [CommonModule, RouterModule, HorarioComponent],
+  imports: [CommonModule, RouterModule, HorarioComponent, SolicitarBajaComponent],
   templateUrl: './mis-materias.component.html',
   styleUrl: './mis-materias.component.css'
 })
 export class MisMateriasComponent {
   mostrarHorarioModal = false;
+  mostrarBajaModal = false;
 
   materias = [
     { nrc: '24589', nombre: 'Arquitectura de Software', docente: 'Dr. Javier Ruiz Esparza', promedio: 9.8, creditos: 6 },
@@ -26,5 +28,13 @@ export class MisMateriasComponent {
 
   cerrarHorario() {
     this.mostrarHorarioModal = false;
+  }
+
+  abrirBaja() {
+    this.mostrarBajaModal = true;
+  }
+
+  cerrarBaja() {
+    this.mostrarBajaModal = false;
   }
 }
