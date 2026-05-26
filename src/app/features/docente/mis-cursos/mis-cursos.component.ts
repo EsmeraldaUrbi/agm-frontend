@@ -28,7 +28,7 @@ export class MisCursosComponent implements OnInit {
   private docentesService = inject(DocentesService);
   private materiasService = inject(MateriasService);
 
-  cursos: Curso[] = [];
+  cursos = signal<Curso[]>([]);
   docenteId: string | null = null;
   isLoading = signal(false);
 
@@ -39,7 +39,7 @@ export class MisCursosComponent implements OnInit {
     const term = this.searchTerm().toLowerCase();
     const status = this.statusFilter();
     
-    return this.cursos.filter(curso => {
+    return this.cursos().filter(curso => {
       const matchesSearch = curso.nrc.toLowerCase().includes(term) || 
                             curso.nombre.toLowerCase().includes(term) || 
                             curso.seccion.toLowerCase().includes(term);
@@ -49,7 +49,7 @@ export class MisCursosComponent implements OnInit {
   });
 
   get totalAlumnos(): number {
-    return this.cursos.reduce((sum, c) => sum + c.alumnos, 0);
+    return this.cursos().reduce((sum, c) => sum + c.alumnos, 0);
   }
 
   isCierreModalOpen = false;
@@ -92,7 +92,7 @@ export class MisCursosComponent implements OnInit {
   cargarCursos(docenteId: string) {
     this.materiasService.getMateriasByDocente(docenteId).subscribe({
       next: (res) => {
-        this.cursos = res.items.map((m: any) => {
+        const mappedCursos = res.items.map((m: any) => {
           const isCanceled = m.estado === 'CANCELADA' || m.estado === 'CERRADA';
           return {
             materia_id: m.materia_id || '',
@@ -105,6 +105,7 @@ export class MisCursosComponent implements OnInit {
             estado: m.estado || 'ACTIVA'
           };
         });
+        this.cursos.set(mappedCursos);
         this.isLoading.set(false);
       },
       error: (err) => {
