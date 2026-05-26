@@ -26,7 +26,7 @@ export class DashboardComponent {
   get asisLinePath(): string {
     const data = this.selectedMateria.asistenciaSemanal;
     if (!data || data.length === 0) return '';
-    const points = data.map((val, i) => {
+    const points = data.map((val: number, i: number) => {
       const x = (i / (data.length - 1)) * 100;
       const y = 100 - val;
       return `${x},${y}`;
@@ -37,7 +37,7 @@ export class DashboardComponent {
   get asisAreaPath(): string {
     const data = this.selectedMateria.asistenciaSemanal;
     if (!data || data.length === 0) return '';
-    const points = data.map((val, i) => {
+    const points = data.map((val: number, i: number) => {
       const x = (i / (data.length - 1)) * 100;
       const y = 100 - val;
       return `${x},${y}`;
