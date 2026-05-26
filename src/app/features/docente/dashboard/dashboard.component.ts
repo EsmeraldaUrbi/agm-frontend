@@ -77,7 +77,7 @@ export class DashboardComponent {
       legend: { display: false },
       tooltip: {
         callbacks: {
-          label: (context) => ` ${context.raw} alumnos`
+          label: (context: any) => ` ${context.raw} alumnos`
         }
       }
     },
