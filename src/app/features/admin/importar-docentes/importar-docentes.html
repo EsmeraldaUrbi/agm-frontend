@@ -58,7 +58,7 @@
     </div>
     <div>
       <h3 class="text-[#93000a] font-bold text-base font-headline">Archivo Duplicado (Error 409)</h3>
-      <p class="text-[#93000a]/80 text-sm mt-1">Este documento CSV ya fue procesado anteriormente en este periodo. El sistema ha bloqueado la carga para evitar padrones de docentes duplicados.</p>
+      <p class="text-[#93000a]/80 text-sm mt-1">Este documento PDF ya fue procesado anteriormente en este periodo. El sistema ha bloqueado la carga para evitar padrones de docentes duplicados.</p>
     </div>
   </div>
 
@@ -70,13 +70,13 @@
       (drop)="onDrop($event)"
       (click)="fileInput.click()">
       
-      <input #fileInput type="file" accept=".csv,text/csv" class="hidden" (change)="onFileSelected($event)">
+      <input #fileInput type="file" accept=".pdf,application/pdf" class="hidden" (change)="onFileSelected($event)">
       
       <div class="w-20 h-20 bg-white rounded-full shadow-md flex items-center justify-center text-primary-container mb-6">
         <span class="material-symbols-outlined text-4xl">cloud_upload</span>
       </div>
-      <h3 class="text-xl font-black text-[#003B5C] font-headline text-center mb-2">Sube tu CSV de Docentes</h3>
-      <p class="text-slate-500 text-sm text-center max-w-sm mb-6">Arrastra y suelta el archivo CSV con el padrón de docentes aquí, o haz clic para explorar en tu computadora.</p>
+      <h3 class="text-xl font-black text-[#003B5C] font-headline text-center mb-2">Sube tu PDF de Docentes</h3>
+      <p class="text-slate-500 text-sm text-center max-w-sm mb-6">Arrastra y suelta el archivo PDF con el padrón de docentes aquí, o haz clic para explorar en tu computadora.</p>
       
       <button class="px-6 py-2.5 bg-primary-container text-white font-bold text-sm rounded-xl shadow-md pointer-events-none">
         Seleccionar Archivo
@@ -88,7 +88,7 @@
   <div *ngIf="currentStep() === 2" class="animate-fade-in flex flex-col items-center justify-center py-32">
     <div class="w-16 h-16 border-4 border-slate-200 border-t-primary-container rounded-full animate-spin mb-6"></div>
     <h3 class="text-xl font-black text-[#003B5C] font-headline text-center mb-2">Procesando Documento...</h3>
-    <p class="text-slate-500 text-sm text-center">Analizando el CSV y validando la estructura del padrón. Por favor espera.</p>
+    <p class="text-slate-500 text-sm text-center">Analizando el PDF y validando la estructura del padrón. Por favor espera.</p>
   </div>
 
   <!-- PASO 3: VISTA PREVIA (Preview) -->
@@ -176,7 +176,7 @@
           <span class="material-symbols-outlined">description</span>
         </div>
         <h3 class="text-sm font-bold text-[#003B5C] mb-1">Archivo Fuente</h3>
-        <p class="text-xl font-black text-slate-800">{{ selectedFile()?.name || 'docentes_fcc_2026.csv' }}</p>
+        <p class="text-xl font-black text-slate-800">{{ selectedFile()?.name || 'docentes_fcc_2026.pdf' }}</p>
         <p class="text-xs text-slate-500 mt-2">Leído correctamente</p>
       </div>
     </div>

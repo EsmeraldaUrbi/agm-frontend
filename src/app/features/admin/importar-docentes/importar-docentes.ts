@@ -35,8 +35,8 @@ export class ImportarDocentesComponent {
   }
 
   private handleFile(file: File) {
-    if (file.type !== 'text/csv' && !file.name.toLowerCase().endsWith('.csv')) {
-      alert('Por favor, selecciona únicamente un archivo CSV.');
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      alert('Por favor, selecciona únicamente un archivo PDF.');
       return;
     }
 
