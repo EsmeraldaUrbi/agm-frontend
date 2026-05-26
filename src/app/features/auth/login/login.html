@@ -85,7 +85,7 @@
         </div>
 
         <!-- Login Form -->
-        <form (submit)="onLogin(); $event.preventDefault()" class="space-y-5">
+        <div class="space-y-5">
           <div class="relative group">
             <label class="absolute -top-2 left-3 px-1 bg-white text-[11px] font-bold text-primary-container z-10">Institutional Email</label>
             <div class="flex items-center border border-outline-variant rounded-lg px-4 py-3 bg-white focus-within:ring-2 focus-within:ring-primary-container/20 focus-within:border-primary-container transition-all">
@@ -127,12 +127,13 @@
           </div>
 
           <button 
-            type="submit"
+            type="button"
+            (click)="onLogin()"
             class="w-full h-12 bg-primary-container text-white font-headline font-bold rounded-lg shadow-md hover:bg-primary transition-all active:scale-[0.98] flex items-center justify-center gap-2">
             Ingresar
             <span class="material-symbols-outlined text-xl">login</span>
           </button>
-        </form>
+        </div>
 
         <!-- Footer -->
         <div class="mt-12 flex justify-center">

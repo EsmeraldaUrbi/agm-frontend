@@ -27,11 +27,11 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      // 401: Sesión Expirada o no autorizado
-      if (error.status === 401) {
+      // 401: Sesión Expirada o no autorizado (excepto al hacer login)
+      if (error.status === 401 && !req.url.includes('/auth/login')) {
         authService.logout();
         router.navigate(['/sesion-expirada']);
-      } 
+      }
       // 403: Acceso Denegado (rol incorrecto)
       else if (error.status === 403) {
         router.navigate(['/acceso-denegado']);
