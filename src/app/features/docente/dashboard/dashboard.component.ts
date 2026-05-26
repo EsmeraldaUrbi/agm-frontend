@@ -14,18 +14,13 @@ import { ChartConfiguration, ChartType } from 'chart.js';
 })
 export class DashboardComponent {
   // Datos mockeados para la vista inicial
-  materias = [
-    { nrc: '28491', nombre: 'Web Services Architecture', seccion: 'Sec 101', alumnos: 32, estatus: 'ACTIVA', rendimiento: 8.8, asistencia: 85, asistenciaSemanal: [95, 90, 85, 100, 95] },
-    { nrc: '31022', nombre: 'Advanced Databases', seccion: 'Sec 202', alumnos: 38, estatus: 'ACTIVA', rendimiento: 9.2, asistencia: 92, asistenciaSemanal: [100, 95, 100, 90, 95] },
-    { nrc: '29554', nombre: 'Software Engineering II', seccion: 'Sec 104', alumnos: 35, estatus: 'ACTIVA', rendimiento: 7.5, asistencia: 78, asistenciaSemanal: [85, 80, 75, 80, 70] },
-    { nrc: '22310', nombre: 'Mobile Development', seccion: 'Sec 105', alumnos: 37, estatus: 'ACTIVA', rendimiento: 8.1, asistencia: 88, asistenciaSemanal: [90, 95, 85, 90, 85] }
-  ];
+  materias: any[] = [];
 
-  selectedMateriaNrc = this.materias[0].nrc;
-  selectedChartNrc = this.materias[0].nrc;
+  selectedMateriaNrc = '';
+  selectedChartNrc = '';
 
   get selectedMateria() {
-    return this.materias.find(m => m.nrc === this.selectedMateriaNrc) || this.materias[0];
+    return this.materias.find(m => m.nrc === this.selectedMateriaNrc) || { nrc: '', nombre: '', seccion: '', alumnos: 0, estatus: '', rendimiento: 0, asistencia: 0, asistenciaSemanal: [] };
   }
 
   get asisLinePath(): string {

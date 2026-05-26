@@ -29,12 +29,7 @@ export class PaseListaComponent implements OnDestroy {
   estadoSesion = signal<EstadoSesion>('idle');
 
   materiaSeleccionada = '';
-  materias = [
-    { id_materia: 1, nrc: '15842', nombre: 'Arquitectura de Servicios Web', seccion: '101' },
-    { id_materia: 2, nrc: '15845', nombre: 'Ingeniería de Software II',     seccion: '102' },
-    { id_materia: 3, nrc: '16021', nombre: 'Programación Paralela',         seccion: '101' },
-    { id_materia: 4, nrc: '16110', nombre: 'Seguridad de la Información',   seccion: '104' },
-  ];
+  materias: any[] = [];
 
   // Datos de sesión activa
   sessionId = signal<number | null>(null);
@@ -104,7 +99,15 @@ export class PaseListaComponent implements OnDestroy {
       },
       error: (error) => {
         console.error('Error al iniciar sesión de asistencia:', error);
-        alert(error.error?.detail || 'No se pudo iniciar la sesión de asistencia.');
+        let msg = 'No se pudo iniciar la sesión de asistencia.';
+        if (error.error?.detail) {
+          if (typeof error.error.detail === 'string') {
+            msg = error.error.detail;
+          } else if (Array.isArray(error.error.detail)) {
+            msg = error.error.detail.map((e: any) => e.msg).join(', ');
+          }
+        }
+        alert(msg);
       }
     });
   }
@@ -113,7 +116,7 @@ export class PaseListaComponent implements OnDestroy {
     this.errorCamara.set('');
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' } // Cámara trasera en móvil si está disponible
+        video: { facingMode: { ideal: 'environment' } } // Cámara trasera en móvil si está disponible, o webcam en PC
       });
       if (this.videoEl) {
         this.videoEl.nativeElement.srcObject = this.stream;
@@ -218,8 +221,15 @@ export class PaseListaComponent implements OnDestroy {
         }
       },
       error: (error) => {
-        const errorMsg = error.error?.detail || 'Error al procesar el código QR o asistencia ya registrada.';
-        alert(errorMsg);
+        let msg = 'Error al procesar el código QR o asistencia ya registrada.';
+        if (error.error?.detail) {
+          if (typeof error.error.detail === 'string') {
+            msg = error.error.detail;
+          } else if (Array.isArray(error.error.detail)) {
+            msg = error.error.detail.map((e: any) => e.msg).join(', ');
+          }
+        }
+        alert(msg);
 
         setTimeout(() => {
           this.lecturaBloqueada = false;

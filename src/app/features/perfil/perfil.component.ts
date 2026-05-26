@@ -26,31 +26,12 @@ export class PerfilComponent implements OnInit {
     activo: true
   };
 
-  periodosMock: PeriodoAcademico[] = [
-    {
-      id: 'p-actual',
-      nombre: 'Primavera 2026',
-      materias: [
-        { nrc: '15842', nombre: 'Web Services Architecture', aprobacion: 92 },
-        { nrc: '28491', nombre: 'Sistemas Distribuidos', aprobacion: 85 },
-        { nrc: '31022', nombre: 'Advanced Databases', aprobacion: 78 },
-        { nrc: '22310', nombre: 'Mobile Development', aprobacion: 96 }
-      ]
-    },
-    {
-      id: 'p-prev',
-      nombre: 'Otoño 2025',
-      materias: [
-        { nrc: '12411', nombre: 'Sistemas Distribuidos', aprobacion: 88 },
-        { nrc: '13552', nombre: 'Seguridad Informática', aprobacion: 90 }
-      ]
-    }
-  ];
+  periodosMock: PeriodoAcademico[] = [];
 
-  selectedPeriodoId = signal<string>(this.periodosMock[0].id);
+  selectedPeriodoId = signal<string>('');
 
   get currentPeriodoData() {
-    return this.periodosMock.find(p => p.id === this.selectedPeriodoId()) || this.periodosMock[0];
+    return this.periodosMock.find(p => p.id === this.selectedPeriodoId()) || null;
   }
 
   ngOnInit() {
