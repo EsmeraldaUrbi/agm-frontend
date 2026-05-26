@@ -158,6 +158,16 @@ export class MateriasService {
   }
 
   // === HORARIOS ===
+  getHorarios(params?: { materia_ofertada_id?: string; dia?: string; page?: number; limit?: number }): Observable<any> {
+    const safeParams = { ...params, limit: Math.min(params?.limit || 100, 100) };
+    return this.apiClient.get<any>(`${this.baseUrl}/materia-horarios`, safeParams).pipe(
+      map(res => {
+        const unwrapped = unwrapApiResponse<any>(res);
+        return unwrapArrayResponse<Horario>(unwrapped);
+      })
+    );
+  }
+
   createHorario(payload: Partial<Horario>): Observable<Horario> {
     return this.apiClient.post<any>(`${this.baseUrl}/materia-horarios`, payload).pipe(
       map(res => unwrapApiResponse<Horario>(res))
