@@ -11,7 +11,7 @@ import { environment } from '../../../../environments/environment';
   templateUrl: './importar-docentes.html'
 })
 export class ImportarDocentesComponent {
-  currentStep = signal<1 | 2 | 3>(1);
+  currentStep = signal<1 | 2 | 3 | 4>(1);
   selectedFile = signal<File | null>(null);
   showDuplicateError = signal(false);
   isSaving = signal(false);
@@ -88,8 +88,7 @@ export class ImportarDocentesComponent {
     this.showDuplicateError.set(false);
     this.isSaving.set(false);
   }
-
-
+  goToDashboard() {
     this.router.navigate(['/admin/dashboard']);
   }
 }

@@ -11,10 +11,11 @@ import { environment } from '../../../../environments/environment';
   templateUrl: './importar-materias.component.html'
 })
 export class ImportarMateriasComponent {
-  currentStep = signal<1 | 2 | 3>(1);
+  currentStep = signal<1 | 2 | 3 | 4>(1);
   
   selectedFile = signal<File | null>(null);
   showDuplicateError = signal(false);
+  isSaving = signal(false);
 
   // Modal de horario
   showScheduleModal = signal(false);
