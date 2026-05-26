@@ -65,6 +65,7 @@ export function normalizeMateria(materia: any): any {
   const docente_id = materia.docente_id || materia.id_docente;
   const nombre = materia.nombre || materia.materia?.nombre || materia.materia_catalogo?.nombre;
   return {
+    ...materia,
     materia_id,
     nombre,
     nrc,

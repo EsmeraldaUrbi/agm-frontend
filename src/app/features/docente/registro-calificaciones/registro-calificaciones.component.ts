@@ -2,6 +2,7 @@ import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { MateriasService } from '../../../core/services/materias.service';
 
 interface CalificacionActividad {
   id: string;
@@ -26,14 +27,15 @@ interface CalificacionActividad {
   templateUrl: './registro-calificaciones.component.html'
 })
 export class RegistroCalificacionesComponent {
-  materia = {
-    nrc: '28491',
-    nombre: 'Web Services Architecture',
-    seccion: '101',
-    horario: 'Lunes, Miércoles 16:00 - 18:00',
-    programa: 'Postgrado en Computación',
-    periodo: 'Primavera 2026',
-  };
+  materia = signal<any>({
+    materia_id: '',
+    nrc: '',
+    nombre: 'Cargando materia...',
+    seccion: '',
+    horario: 'Sin horario asignado',
+    programa: 'Cargando programa...',
+    periodo: 'Cargando periodo...',
+  });
 
   tabs = ['Alumnos', 'Ponderaciones', 'Actividades'];
 
@@ -104,17 +106,55 @@ export class RegistroCalificacionesComponent {
     }
   ]);
 
-  constructor(private route: ActivatedRoute) {
+  constructor(
+    private route: ActivatedRoute,
+    private materiasService: MateriasService
+  ) {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
-        this.materia.nrc = id;
+        this.cargarDatosMateria(id);
       }
     });
 
     this.route.queryParams.subscribe(params => {
       if (params['actividad']) {
         // Podríamos cargar la actividad seleccionada
+      }
+    });
+  }
+
+  cargarDatosMateria(id: string) {
+    this.materiasService.getMateriaById(id).subscribe({
+      next: (data: any) => {
+        let horarioFormat = 'Horario no definido';
+        if (data.horarios && data.horarios.length > 0) {
+          const gruposHorarios: { [key: string]: string[] } = {};
+          data.horarios.forEach((h: any) => {
+            const ini = h.hora_inicio?.substring(0, 5) || '';
+            const fin = h.hora_fin?.substring(0, 5) || '';
+            const rango = `${ini} - ${fin}`;
+            if (!gruposHorarios[rango]) gruposHorarios[rango] = [];
+            gruposHorarios[rango].push(h.dia);
+          });
+          const partes = Object.entries(gruposHorarios).map(([rango, dias]) => {
+            return `${dias.join(', ')} ${rango}`;
+          });
+          horarioFormat = partes.join(' | ');
+        }
+
+        this.materia.set({
+          materia_id: id,
+          nrc: data.nrc || 'N/A',
+          nombre: data.nombre || 'Materia sin nombre',
+          seccion: data.seccion || '001',
+          horario: horarioFormat,
+          programa: data.programa || 'Licenciatura en Ciencias de la Computación',
+          periodo: data.periodo?.nombre || 'Otoño 2024'
+        });
+      },
+      error: (err) => {
+        console.error('Error al cargar la materia', err);
       }
     });
   }

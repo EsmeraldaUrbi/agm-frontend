@@ -2,6 +2,7 @@ import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { MateriasService } from '../../../core/services/materias.service';
 
 interface Actividad {
   id: string;
@@ -24,89 +25,71 @@ interface Actividad {
   templateUrl: './actividades.component.html'
 })
 export class ActividadesComponent {
-  materia = {
-    nrc: '28491',
-    nombre: 'Web Services Architecture',
-    seccion: '101',
-    horario: 'Lunes, Miércoles 16:00 - 18:00',
-    programa: 'Postgrado en Computación',
-    periodo: 'Primavera 2026',
-  };
+  materia = signal<any>({
+    materia_id: '',
+    nrc: '',
+    nombre: 'Cargando materia...',
+    seccion: '',
+    horario: 'Sin horario asignado',
+    programa: 'Cargando programa...',
+    periodo: 'Cargando periodo...',
+  });
 
-  constructor(private route: ActivatedRoute) {
+  constructor(
+    private route: ActivatedRoute,
+    private materiasService: MateriasService
+  ) {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
-        this.materia.nrc = id;
+        this.cargarDatosMateria(id);
+      }
+    });
+  }
+
+  cargarDatosMateria(id: string) {
+    this.materiasService.getMateriaById(id).subscribe({
+      next: (data: any) => {
+        let horarioFormat = 'Horario no definido';
+        if (data.horarios && data.horarios.length > 0) {
+          const gruposHorarios: { [key: string]: string[] } = {};
+          data.horarios.forEach((h: any) => {
+            const ini = h.hora_inicio?.substring(0, 5) || '';
+            const fin = h.hora_fin?.substring(0, 5) || '';
+            const rango = `${ini} - ${fin}`;
+            if (!gruposHorarios[rango]) gruposHorarios[rango] = [];
+            gruposHorarios[rango].push(h.dia);
+          });
+          const partes = Object.entries(gruposHorarios).map(([rango, dias]) => {
+            return `${dias.join(', ')} ${rango}`;
+          });
+          horarioFormat = partes.join(' | ');
+        }
+
+        this.materia.set({
+          materia_id: id,
+          nrc: data.nrc || 'N/A',
+          nombre: data.nombre || 'Materia sin nombre',
+          seccion: data.seccion || '001',
+          // Algunos datos aún podrían ser mock hasta tener el servicio completo:
+          horario: horarioFormat,
+          programa: data.programa || 'Licenciatura en Ciencias de la Computación',
+          periodo: data.periodo?.nombre || 'Otoño 2024'
+        });
+      },
+      error: (err) => {
+        console.error('Error al cargar la materia', err);
       }
     });
   }
 
   tabs = ['Alumnos', 'Ponderaciones', 'Actividades'];
 
-  ponderaciones = [
-    { id: 'p1', nombre: 'Exámenes Parciales', porcentaje: 40 },
-    { id: 'p2', nombre: 'Tareas y Taller',    porcentaje: 30 },
-    { id: 'p3', nombre: 'Proyecto Final',     porcentaje: 20 },
-    { id: 'p4', nombre: 'Asistencia',         porcentaje: 10 },
-  ];
+  ponderaciones: any[] = [];
 
   filtroPonderacion = signal<string>('todas');
 
-  actividades = signal<Actividad[]>([
-    {
-      id: '16655e27-37d5-470a-bac2-f9ebbf48e850',
-      ponderacion_id: 'p1',
-      ponderacion_nombre: 'Exámenes Parciales',
-      nombre: 'Examen Parcial Semana 1',
-      descripcion: 'Evaluación teórica de conceptos de microservicios y REST APIs',
-      valor_maximo: 10.0,
-      fecha_aplicacion: '2026-05-10',
-      estado: 'activa',
-      evaluados: 30,
-      total: 36,
-      promedio: 8.42
-    },
-    {
-      id: 'act-2',
-      ponderacion_id: 'p2',
-      ponderacion_nombre: 'Tareas y Taller',
-      nombre: 'Práctica 1: Docker y Compose',
-      descripcion: 'Contenerización de una aplicación Node.js con Redis',
-      valor_maximo: 10.0,
-      fecha_aplicacion: '2026-05-12',
-      estado: 'activa',
-      evaluados: 35,
-      total: 36,
-      promedio: 9.10
-    },
-    {
-      id: 'act-3',
-      ponderacion_id: 'p2',
-      ponderacion_nombre: 'Tareas y Taller',
-      nombre: 'Práctica 2: gRPC en Python',
-      descripcion: 'Implementación de un servidor y cliente gRPC bidireccional',
-      valor_maximo: 10.0,
-      fecha_aplicacion: '2026-05-15',
-      estado: 'activa',
-      evaluados: 28,
-      total: 36,
-      promedio: 8.75
-    },
-    {
-      id: 'act-4',
-      ponderacion_id: 'p3',
-      ponderacion_nombre: 'Proyecto Final',
-      nombre: 'Definición de Arquitectura',
-      descripcion: 'Entrega del diagrama C4 y contratos OpenAPI/Protobuf',
-      valor_maximo: 10.0,
-      fecha_aplicacion: '2026-05-20',
-      estado: 'activa',
-      evaluados: 0,
-      total: 36,
-      promedio: 0.0
-    }
-  ]);
+  actividades = signal<Actividad[]>([]);
 
   actividadesFiltradas = computed(() => {
     const filtro = this.filtroPonderacion();
@@ -186,21 +169,10 @@ export class ActividadesComponent {
       this.resultadoImportacion.set({
         actividad_id: this.actividadSeleccionada()?.id || '16655e27-37d5-470a-bac2-f9ebbf48e850',
         materia_id: '22222222-2222-2222-2222-222222222222',
-        procesadas: 36,
-        insertadas: 30,
+        procesadas: 0,
+        insertadas: 0,
         actualizadas: 0,
-        omitidas: [
-          {
-            fila: 7,
-            motivo: 'Fila sin puntos; se considera no calificada',
-            correo: 'diego.cannata@alumno.buap.mx'
-          },
-          {
-            fila: 11,
-            motivo: 'Fila sin puntos; se considera no calificada',
-            correo: 'alejandro.garciacon@alumno.buap.mx'
-          }
-        ]
+        omitidas: []
       });
 
       // Actualizar evaluados en la actividad

@@ -2,6 +2,7 @@ import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { MateriasService } from '../../../core/services/materias.service';
 
 interface Alumno {
   matricula: string;
@@ -17,24 +18,20 @@ interface Alumno {
   templateUrl: './importar-alumnos.component.html'
 })
 export class ImportarAlumnosComponent {
-  materia = {
-    nrc: '28491',
-    nombre: 'Web Services Architecture',
-    seccion: '101',
-    horario: 'Lunes, Miércoles 16:00 - 18:00',
-    programa: 'Postgrado en Computación',
-    periodo: 'Primavera 2026',
-  };
+  materia = signal<any>({
+    materia_id: '',
+    nrc: '',
+    nombre: 'Cargando materia...',
+    seccion: '',
+    horario: 'Sin horario asignado',
+    programa: 'Cargando programa...',
+    periodo: 'Cargando periodo...',
+  });
 
   tabs = ['Alumnos', 'Ponderaciones', 'Actividades'];
 
   // Lista de Alumnos Inscritos
-  alumnos = signal<Alumno[]>([
-    { matricula: '202012345', nombre: 'Diego Cannata', correo: 'diego.cannata@alumno.buap.mx', estatus: 'Inscrito Oficial' },
-    { matricula: '202015678', nombre: 'Alejandro Garcia', correo: 'alejandro.garciacon@alumno.buap.mx', estatus: 'Inscrito Oficial' },
-    { matricula: '202019921', nombre: 'Maria Rodriguez Ortiz', correo: 'maria.rodriguez@alumno.buap.mx', estatus: 'Inscrito Oficial' },
-    { matricula: '202113342', nombre: 'Ana Beltrán López', correo: 'ana.beltran@alumno.buap.mx', estatus: 'Inscrito Oficial' },
-  ]);
+  alumnos = signal<Alumno[]>([]);
 
   busqueda = signal('');
 
@@ -48,11 +45,49 @@ export class ImportarAlumnosComponent {
     );
   });
 
-  constructor(private route: ActivatedRoute) {
+  constructor(
+    private route: ActivatedRoute,
+    private materiasService: MateriasService
+  ) {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
-        this.materia.nrc = id;
+        this.cargarDatosMateria(id);
+      }
+    });
+  }
+
+  cargarDatosMateria(id: string) {
+    this.materiasService.getMateriaById(id).subscribe({
+      next: (data: any) => {
+        let horarioFormat = 'Horario no definido';
+        if (data.horarios && data.horarios.length > 0) {
+          const gruposHorarios: { [key: string]: string[] } = {};
+          data.horarios.forEach((h: any) => {
+            const ini = h.hora_inicio?.substring(0, 5) || '';
+            const fin = h.hora_fin?.substring(0, 5) || '';
+            const rango = `${ini} - ${fin}`;
+            if (!gruposHorarios[rango]) gruposHorarios[rango] = [];
+            gruposHorarios[rango].push(h.dia);
+          });
+          const partes = Object.entries(gruposHorarios).map(([rango, dias]) => {
+            return `${dias.join(', ')} ${rango}`;
+          });
+          horarioFormat = partes.join(' | ');
+        }
+
+        this.materia.set({
+          materia_id: id,
+          nrc: data.nrc || 'N/A',
+          nombre: data.nombre || 'Materia sin nombre',
+          seccion: data.seccion || '001',
+          horario: horarioFormat,
+          programa: data.programa || 'Licenciatura en Ciencias de la Computación',
+          periodo: data.periodo?.nombre || 'Otoño 2024'
+        });
+      },
+      error: (err) => {
+        console.error('Error al cargar la materia', err);
       }
     });
   }
@@ -86,10 +121,7 @@ export class ImportarAlumnosComponent {
   showPdfModal = signal(false);
   step = signal<number>(1); // 1: Subir PDF, 2: Procesando, 3: Previsualización, 4: Confirmado
   archivoSeleccionado = signal<string>('');
-  alumnosExtraidos = signal<any[]>([
-    { matricula: '202245678', nombre: 'Carlos Sánchez Ruiz', correo: 'carlos.sanchez@alumno.buap.mx', status: 'Nuevo' },
-    { matricula: '202289101', nombre: 'Laura Gómez Fernandez', correo: 'laura.gomez@alumno.buap.mx', status: 'Nuevo' },
-  ]);
+  alumnosExtraidos = signal<any[]>([]);
 
   abrirPdfModal() {
     this.step.set(1);

@@ -2,6 +2,7 @@ import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { MateriasService } from '../../../core/services/materias.service';
 
 interface Criterio {
   id: number;
@@ -19,31 +20,65 @@ interface Criterio {
 })
 export class PonderacionesComponent {
 
-  materia = {
-    nrc: '28491',
-    nombre: 'Web Services Architecture',
-    seccion: '101',
-    horario: 'Lunes, Miércoles 16:00 - 18:00',
-    programa: 'Postgrado en Computación',
-    periodo: 'Primavera 2026',
-  };
+  materia = signal<any>({
+    materia_id: '',
+    nrc: '',
+    nombre: 'Cargando materia...',
+    seccion: '',
+    horario: 'Sin horario asignado',
+    programa: 'Cargando programa...',
+    periodo: 'Cargando periodo...',
+  });
 
-  constructor(private route: ActivatedRoute) {
+  constructor(
+    private route: ActivatedRoute,
+    private materiasService: MateriasService
+  ) {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
-        this.materia.nrc = id;
+        this.cargarDatosMateria(id);
+      }
+    });
+  }
+
+  cargarDatosMateria(id: string) {
+    this.materiasService.getMateriaById(id).subscribe({
+      next: (data: any) => {
+        let horarioFormat = 'Horario no definido';
+        if (data.horarios && data.horarios.length > 0) {
+          const gruposHorarios: { [key: string]: string[] } = {};
+          data.horarios.forEach((h: any) => {
+            const ini = h.hora_inicio?.substring(0, 5) || '';
+            const fin = h.hora_fin?.substring(0, 5) || '';
+            const rango = `${ini} - ${fin}`;
+            if (!gruposHorarios[rango]) gruposHorarios[rango] = [];
+            gruposHorarios[rango].push(h.dia);
+          });
+          const partes = Object.entries(gruposHorarios).map(([rango, dias]) => {
+            return `${dias.join(', ')} ${rango}`;
+          });
+          horarioFormat = partes.join(' | ');
+        }
+
+        this.materia.set({
+          materia_id: id,
+          nrc: data.nrc || 'N/A',
+          nombre: data.nombre || 'Materia sin nombre',
+          seccion: data.seccion || '001',
+          horario: horarioFormat,
+          programa: data.programa || 'Licenciatura en Ciencias de la Computación',
+          periodo: data.periodo?.nombre || 'Otoño 2024'
+        });
+      },
+      error: (err) => {
+        console.error('Error al cargar la materia', err);
       }
     });
   }
 
   // Criterios de evaluación — reactivos con signal
-  criterios = signal<Criterio[]>([
-    { id: 1, nombre: 'Exámenes Parciales', descripcion: 'Promedio de 3 periodos',             icono: 'assignment',   porcentaje: 40 },
-    { id: 2, nombre: 'Tareas y Taller',    descripcion: 'Ejercicios prácticos semanales',      icono: 'history_edu',  porcentaje: 30 },
-    { id: 3, nombre: 'Proyecto Final',     descripcion: 'Implementación de Microservicios',    icono: 'rocket_launch', porcentaje: 20 },
-    { id: 4, nombre: 'Asistencia',         descripcion: 'Mínimo 80% requerido',               icono: 'how_to_reg',   porcentaje: 10 },
-  ]);
+  criterios = signal<Criterio[]>([]);
 
   // Total calculado reactivamente
   totalPonderacion = computed(() =>
@@ -97,12 +132,7 @@ export class PonderacionesComponent {
 
   // Descartar cambios — reset a valores originales
   descartar() {
-    this.criterios.set([
-      { id: 1, nombre: 'Exámenes Parciales', descripcion: 'Promedio de 3 periodos',          icono: 'assignment',   porcentaje: 40 },
-      { id: 2, nombre: 'Tareas y Taller',    descripcion: 'Ejercicios prácticos semanales',   icono: 'history_edu',  porcentaje: 30 },
-      { id: 3, nombre: 'Proyecto Final',     descripcion: 'Implementación de Microservicios', icono: 'rocket_launch', porcentaje: 20 },
-      { id: 4, nombre: 'Asistencia',         descripcion: 'Mínimo 80% requerido',            icono: 'how_to_reg',   porcentaje: 10 },
-    ]);
+    this.criterios.set([]);
   }
 
   // Altura de barra en gráfico visual (max = 100% → 192px)
