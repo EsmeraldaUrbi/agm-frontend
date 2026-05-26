@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { BRANDING } from '../../../core/config/branding.config';
 
 @Component({
   selector: 'app-login',
@@ -16,11 +17,23 @@ import { AuthService } from '../../../core/services/auth.service';
   `]
 })
 export class LoginComponent {
+  protected readonly BRANDING = BRANDING;
+
+  // --- CONFIGURACIÓN DE LOGOS ---
+  // Puedes cambiar estos valores por BRANDING.logoSecondary y BRANDING.isLogoSecondaryImage si lo deseas
+  protected readonly logo = BRANDING.logoSecondary; 
+  protected readonly isLogoImage = BRANDING.isLogoSecondaryImage;
+
+  protected readonly footerLogo = BRANDING.logoSecondary;
+  protected readonly isFooterLogoImage = BRANDING.isLogoSecondaryImage;
+
   // Signals para el formulario
   email = '';
   password = '';
   selectedRole = signal<'admin' | 'docente' | 'alumno'>('admin');
+
   showError = signal(false);
+  showPassword = signal(false);
 
   constructor(private authService: AuthService, private router: Router) {}
 

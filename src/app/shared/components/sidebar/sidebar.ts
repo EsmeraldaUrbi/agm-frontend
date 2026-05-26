@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { LayoutService } from '../../../core/services/layout.service';
+import { BRANDING } from '../../../core/config/branding.config';
 
 interface NavItem {
   label: string;
@@ -10,6 +11,7 @@ interface NavItem {
   icon: string;
   section?: string;  // separador de sección opcional
 }
+
 
 @Component({
   selector: 'app-sidebar',
@@ -23,6 +25,13 @@ interface NavItem {
   `]
 })
 export class SidebarComponent implements OnInit {
+  protected readonly BRANDING = BRANDING;
+
+  // --- CONFIGURACIÓN DE LOGOS ---
+  // Puedes cambiar estos valores por BRANDING.logoSecondary y BRANDING.isLogoSecondaryImage si lo deseas
+  protected readonly logo = BRANDING.logoSecondary;
+  protected readonly isLogoImage = BRANDING.isLogoSecondaryImage;
+
   menuItems = signal<NavItem[]>([]);
   userRole = signal<string>('');
 

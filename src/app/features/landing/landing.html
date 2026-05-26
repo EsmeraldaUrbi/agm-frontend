@@ -4,13 +4,17 @@
   <nav
     class="flex justify-between items-center h-16 px-8 w-full sticky top-0 z-40 bg-white border-b border-outline-variant/20 shadow-[0_2px_12px_rgba(0,59,92,0.03)] font-headline text-sm font-medium">
     <div class="flex items-center gap-3">
-      <!-- AGM Placeholder Badge -->
+      <!-- Logo Badge -->
+      @if (isNavLogoImage) {
+      <img [src]="navLogo" class="h-9 w-auto object-contain" alt="Logo" />
+      } @else {
       <div
-        class="w-9 h-9 bg-gradient-to-br from-[#003b5c] to-[#00a3cc] text-white rounded-xl shadow-md flex items-center justify-center font-black text-sm tracking-tighter border-[1.5px] border-white ring-2 ring-[#003b5c]/10">
-        AGM
+        class="w-9 h-9 bg-gradient-to-br from-[#003b5c] to-[#00a3cc] text-white rounded-xl shadow-md flex items-center justify-center font-black text-sm tracking-tighter border-[1.5px] border-white ring-2 ring-[#003b5c]/10 overflow-hidden">
+        <span class="material-symbols-outlined text-base">{{ navLogo }}</span>
       </div>
+      }
       <span class="text-sm font-extrabold text-primary-container tracking-tight uppercase hidden sm:block">
-        Academic Grade Management
+        {{ BRANDING.fullName }}
       </span>
     </div>
 
@@ -38,7 +42,7 @@
           </h1>
 
           <p class="text-lg text-on-surface-variant font-medium mb-10 leading-relaxed max-w-xl">
-            Facultad de Ciencias de la Computación. Una arquitectura de vanguardia basada en microservicios para la
+            Una arquitectura de vanguardia basada en microservicios para la
             excelencia, seguridad y control académico institucional.
           </p>
 
@@ -117,7 +121,7 @@
               </div>
               <p class="text-on-surface-variant leading-relaxed text-sm font-medium">
                 Auditorías en vivo y dashboards interactivos para la visualización del avance en la captura escolar y la
-                toma de decisiones directivas de la FCC.
+                toma de decisiones directivas de la.
               </p>
             </div>
           </agm-card>
@@ -131,16 +135,19 @@
 
             <div class="flex-1 z-10">
               <div class="flex items-center gap-3 mb-6">
+                @if (isCalloutLogoImage) {
+                <img [src]="calloutLogo" class="h-12 w-auto object-contain" alt="Logo" />
+                } @else {
                 <span class="material-symbols-outlined text-secondary-container text-4xl"
-                  style="font-variation-settings: 'FILL' 1;">school</span>
+                  style="font-variation-settings: 'FILL' 1;">{{ calloutLogo }}</span>
+                }
                 <h3 class="text-2xl font-black font-headline">Gestión Transparente de Calificaciones</h3>
               </div>
               <p class="text-[#cce5ff] text-base mb-8 leading-relaxed font-medium">
                 Optimiza la captura escolar, las asistencias y los promedios semestrales en un portal unificado. El
-                sistema AGM reduce el esfuerzo administrativo y otorga visibilidad inmediata a docentes y alumnos de la
-                FCC.
+                sistema {{ BRANDING.shortName }} reduce el esfuerzo administrativo y otorga visibilidad inmediata a
+                docentes y alumnos de {{ BRANDING.shortName }}.
               </p>
-
             </div>
 
             <div
@@ -162,10 +169,10 @@
     <div
       class="max-w-[1440px] mx-auto px-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
       <div>
-        <h4 class="text-lg font-extrabold mb-2 font-headline uppercase tracking-tight">AGM — Academic Grade Management
+        <h4 class="text-lg font-extrabold mb-2 font-headline uppercase tracking-tight">{{ BRANDING.fullName }}
         </h4>
         <p class="text-[#cce5ff]/60 text-xs font-semibold leading-relaxed">
-          © 2026 Control Escolar.<br />Todos los derechos reservados.
+          © 2026 Control Escolar {{ BRANDING.institution }}.<br />Todos los derechos reservados.
         </p>
       </div>
 

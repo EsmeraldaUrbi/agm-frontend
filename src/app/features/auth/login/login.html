@@ -1,6 +1,7 @@
 <div class="min-h-screen bg-background flex items-center justify-center p-4 font-body">
-  <div class="max-w-[1100px] w-full bg-white rounded-xl shadow-[0px_8px_24px_rgba(0,59,92,0.15)] overflow-hidden flex flex-col md:flex-row min-h-[640px]">
-    
+  <div
+    class="max-w-[1100px] w-full bg-white rounded-xl shadow-[0px_8px_24px_rgba(0,59,92,0.15)] overflow-hidden flex flex-col md:flex-row min-h-[640px]">
+
     <!-- Brand Side - Visual Anchor -->
     <div class="md:w-5/12 login-gradient p-10 flex flex-col justify-between relative overflow-hidden text-white">
       <!-- Background Texture -->
@@ -14,22 +15,28 @@
           <rect fill="url(#grid)" height="100%" width="100%"></rect>
         </svg>
       </div>
-      
+
       <div class="relative z-10">
         <div class="flex items-center gap-3 mb-8">
-          <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
-            <span class="material-symbols-outlined text-primary-container text-3xl" style="font-variation-settings: 'FILL' 1;">school</span>
+          @if (isLogoImage) {
+          <img [src]="logo" class="h-16 w-auto object-contain" alt="Logo" />
+          } @else {
+          <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+            <span class="material-symbols-outlined text-primary-container text-3xl"
+              style="font-variation-settings: 'FILL' 1;">{{ logo }}</span>
           </div>
+          }
           <div>
-            <h1 class="font-headline font-extrabold text-2xl tracking-tight">AGM</h1>
-            <p class="text-secondary-fixed text-xs font-medium uppercase tracking-widest">Academic Grade Management</p>
+            <h1 class="font-headline font-extrabold text-2xl tracking-tight">{{ BRANDING.shortName }}</h1>
+            <p class="text-secondary-fixed text-xs font-medium uppercase tracking-widest">{{ BRANDING.fullName }}</p>
           </div>
         </div>
         <h2 class="font-headline font-bold text-3xl mt-12 leading-tight">
-          Gestión académica de alta precisión para FCC - BUAP.
+          Gestión académica de alta precisión para {{ BRANDING.institution }}.
         </h2>
         <p class="text-primary-fixed-dim mt-4 text-sm leading-relaxed max-w-xs">
-          Acceda a su portal institucional para administrar calificaciones, asistencias y reportes académicos con seguridad de nivel empresarial.
+          Acceda a su portal institucional para administrar calificaciones, asistencias y reportes académicos con
+          seguridad de nivel empresarial.
         </p>
       </div>
 
@@ -41,7 +48,6 @@
           </div>
           <div class="h-[1px] w-full bg-white/20"></div>
           <div class="flex justify-between items-center">
-            <p class="text-[10px] text-white/50 uppercase tracking-tighter font-semibold">Benemérita Universidad Autónoma de Puebla</p>
             <p class="text-[10px] text-white/50 uppercase tracking-tighter font-semibold">2026</p>
           </div>
         </div>
@@ -58,28 +64,35 @@
 
         <!-- Role Selector -->
         <div class="mb-8">
-          <label class="text-[11px] font-bold text-outline-variant uppercase tracking-wider mb-3 block">Seleccione su Rol</label>
+          <label class="text-[11px] font-bold text-outline-variant uppercase tracking-wider mb-3 block">Seleccione su
+            Rol</label>
           <div class="grid grid-cols-3 gap-2">
-            <button 
-              (click)="selectRole('admin')"
+            <button (click)="selectRole('admin')"
               [ngClass]="selectedRole() === 'admin' ? 'border-primary-container bg-surface-container-low shadow-sm' : 'border-outline-variant hover:border-primary-container/50'"
               class="flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all">
-              <span class="material-symbols-outlined mb-1" [style.font-variation-settings]="selectedRole() === 'admin' ? '\'FILL\' 1' : '\'FILL\' 0'" [class.text-primary-container]="selectedRole() === 'admin'">shield_person</span>
-              <span class="text-[10px] font-bold" [class.text-primary-container]="selectedRole() === 'admin'">Admin</span>
+              <span class="material-symbols-outlined mb-1"
+                [style.font-variation-settings]="selectedRole() === 'admin' ? '\'FILL\' 1' : '\'FILL\' 0'"
+                [class.text-primary-container]="selectedRole() === 'admin'">shield_person</span>
+              <span class="text-[10px] font-bold"
+                [class.text-primary-container]="selectedRole() === 'admin'">Admin</span>
             </button>
-            <button 
-              (click)="selectRole('docente')"
+            <button (click)="selectRole('docente')"
               [ngClass]="selectedRole() === 'docente' ? 'border-primary-container bg-surface-container-low shadow-sm' : 'border-outline-variant hover:border-primary-container/50'"
               class="flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all">
-              <span class="material-symbols-outlined mb-1" [style.font-variation-settings]="selectedRole() === 'docente' ? '\'FILL\' 1' : '\'FILL\' 0'" [class.text-primary-container]="selectedRole() === 'docente'">person_book</span>
-              <span class="text-[10px] font-bold" [class.text-primary-container]="selectedRole() === 'docente'">Docente</span>
+              <span class="material-symbols-outlined mb-1"
+                [style.font-variation-settings]="selectedRole() === 'docente' ? '\'FILL\' 1' : '\'FILL\' 0'"
+                [class.text-primary-container]="selectedRole() === 'docente'">person_book</span>
+              <span class="text-[10px] font-bold"
+                [class.text-primary-container]="selectedRole() === 'docente'">Docente</span>
             </button>
-            <button 
-              (click)="selectRole('alumno')"
+            <button (click)="selectRole('alumno')"
               [ngClass]="selectedRole() === 'alumno' ? 'border-primary-container bg-surface-container-low shadow-sm' : 'border-outline-variant hover:border-primary-container/50'"
               class="flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all">
-              <span class="material-symbols-outlined mb-1" [style.font-variation-settings]="selectedRole() === 'alumno' ? '\'FILL\' 1' : '\'FILL\' 0'" [class.text-primary-container]="selectedRole() === 'alumno'">group</span>
-              <span class="text-[10px] font-bold" [class.text-primary-container]="selectedRole() === 'alumno'">Alumno</span>
+              <span class="material-symbols-outlined mb-1"
+                [style.font-variation-settings]="selectedRole() === 'alumno' ? '\'FILL\' 1' : '\'FILL\' 0'"
+                [class.text-primary-container]="selectedRole() === 'alumno'">group</span>
+              <span class="text-[10px] font-bold"
+                [class.text-primary-container]="selectedRole() === 'alumno'">Alumno</span>
             </button>
           </div>
         </div>
@@ -87,44 +100,49 @@
         <!-- Login Form -->
         <div class="space-y-5">
           <div class="relative group">
-            <label class="absolute -top-2 left-3 px-1 bg-white text-[11px] font-bold text-primary-container z-10">Correo Institucional</label>
-            <div class="flex items-center border border-outline-variant rounded-lg px-4 py-3 bg-white focus-within:ring-2 focus-within:ring-primary-container/20 focus-within:border-primary-container transition-all">
+            <label class="absolute -top-2 left-3 px-1 bg-white text-[11px] font-bold text-primary-container z-10">Correo
+              Institucional</label>
+            <div
+              class="flex items-center border border-outline-variant rounded-lg px-4 py-3 bg-white focus-within:ring-2 focus-within:ring-primary-container/20 focus-within:border-primary-container transition-all">
               <span class="material-symbols-outlined text-outline mr-3 text-xl">alternate_email</span>
-              <input 
-                name="email"
-                [(ngModel)]="email"
-                class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-on-surface placeholder:text-outline-variant" 
-                placeholder="nombre.apellido@alumno.buap.mx" 
-                type="email"/>
+              <input name="email" [(ngModel)]="email"
+                class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-on-surface placeholder:text-outline-variant"
+                placeholder="nombre.apellido@alumno.buap.mx" type="email" />
             </div>
           </div>
 
           <div class="relative group">
-            <label class="absolute -top-2 left-3 px-1 bg-white text-[11px] font-bold text-primary-container z-10">Contraseña</label>
-            <div class="flex items-center border border-outline-variant rounded-lg px-4 py-3 bg-white focus-within:ring-2 focus-within:ring-primary-container/20 focus-within:border-primary-container transition-all">
+            <label
+              class="absolute -top-2 left-3 px-1 bg-white text-[11px] font-bold text-primary-container z-10">Contraseña</label>
+            <div
+              class="flex items-center border border-outline-variant rounded-lg px-4 py-3 bg-white focus-within:ring-2 focus-within:ring-primary-container/20 focus-within:border-primary-container transition-all">
               <span class="material-symbols-outlined text-outline mr-3 text-xl">lock</span>
-              <input 
-                name="password"
-                [(ngModel)]="password"
-                class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-on-surface placeholder:text-outline-variant" 
-                placeholder="••••••••••••" 
-                type="password"/>
+              <input name="password" [(ngModel)]="password"
+                class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-on-surface placeholder:text-outline-variant"
+                placeholder="••••••••••••" [type]="showPassword() ? 'text' : 'password'" />
+              <button type="button" (click)="showPassword.set(!showPassword())"
+                class="text-outline hover:text-primary-container p-1 rounded-lg transition-colors flex items-center justify-center ml-2 focus:outline-none">
+                <span class="material-symbols-outlined text-xl">
+                  {{ showPassword() ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
             </div>
           </div>
 
           <!-- Error State -->
-          <div *ngIf="showError()" class="flex items-center gap-2 p-3 bg-error-container/40 rounded-lg border border-error/20 animate-in fade-in zoom-in duration-300">
+          <div *ngIf="showError()"
+            class="flex items-center gap-2 p-3 bg-error-container/40 rounded-lg border border-error/20 animate-in fade-in zoom-in duration-300">
             <span class="material-symbols-outlined text-error text-lg">error</span>
-            <p class="text-on-error-container text-[11px] font-medium leading-tight">Credenciales inválidas. Por favor verifique sus datos.</p>
+            <p class="text-on-error-container text-[11px] font-medium leading-tight">Credenciales inválidas. Por favor
+              verifique sus datos.</p>
           </div>
 
           <div class="flex items-center justify-end py-1">
-            <a class="text-xs font-bold text-primary-container hover:underline decoration-2 underline-offset-4" routerLink="/forgot-password">Olvidé mi contraseña</a>
+            <a class="text-xs font-bold text-primary-container hover:underline decoration-2 underline-offset-4"
+              routerLink="/forgot-password">Olvidé mi contraseña</a>
           </div>
 
-          <button 
-            type="button"
-            (click)="onLogin()"
+          <button type="button" (click)="onLogin()"
             class="w-full h-12 bg-primary-container text-white font-headline font-bold rounded-lg shadow-md hover:bg-primary transition-all active:scale-[0.98] flex items-center justify-center gap-2">
             Ingresar
             <span class="material-symbols-outlined text-xl">login</span>
@@ -134,11 +152,16 @@
         <!-- Footer -->
         <div class="mt-12 flex justify-center">
           <div class="flex items-center gap-3 opacity-60">
-            <div class="w-8 h-8 bg-outline-variant text-white rounded-lg flex items-center justify-center font-black text-xs">
-              AGM
+            @if (isFooterLogoImage) {
+            <img [src]="footerLogo" class="h-8 w-auto object-contain" alt="Logo" />
+            } @else {
+            <div
+              class="w-8 h-8 bg-outline-variant text-white rounded-lg flex items-center justify-center font-black text-xs overflow-hidden">
+              {{ BRANDING.shortName }}
             </div>
+            }
             <span class="text-[10px] font-bold text-outline-variant tracking-wider uppercase">
-              Academic Grade Management
+              {{ BRANDING.fullName }}
             </span>
           </div>
         </div>

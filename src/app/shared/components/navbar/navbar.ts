@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { LayoutService } from '../../../core/services/layout.service';
+import { BRANDING } from '../../../core/config/branding.config';
 
 @Component({
   selector: 'app-navbar',
@@ -16,7 +17,9 @@ import { LayoutService } from '../../../core/services/layout.service';
   `]
 })
 export class NavbarComponent implements OnInit {
+  protected readonly BRANDING = BRANDING;
   userName = signal<string>('Usuario');
+
   userEmail = signal<string>('');
   userRole = signal<string>('');
   userInitials = signal<string>('U');
