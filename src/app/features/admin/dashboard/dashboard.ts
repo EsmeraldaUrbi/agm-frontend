@@ -2,6 +2,9 @@ import { Component, signal, computed, OnInit, OnDestroy, inject } from '@angular
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PeriodosService, Periodo } from '../../../core/services/periodos.service';
+import { DashboardAdminService } from '../../../core/services/dashboard-admin.service';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData } from 'chart.js';
 
 interface QuickAction {
   label: string;
@@ -23,7 +26,7 @@ interface ActivityItem {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, BaseChartDirective],
   templateUrl: './dashboard.html',
   styles: [`
     :host { display: block; }
@@ -45,7 +48,32 @@ interface ActivityItem {
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private periodosService = inject(PeriodosService);
+  private dashboardAdminService = inject(DashboardAdminService);
   private clockInterval: any;
+
+  // ── Estadísticas y Gráficas ──────────────────────────────────────────────
+  totalDocentes = signal<number>(0);
+  totalAlumnos = signal<number>(0);
+  
+  chartData = signal<ChartData<'doughnut'>>({
+    labels: ['Docentes', 'Alumnos'],
+    datasets: [{
+      data: [0, 0],
+      backgroundColor: ['#003b5c', '#42d0fe'],
+      hoverBackgroundColor: ['#00253B', '#1FB2E5'],
+      borderWidth: 0
+    }]
+  });
+
+  chartOptions: ChartConfiguration<'doughnut'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '75%',
+    plugins: {
+      legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { family: 'Inter', weight: 'bold' } } },
+      tooltip: { padding: 12, cornerRadius: 8, bodyFont: { family: 'Inter' } }
+    }
+  };
 
   // ── Reloj en tiempo real ─────────────────────────────────────────────────
   currentTime = signal<string>('');
@@ -121,6 +149,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.updateClock();
     this.clockInterval = setInterval(() => this.updateClock(), 1000);
     this.cargarPeriodoActivo();
+    this.cargarEstadisticas();
+  }
+
+  cargarEstadisticas() {
+    this.dashboardAdminService.getStats().subscribe({
+      next: (stats) => {
+        this.totalDocentes.set(stats.totalDocentes);
+        this.totalAlumnos.set(stats.totalAlumnos);
+        this.chartData.set({
+          labels: ['Docentes', 'Alumnos'],
+          datasets: [{
+            data: [stats.totalDocentes, stats.totalAlumnos],
+            backgroundColor: ['#003b5c', '#42d0fe'],
+            hoverBackgroundColor: ['#00253B', '#1FB2E5'],
+            borderWidth: 0
+          }]
+        });
+      },
+      error: (err) => console.error('Error cargando estadísticas', err)
+    });
   }
 
   cargarPeriodoActivo() {

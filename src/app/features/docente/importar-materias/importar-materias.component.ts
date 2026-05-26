@@ -47,6 +47,7 @@ export class ImportarMateriasComponent {
     if (daysStr === 'Lu/Mi') fullDays = 'Lunes y Miércoles';
     if (daysStr === 'Ma/Ju') fullDays = 'Martes y Jueves';
     if (daysStr === 'Vi') fullDays = 'Viernes';
+    if (daysStr === 'Sa') fullDays = 'Sábado';
 
     this.selectedSchedule.set({ days: fullDays, time: timeStr, raw: scheduleStr });
     this.showScheduleModal.set(true);
