@@ -359,7 +359,7 @@ export class PaseListaComponent implements OnInit, OnDestroy {
   get esFinalizada(){ return this.estadoSesion() === 'finalizada'; }
 
   get materiaActual() {
-    return this.materias.find(m => m.id_materia === Number(this.materiaSeleccionada));
+    return this.materias.find(m => String(m.materia_id) === String(this.materiaSeleccionada));
   }
 
   ngOnDestroy() {

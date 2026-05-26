@@ -21,8 +21,8 @@
           <select [(ngModel)]="materiaSeleccionada"
             class="w-full bg-[#f8f9fa] border-2 border-[#c2c7ce] rounded-xl px-4 py-3 text-sm text-[#191c1d] focus:border-[#003b5c] outline-none transition-all font-semibold">
             <option value="">-- Seleccione una materia --</option>
-            @for (m of materias; track m.id_materia) {
-              <option [value]="m.id_materia">NRC {{ m.nrc }} — {{ m.nombre }} (Sec. {{ m.seccion }})</option>
+            @for (m of materias; track m.materia_id) {
+              <option [value]="m.materia_id">NRC {{ m.nrc }} — {{ m.nombre }} (Sec. {{ m.seccion }})</option>
             }
           </select>
         </div>
