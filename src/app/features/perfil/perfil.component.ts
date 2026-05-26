@@ -58,10 +58,10 @@ export class PerfilComponent implements OnInit {
 
     // 2. Fetch real data if backend is available
     this.authService.getProfile().subscribe({
-      next: (profile) => {
+      next: (profile: UserProfile) => {
         this.usuario = profile;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error al obtener perfil:', err);
       }
     });

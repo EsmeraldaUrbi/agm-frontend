@@ -18,6 +18,12 @@ export class ImportarDocentesComponent {
   
   private router = inject(Router);
   private docentesService = inject(DocentesService);
+  
+  toastMessage = signal<string>('');
+  toastType = signal<'success' | 'error'>('success');
+  showToast = signal<boolean>(false);
+
+  private currentFileSignature = '';
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -30,20 +36,38 @@ export class ImportarDocentesComponent {
     if (file) this.handleFile(file);
   }
 
-  onDropOver(event: DragEvent) {
+  onDragOver(event: DragEvent) {
     event.preventDefault();
+  }
+
+  triggerToast(message: string, type: 'success' | 'error' = 'success') {
+    this.toastMessage.set(message);
+    this.toastType.set(type);
+    this.showToast.set(true);
+    setTimeout(() => {
+      this.showToast.set(false);
+    }, 4000);
   }
 
   private handleFile(file: File) {
     // Aceptamos Excel (.xlsx, .xls) o PDF para coincidir con la compatibilidad del backend
     const nameLower = file.name.toLowerCase();
     if (!nameLower.endsWith('.pdf') && !nameLower.endsWith('.xlsx') && !nameLower.endsWith('.xls')) {
-      alert('Por favor, selecciona únicamente un archivo Excel (.xlsx) o PDF de plantilla.');
+      this.triggerToast('Por favor, selecciona únicamente un archivo Excel (.xlsx) o PDF de plantilla.', 'error');
+      return;
+    }
+
+    const signature = `${file.name}_${file.size}`;
+    const uploaded = JSON.parse(localStorage.getItem('agm_uploaded_docentes') || '[]');
+    if (uploaded.includes(signature)) {
+      this.showDuplicateError.set(true);
+      this.triggerToast('Este archivo de docentes ya fue cargado y procesado anteriormente.', 'error');
       return;
     }
 
     this.selectedFile.set(file);
     this.showDuplicateError.set(false);
+    this.currentFileSignature = signature;
     
     // Simular el parseo de vista previa para la UX antes de confirmar el envío real al backend
     this.currentStep.set(2);
@@ -69,13 +93,21 @@ export class ImportarDocentesComponent {
       .subscribe({
         next: () => {
           this.isSaving.set(false);
-          // Éxito: se mantiene en el paso 4 mostrando el éxito
+          const uploaded = JSON.parse(localStorage.getItem('agm_uploaded_docentes') || '[]');
+          if (!uploaded.includes(this.currentFileSignature)) {
+            uploaded.push(this.currentFileSignature);
+            localStorage.setItem('agm_uploaded_docentes', JSON.stringify(uploaded));
+          }
         },
         error: (err: HttpErrorResponse) => {
           this.isSaving.set(false);
-          this.showDuplicateError.set(true);
           this.currentStep.set(1);
-          alert('Hubo un error al procesar el archivo. Asegúrate de que los campos coincidan con la plantilla.');
+          if (err.status === 409) {
+            this.showDuplicateError.set(true);
+          } else {
+            const errorMsg = err.error?.detail || err.error?.message || err.message || 'Error desconocido';
+            this.triggerToast(`Hubo un error al procesar el archivo: ${errorMsg}. Asegúrate de que los campos coincidan con la plantilla.`, 'error');
+          }
         }
       });
   }

@@ -126,7 +126,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   cargarPeriodoActivo() {
     this.periodosService.getPeriodoActivo().subscribe({
       next: (res) => {
-        this.activePeriod.set(res.data);
+        this.activePeriod.set(res);
       },
       error: (err) => console.error('Error obteniendo periodo activo', err)
     });

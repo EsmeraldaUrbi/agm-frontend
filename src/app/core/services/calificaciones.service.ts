@@ -55,7 +55,7 @@ export class CalificacionesService {
   getPonderaciones(materiaId: string): Observable<Ponderacion | null> {
     return this.apiClient.get<any>(`${this.baseUrl}/ponderaciones/${materiaId}`).pipe(
       map(res => {
-        const data = unwrapApiResponse(res);
+        const data = unwrapApiResponse<Ponderacion>(res);
         return data ? data : null;
       })
     );

@@ -46,6 +46,7 @@ export class PeriodosComponent implements OnInit {
 
   // Alertas / Toasts
   toastMessage = signal<string>('');
+  toastType = signal<'success' | 'error'>('success');
   showToast = signal<boolean>(false);
 
   ngOnInit() {
@@ -55,11 +56,12 @@ export class PeriodosComponent implements OnInit {
   cargarPeriodos() {
     this.periodosService.getPeriodos(1, 100).subscribe({
       next: (res) => {
-        this.periodosList.set(res.data.items);
+        this.periodosList.set(res.items);
       },
       error: (err) => {
         console.error('Error cargando periodos:', err);
-        this.triggerToast('Error al cargar la lista de periodos');
+        const errorMsg = err.error?.detail || err.error?.message || err.message || 'Error al cargar la lista de periodos';
+        this.triggerToast(errorMsg, 'error');
       }
     });
   }
@@ -116,14 +118,14 @@ export class PeriodosComponent implements OnInit {
   // Guardar datos
   savePeriodo() {
     if (!this.periodoName || !this.periodoStartDate || !this.periodoEndDate) {
-      this.triggerToast('Por favor, rellena todos los campos obligatorios.');
+      this.triggerToast('Por favor, rellena todos los campos obligatorios.', 'error');
       return;
     }
 
     const start = new Date(this.periodoStartDate).getTime();
     const end = new Date(this.periodoEndDate).getTime();
     if (start >= end) {
-      this.triggerToast('La fecha de término debe ser posterior a la fecha de inicio.');
+      this.triggerToast('La fecha de término debe ser posterior a la fecha de inicio.', 'error');
       return;
     }
 
@@ -143,7 +145,8 @@ export class PeriodosComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.triggerToast('Error al actualizar el periodo.');
+          const errorMsg = err.error?.detail || err.error?.message || err.message || 'Error al actualizar el periodo.';
+          this.triggerToast(errorMsg, 'error');
         }
       });
     } else {
@@ -155,7 +158,8 @@ export class PeriodosComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.triggerToast('Error al crear el periodo.');
+          const errorMsg = err.error?.detail || err.error?.message || err.message || 'Error al crear el periodo.';
+          this.triggerToast(errorMsg, 'error');
         }
       });
     }
@@ -171,7 +175,8 @@ export class PeriodosComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.triggerToast('Error al activar el periodo.');
+        const errorMsg = err.error?.detail || err.error?.message || err.message || 'Error al activar el periodo.';
+        this.triggerToast(errorMsg, 'error');
       }
     });
   }
@@ -179,7 +184,7 @@ export class PeriodosComponent implements OnInit {
   // Eliminar periodo
   deletePeriodo(periodo: Periodo) {
     if (periodo.activo) {
-      this.triggerToast('No se puede eliminar el periodo actualmente activo. Primero activa otro.');
+      this.triggerToast('No se puede eliminar el periodo actualmente activo. Primero activa otro.', 'error');
       return;
     }
 
@@ -192,18 +197,20 @@ export class PeriodosComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.triggerToast('Error al eliminar el periodo.');
+          const errorMsg = err.error?.detail || err.error?.message || err.message || 'Error al eliminar el periodo.';
+          this.triggerToast(errorMsg, 'error');
         }
       });
     }
   }
 
   // Toast Helper
-  triggerToast(message: string) {
+  triggerToast(message: string, type: 'success' | 'error' = 'success') {
     this.toastMessage.set(message);
+    this.toastType.set(type);
     this.showToast.set(true);
     setTimeout(() => {
       this.showToast.set(false);
-    }, 3000);
+    }, 4000);
   }
 }

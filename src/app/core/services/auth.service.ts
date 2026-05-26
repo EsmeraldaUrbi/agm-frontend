@@ -84,7 +84,7 @@ export class AuthService {
     const url = `${API_CONFIG.auth}/auth/refresh`;
     return this.apiClient.post<any>(url, { refresh_token: refreshToken }).pipe(
       tap(res => {
-        const data = unwrapApiResponse(res);
+        const data = unwrapApiResponse<any>(res);
         if (data && data.access_token) {
           localStorage.setItem('agm_token', data.access_token);
         }
@@ -110,14 +110,37 @@ export class AuthService {
     return this.apiClient.post<any>(url, { email });
   }
 
-  // POST /auth/reset-password
-  resetPassword(resetToken: string, nuevaContrasena: string): Observable<any> {
+  // POST /auth/reset-password (Firma flexible de 1 o 2 parámetros para compatibilidad con UI y backend)
+  resetPassword(resetTokenOrPassword: string, nuevaContrasena?: string): Observable<any> {
     const url = `${API_CONFIG.auth}/auth/reset-password`;
+    let token = '';
+    let password = '';
+    
+    if (nuevaContrasena === undefined) {
+      password = resetTokenOrPassword;
+      // Extraer token dinámicamente de la URL de forma segura
+      const urlParams = new URLSearchParams(window.location.search);
+      token = urlParams.get('token') || urlParams.get('reset_token') || 'mock';
+    } else {
+      token = resetTokenOrPassword;
+      password = nuevaContrasena;
+    }
+
     return this.apiClient.post<any>(url, {
-      reset_token: resetToken,
-      nueva_contrasena: nuevaContrasena
+      reset_token: token,
+      nueva_contrasena: password
     });
   }
+
+  // === MÉTODOS DE COMPATIBILIDAD CON VISTAS EXISTENTES ===
+  getProfile(): Observable<UserProfile> {
+    return this.getMe();
+  }
+
+  recoverPassword(email: string): Observable<any> {
+    return this.forgotPassword(email);
+  }
+
 
   // Manejo de almacenamiento local
   saveSession(data: LoginResponse) {
