@@ -9,6 +9,10 @@ export interface Inscripcion {
   inscripcion_id?: string;
   alumno_id: string;
   materia_id: string;
+  docente_id?: string;
+  periodo_id?: string;
+  nrc_materia?: string;
+  seccion_materia?: string;
   fecha_inscripcion?: string;
   // Campos cruzados de la materia cargados por el backend
   materia?: {

@@ -5,9 +5,10 @@ import { HorarioComponent } from '../horario/horario.component';
 import { SolicitarBajaComponent } from '../solicitar-baja/solicitar-baja.component';
 import { InscripcionesService } from '../../../core/services/inscripciones.service';
 import { MateriasService } from '../../../core/services/materias.service';
+import { AlumnosService } from '../../../core/services/alumnos.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-mis-materias',
@@ -25,6 +26,7 @@ export class MisMateriasComponent implements OnInit {
 
   private inscripcionesService = inject(InscripcionesService);
   private materiasService = inject(MateriasService);
+  private alumnosService = inject(AlumnosService);
   private authService = inject(AuthService);
 
   ngOnInit() {
@@ -35,32 +37,55 @@ export class MisMateriasComponent implements OnInit {
     const user = this.authService.getCurrentUser();
     if (!user) return;
     
-    this.inscripcionesService.getInscripcionesByAlumno(user.user_id).subscribe({
+    // Primero buscar el alumno_id correspondiente a este user_id
+    this.alumnosService.getAlumnos({ limit: 1000 }).pipe(
+      switchMap(alumnos => {
+        const miRegistro = alumnos.find(a => a.user_id === user.user_id);
+        if (!miRegistro || !miRegistro.alumno_id) {
+          return of([]);
+        }
+        return this.inscripcionesService.getInscripcionesByAlumno(miRegistro.alumno_id);
+      })
+    ).subscribe({
       next: (inscripciones) => {
-        this.materias = inscripciones.map(ins => ({
-          nrc: ins.materia?.nrc || 'N/A',
-          nombre: ins.materia?.nombre || 'Materia sin nombre',
-          docente: 'Asignado',
-          creditos: 6,
-          promedio: 'N/A'
-        }));
-        
-        if (inscripciones.length === 0) return;
+        if (!inscripciones || inscripciones.length === 0) {
+          this.materias = [];
+          this.scheduleData = [];
+          return;
+        }
 
-        const peticiones = inscripciones.map(inscripcion => 
-          this.materiasService.getHorarios({ materia_ofertada_id: inscripcion.materia_id }).pipe(
+        const infoPeticiones = inscripciones.map(ins => 
+          this.materiasService.getMateriaById(ins.materia_id).pipe(
+            catchError(() => of(null))
+          )
+        );
+
+        const horariosPeticiones = inscripciones.map(ins => 
+          this.materiasService.getHorarios({ materia_ofertada_id: ins.materia_id }).pipe(
             catchError(() => of([]))
           )
         );
 
-        forkJoin(peticiones).subscribe((resultados) => {
+        forkJoin([forkJoin(infoPeticiones), forkJoin(horariosPeticiones)]).subscribe(([materiasInfo, horariosData]) => {
+          this.materias = inscripciones.map((ins, index) => {
+            const info = materiasInfo[index];
+            return {
+              nrc: ins.nrc_materia || info?.nrc || 'S/N',
+              nombre: info?.nombre || 'Materia sin nombre',
+              docente: 'Asignado',
+              creditos: 6,
+              promedio: 'N/A'
+            };
+          });
+
           let allHorarios: any[] = [];
-          resultados.forEach((horariosMateria: any[], index) => {
-            const materiaInfo = inscripciones[index].materia;
+          horariosData.forEach((horariosMateria: any[], index) => {
+            const info = materiasInfo[index];
             horariosMateria.forEach(h => {
               allHorarios.push({
                 ...h,
-                materia_nombre: materiaInfo?.nombre || 'Materia'
+                materia_nombre: info?.nombre || 'Materia',
+                materia_id: inscripciones[index].materia_id
               });
             });
           });
