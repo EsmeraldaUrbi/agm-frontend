@@ -188,15 +188,20 @@
       </div>
     </div>
     
-    <!-- Summary Section -->
-    <div class="mt-12 font-sans max-w-sm">
+    <!-- PDF Preview Section -->
+    <div class="mt-8 font-sans w-full" *ngIf="pdfPreviewUrl()">
       <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <div class="w-10 h-10 rounded-lg bg-blue-50 text-[#003B5C] flex items-center justify-center mb-4">
-          <span class="material-symbols-outlined">description</span>
+        <h3 class="text-sm font-bold text-[#003B5C] mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">visibility</span>
+          Vista Previa del Documento: {{ selectedFile()?.name }}
+        </h3>
+        <div class="w-full h-[500px] bg-slate-100 rounded-lg overflow-hidden border border-slate-200 relative">
+          <object [data]="pdfPreviewUrl()" type="application/pdf" width="100%" height="100%">
+            <div class="absolute inset-0 flex items-center justify-center">
+              <p class="text-slate-500 text-sm">Tu navegador no soporta previsualización de PDFs en línea.</p>
+            </div>
+          </object>
         </div>
-        <h3 class="text-sm font-bold text-[#003B5C] mb-1">Archivo Fuente</h3>
-        <p class="text-xl font-black text-slate-800">{{ selectedFile()?.name || 'materias_2026.pdf' }}</p>
-        <p class="text-xs text-slate-500 mt-2">Leído correctamente</p>
       </div>
     </div>
   </div>

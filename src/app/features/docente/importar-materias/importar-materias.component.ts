@@ -6,6 +6,8 @@ import { environment } from '../../../../environments/environment';
 import { PeriodosService } from '../../../core/services/periodos.service';
 import { MateriasService } from '../../../core/services/materias.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { OnDestroy } from '@angular/core';
 
 @Component({
   selector: 'app-importar-materias',
@@ -13,7 +15,7 @@ import { AuthService } from '../../../core/services/auth.service';
   imports: [CommonModule, RouterModule],
   templateUrl: './importar-materias.component.html'
 })
-export class ImportarMateriasComponent {
+export class ImportarMateriasComponent implements OnDestroy {
   currentStep = signal<1 | 2 | 3 | 4>(1);
   
   selectedFile = signal<File | null>(null);
@@ -28,6 +30,9 @@ export class ImportarMateriasComponent {
   toastType = signal<'success' | 'error'>('success');
   showToast = signal<boolean>(false);
 
+  pdfPreviewUrl = signal<SafeResourceUrl | null>(null);
+  private rawPdfUrl: string | null = null;
+
   private processedHashes: string[] = [];
 
   private router = inject(Router);
@@ -35,8 +40,21 @@ export class ImportarMateriasComponent {
   private periodosService = inject(PeriodosService);
   private materiasService = inject(MateriasService);
   private authService = inject(AuthService);
+  private sanitizer = inject(DomSanitizer);
 
   private currentFileSignature = '';
+
+  ngOnDestroy() {
+    this.revokePdfUrl();
+  }
+
+  private revokePdfUrl() {
+    if (this.rawPdfUrl) {
+      URL.revokeObjectURL(this.rawPdfUrl);
+      this.rawPdfUrl = null;
+      this.pdfPreviewUrl.set(null);
+    }
+  }
 
   openScheduleModal(scheduleStr: string) {
     const parts = scheduleStr.split(' ');
@@ -105,6 +123,11 @@ export class ImportarMateriasComponent {
     this.showDuplicateError.set(false);
     this.currentFileSignature = signature;
     
+    // Generar vista previa
+    this.revokePdfUrl();
+    this.rawPdfUrl = URL.createObjectURL(file);
+    this.pdfPreviewUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.rawPdfUrl));
+    
     // Simular tiempo de carga de vista previa
     this.currentStep.set(2);
     setTimeout(() => {
@@ -116,6 +139,7 @@ export class ImportarMateriasComponent {
     this.currentStep.set(1);
     this.selectedFile.set(null);
     this.showDuplicateError.set(false);
+    this.revokePdfUrl();
   }
 
   confirmImport() {
@@ -216,6 +240,7 @@ export class ImportarMateriasComponent {
     this.selectedFile.set(null);
     this.showDuplicateError.set(false);
     this.isSaving.set(false);
+    this.revokePdfUrl();
   }
 
   goToDashboard() {

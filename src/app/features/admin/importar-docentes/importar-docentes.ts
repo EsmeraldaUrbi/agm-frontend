@@ -2,6 +2,8 @@ import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { DocentesService } from '../../../core/services/docentes.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { OnDestroy } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
@@ -10,7 +12,7 @@ import { HttpErrorResponse } from '@angular/common/http';
   imports: [CommonModule, RouterModule],
   templateUrl: './importar-docentes.html'
 })
-export class ImportarDocentesComponent {
+export class ImportarDocentesComponent implements OnDestroy {
   currentStep = signal<1 | 2 | 3 | 4>(1);
   selectedFile = signal<File | null>(null);
   showDuplicateError = signal(false);
@@ -18,12 +20,28 @@ export class ImportarDocentesComponent {
   
   private router = inject(Router);
   private docentesService = inject(DocentesService);
+  private sanitizer = inject(DomSanitizer);
   
   toastMessage = signal<string>('');
   toastType = signal<'success' | 'error'>('success');
   showToast = signal<boolean>(false);
 
+  pdfPreviewUrl = signal<SafeResourceUrl | null>(null);
+  private rawPdfUrl: string | null = null;
+
   private currentFileSignature = '';
+
+  ngOnDestroy() {
+    this.revokePdfUrl();
+  }
+
+  private revokePdfUrl() {
+    if (this.rawPdfUrl) {
+      URL.revokeObjectURL(this.rawPdfUrl);
+      this.rawPdfUrl = null;
+      this.pdfPreviewUrl.set(null);
+    }
+  }
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -70,7 +88,12 @@ export class ImportarDocentesComponent {
     this.showDuplicateError.set(false);
     this.currentFileSignature = signature;
     
-    // Simular el parseo de vista previa para la UX antes de confirmar el envío real al backend
+    // Generar vista previa
+    this.revokePdfUrl();
+    this.rawPdfUrl = URL.createObjectURL(file);
+    this.pdfPreviewUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.rawPdfUrl));
+
+    // Simular tiempo de carga de vista previa
     this.currentStep.set(2);
     setTimeout(() => {
       this.currentStep.set(3);
@@ -81,6 +104,7 @@ export class ImportarDocentesComponent {
     this.currentStep.set(1);
     this.selectedFile.set(null);
     this.showDuplicateError.set(false);
+    this.revokePdfUrl();
   }
 
   confirmImport() {
@@ -118,6 +142,7 @@ export class ImportarDocentesComponent {
     this.selectedFile.set(null);
     this.showDuplicateError.set(false);
     this.isSaving.set(false);
+    this.revokePdfUrl();
   }
 
   goToDashboard() {

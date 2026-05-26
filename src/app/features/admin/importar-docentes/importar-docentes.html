@@ -180,6 +180,23 @@
         <p class="text-xs text-slate-500 mt-2">Leído correctamente</p>
       </div>
     </div>
+    
+    <!-- PDF Preview Section -->
+    <div class="mt-8 font-sans w-full" *ngIf="pdfPreviewUrl()">
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <h3 class="text-sm font-bold text-[#003B5C] mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">visibility</span>
+          Vista Previa del Documento: {{ selectedFile()?.name }}
+        </h3>
+        <div class="w-full h-[500px] bg-slate-100 rounded-lg overflow-hidden border border-slate-200 relative">
+          <object [data]="pdfPreviewUrl()" type="application/pdf" width="100%" height="100%">
+            <div class="absolute inset-0 flex items-center justify-center">
+              <p class="text-slate-500 text-sm">Tu navegador no soporta previsualización de PDFs en línea.</p>
+            </div>
+          </object>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- PASO 4: CONFIRMAR (Success) -->
