@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MateriasService, Materia } from '../../../core/services/materias.service';
 import { DocentesService, Docente } from '../../../core/services/docentes.service';
-import { AgmButtonComponent, AgmInputComponent, AgmCardComponent } from '../../../shared/components/ui';
+import { AgmButtonComponent, AgmCardComponent } from '../../../shared/components/ui';
 import { Router } from '@angular/router';
 
 interface MateriaView extends Materia {
@@ -17,7 +17,6 @@ interface MateriaView extends Materia {
     CommonModule,
     FormsModule,
     AgmButtonComponent,
-    AgmInputComponent,
     AgmCardComponent
   ],
   templateUrl: './materias.component.html',
