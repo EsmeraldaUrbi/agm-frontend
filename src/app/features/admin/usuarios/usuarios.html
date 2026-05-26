@@ -6,13 +6,30 @@
       <h1 class="text-2xl font-black text-primary font-headline tracking-tight">Directorio de Docentes</h1>
       <p class="text-xs text-outline font-medium">Administra el padrón académico de docentes de la FCC-BUAP.</p>
     </div>
-    <agm-button (agmClick)="openCreateModal()" size="md">
+    <agm-button *ngIf="usersList().length > 0" (agmClick)="openCreateModal()" size="md">
       <span class="material-symbols-outlined text-base mr-1.5">person_add</span>
       Agregar Docente
     </agm-button>
   </div>
 
-  <!-- Metric Summary Cards -->
+  <!-- Empty State Card -->
+  <div 
+    *ngIf="usersList().length === 0" 
+    class="flex flex-col items-center justify-center py-20 px-6 text-center animate-fade-in bg-white rounded-3xl border border-outline-variant/15 shadow-md"
+  >
+    <div class="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center text-primary mb-6 animate-pulse">
+      <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">groups</span>
+    </div>
+    <h3 class="text-lg font-black text-primary font-headline mb-2">Directorio de Docentes Vacío</h3>
+    <p class="text-slate-500 text-sm max-w-sm mb-6">Aún no hay docentes registrados en el sistema. Sube el padrón de docentes FCC para dar de alta sus cuentas de acceso.</p>
+    <agm-button size="md" (agmClick)="router.navigate(['/admin/importar-docentes'])">
+      <span class="material-symbols-outlined text-sm mr-1.5">upload_file</span>
+      Importar Padrón Docente
+    </agm-button>
+  </div>
+
+  <div *ngIf="usersList().length > 0" class="space-y-6">
+    <!-- Metric Summary Cards -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="bg-white p-4 rounded-2xl border border-outline-variant/15 shadow-sm flex items-center justify-between">
       <div>
@@ -100,7 +117,7 @@
             <td class="py-4 px-6 flex items-center gap-3">
               <!-- Custom Avatar -->
               <div class="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs uppercase">
-                {{ user.name.split(' ')[0][0] }}{{ user.name.split(' ')[1] ? user.name.split(' ')[1][0] : '' }}
+                {{ user.name ? (user.name.split(' ')[0][0] + (user.name.split(' ')[1] ? user.name.split(' ')[1][0] : '')) : 'U' }}
               </div>
               <div>
                 <p class="font-bold text-on-surface group-hover:text-primary transition-colors">{{ user.name }}</p>
@@ -202,6 +219,7 @@
     </div>
 
   </agm-card>
+  </div>
 
   <!-- Interactive Create/Edit Dialog Modal Backdrop -->
   <div 
@@ -303,9 +321,12 @@
   <!-- Custom Alert Toast Popup Notification -->
   <div 
     *ngIf="showToast()" 
-    class="fixed bottom-6 right-6 px-4 py-3 rounded-2xl bg-secondary-container text-secondary border border-secondary/15 flex items-center gap-3 shadow-lg z-50 animate-bounce"
+    [ngClass]="toastType() === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50' : 'bg-[#ffdad6] text-[#93000a] border-[#93000a]/15'"
+    class="fixed bottom-6 right-6 px-5 py-3.5 rounded-2xl border flex items-center gap-3 shadow-lg z-50 animate-bounce max-w-sm transition-all"
   >
-    <span class="material-symbols-outlined text-lg">check_circle</span>
+    <span class="material-symbols-outlined text-lg">
+      {{ toastType() === 'success' ? 'check_circle' : 'warning' }}
+    </span>
     <span class="text-xs font-bold leading-none">{{ toastMessage() }}</span>
   </div>
 

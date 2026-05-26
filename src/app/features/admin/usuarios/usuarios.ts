@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DocentesService, Docente } from '../../../core/services/docentes.service';
 import { AgmButtonComponent, AgmInputComponent, AgmCardComponent } from '../../../shared/components/ui';
+import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 
 interface User {
   id: string;
@@ -39,6 +41,7 @@ interface User {
 })
 export class UsuariosComponent implements OnInit {
   private docentesService = inject(DocentesService);
+  public router = inject(Router);
 
   // Exponer Math para el HTML
   Math = Math;
@@ -54,19 +57,26 @@ export class UsuariosComponent implements OnInit {
   cargarDocentes() {
     this.docentesService.getDocentes().subscribe({
       next: (docentes) => {
-        const mappedUsers: User[] = docentes.map(d => ({
-          id: d.docente_id || '',
-          name: d.nombre_completo,
-          email: d.correo,
-          cubiculo: d.cubiculo || 'N/A',
-          status: d.estatus_laboral ? 'active' : 'inactive',
-          createdAt: 'N/A' // Campo no expuesto individualmente por el backend de perfiles
-        }));
+        if (!docentes || !Array.isArray(docentes)) {
+          this.usersList.set([]);
+          return;
+        }
+        const mappedUsers: User[] = docentes.map(d => {
+          if (!d) return null;
+          return {
+            id: d.docente_id || '',
+            name: d.nombre_completo || '',
+            email: d.correo || '',
+            cubiculo: d.cubiculo || 'N/A',
+            status: d.estatus_laboral ? 'active' : 'inactive',
+            createdAt: 'N/A'
+          };
+        }).filter((u): u is User => u !== null);
         this.usersList.set(mappedUsers);
       },
       error: (err) => {
         console.error('Error cargando docentes', err);
-        this.triggerToast('Error de conexión al obtener el padrón de docentes.');
+        this.triggerToast('Error de conexión al obtener el padrón de docentes.', 'error');
       }
     });
   }
@@ -92,18 +102,25 @@ export class UsuariosComponent implements OnInit {
 
   // Toasts / Notificaciones de feedback
   toastMessage = signal<string>('');
+  toastType = signal<'success' | 'error'>('success');
   showToast = signal<boolean>(false);
 
   // Lista Filtrada Dinámicamente (Computed Signal)
   filteredUsers = computed(() => {
-    const query = this.searchQuery().toLowerCase().trim();
-    const status = this.selectedStatusFilter();
+    const rawQuery = this.searchQuery();
+    const query = (rawQuery || '').toLowerCase().trim();
+    const status = this.selectedStatusFilter() || 'all';
 
-    return this.usersList().filter(user => {
+    return (this.usersList() || []).filter(user => {
+      if (!user) return false;
+      const name = user.name || '';
+      const email = user.email || '';
+      const cubiculo = user.cubiculo || '';
+
       const matchesQuery = 
-        user.name.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query) ||
-        user.cubiculo.toLowerCase().includes(query);
+        name.toLowerCase().includes(query) ||
+        email.toLowerCase().includes(query) ||
+        cubiculo.toLowerCase().includes(query);
 
       const matchesStatus = status === 'all' || user.status === status;
 
@@ -166,7 +183,7 @@ export class UsuariosComponent implements OnInit {
   // Guardar cambios (Crear o Editar)
   saveUser() {
     if (!this.userName || !this.userEmail || !this.userCubiculo) {
-      this.triggerToast('Por favor, completa todos los campos obligatorios.');
+      this.triggerToast('Por favor, completa todos los campos obligatorios.', 'error');
       return;
     }
 
@@ -187,14 +204,14 @@ export class UsuariosComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.triggerToast('Error al actualizar el docente en el backend.');
+          this.triggerToast('Error al actualizar el docente en el backend.', 'error');
         }
       });
     } else {
       // Operación de Creación
       // El backend MS-3 no expone creación individual (solo importación masiva)
       // Mostramos aviso formal
-      this.triggerToast('La creación individual no está disponible. Use "Importar Docentes" (Excel) en su lugar.');
+      this.triggerToast('La creación individual no está disponible. Use "Importar Docentes" (Excel) en su lugar.', 'error');
       this.showModal.set(false);
     }
   }
@@ -212,7 +229,7 @@ export class UsuariosComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.triggerToast('Error al cambiar el estado del docente.');
+        this.triggerToast('Error al cambiar el estado del docente.', 'error');
       }
     });
   }
@@ -229,14 +246,15 @@ export class UsuariosComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.triggerToast('Error al desactivar el docente.');
+          this.triggerToast('Error al desactivar el docente.', 'error');
         }
       });
     }
   }
 
-  triggerToast(message: string) {
+  triggerToast(message: string, type: 'success' | 'error' = 'success') {
     this.toastMessage.set(message);
+    this.toastType.set(type);
     this.showToast.set(true);
     setTimeout(() => {
       this.showToast.set(false);
