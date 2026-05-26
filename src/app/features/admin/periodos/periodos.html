@@ -21,8 +21,10 @@
     <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
       <div class="space-y-3 flex-grow">
         <div class="flex items-center gap-2">
-          <span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary text-[9px] font-black uppercase tracking-wider">Ciclo Activo</span>
-          <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></div>
+          <span class="px-3 py-1 rounded-full bg-emerald-500 text-white text-[11px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.5)] border border-emerald-400/50 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[13px]">bolt</span>Ciclo Activo
+          </span>
+          <div class="w-2 h-2 rounded-full bg-emerald-400 animate-ping ml-1"></div>
         </div>
         <h2 class="text-3xl font-black tracking-tight font-headline">{{ active.nombre }}</h2>
         <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/80 font-medium">
@@ -52,10 +54,19 @@
       </div>
 
       <!-- Quick Actions for Active Period -->
-      <div class="flex items-center gap-2 self-stretch md:self-auto justify-end">
+      <div class="flex flex-wrap items-center gap-3 self-stretch md:self-auto justify-end">
+        <button 
+          (click)="deactivatePeriodo(active)"
+          class="px-4 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/40 text-red-100 font-bold text-xs flex items-center gap-1.5 transition-all border border-red-500/30"
+          title="Apagar Periodo"
+        >
+          <span class="material-symbols-outlined text-sm">power_settings_new</span>
+          <span class="hidden md:inline">Apagar Periodo</span>
+        </button>
+
         <button 
           (click)="openEditModal(active)"
-          class="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition-all"
+          class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition-all"
         >
           <span class="material-symbols-outlined text-sm">edit</span>
           Editar Fechas

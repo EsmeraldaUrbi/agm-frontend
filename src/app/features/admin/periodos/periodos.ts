@@ -181,6 +181,25 @@ export class PeriodosComponent implements OnInit {
     });
   }
 
+  // Desactivar periodo activo actual
+  deactivatePeriodo(periodo: Periodo) {
+    if (!periodo.periodo_id) return;
+    if (confirm(`¿Estás seguro de que deseas apagar (desactivar) el periodo ${periodo.nombre}? Todos los módulos dejarán de mostrarlo como el ciclo actual.`)) {
+      // Usamos el updatePeriodo normal para mandarlo a inactivo
+      this.periodosService.updatePeriodo(periodo.periodo_id, { activo: false }).subscribe({
+        next: () => {
+          this.triggerToast('El periodo ha sido desactivado exitosamente.', 'success');
+          this.cargarPeriodos();
+        },
+        error: (err) => {
+          console.error(err);
+          const errorMsg = err.error?.detail || err.error?.message || err.message || 'Error al desactivar el periodo.';
+          this.triggerToast(errorMsg, 'error');
+        }
+      });
+    }
+  }
+
   // Eliminar periodo
   deletePeriodo(periodo: Periodo) {
     if (periodo.activo) {
