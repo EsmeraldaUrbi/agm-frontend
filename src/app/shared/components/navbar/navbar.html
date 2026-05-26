@@ -1,26 +1,30 @@
-<header class="flex justify-between items-center h-16 px-8 w-full sticky top-0 z-40 bg-white border-b border-outline-variant/20 shadow-[0_2px_12px_rgba(0,59,92,0.03)] font-headline text-sm font-medium">
-  
+<header
+  class="flex justify-between items-center h-16 px-8 w-full sticky top-0 z-40 bg-white border-b border-outline-variant/20 shadow-[0_2px_12px_rgba(0,59,92,0.03)] font-headline text-sm font-medium">
+
   <!-- Left Side: System title & Menu Toggle -->
   <div class="flex items-center gap-2 lg:gap-4">
-    <button (click)="toggleSidebar()" class="lg:hidden p-2 -ml-2 text-[#42474e] hover:bg-[#f3f4f5] rounded-lg transition-colors">
+    <button (click)="toggleSidebar()"
+      class="lg:hidden p-2 -ml-2 text-[#42474e] hover:bg-[#f3f4f5] rounded-lg transition-colors">
       <span class="material-symbols-outlined block">menu</span>
     </button>
     <span class="text-[11px] sm:text-sm font-extrabold text-primary-container tracking-tight uppercase truncate">
-      {{ BRANDING.fullName }} <span class="hidden sm:inline">— {{ BRANDING.institution }}</span>
+      {{ BRANDING.fullName }} <span class="hidden sm:inline"></span>
     </span>
   </div>
 
   <!-- Right Side: Profile only -->
   <div class="flex items-center gap-3">
     <!-- User Profile — clickable, navigates to /profile -->
-    <a routerLink="/profile" class="flex items-center gap-3 p-1.5 rounded-xl hover:bg-surface-container transition-all group duration-200 cursor-pointer no-underline">
+    <a routerLink="/profile"
+      class="flex items-center gap-3 p-1.5 rounded-xl hover:bg-surface-container transition-all group duration-200 cursor-pointer no-underline">
       <div class="text-right hidden sm:block">
         <p class="text-xs font-black text-primary-container leading-none">{{ userName() }}</p>
         <p class="text-[9px] text-outline font-bold uppercase tracking-wider mt-1">{{ roleLabel() }}</p>
       </div>
-      
+
       <!-- Avatar Circle -->
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#003B5C] to-[#00253B] flex items-center justify-center text-white text-xs font-black shadow-md relative overflow-hidden transform group-hover:scale-105 transition-transform duration-200">
+      <div
+        class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#003B5C] to-[#00253B] flex items-center justify-center text-white text-xs font-black shadow-md relative overflow-hidden transform group-hover:scale-105 transition-transform duration-200">
         {{ userInitials() }}
         <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
       </div>

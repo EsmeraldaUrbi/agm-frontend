@@ -21,11 +21,11 @@ export class LoginComponent {
 
   // --- CONFIGURACIÓN DE LOGOS ---
   // Puedes cambiar estos valores por BRANDING.logoSecondary y BRANDING.isLogoSecondaryImage si lo deseas
-  protected readonly logo = BRANDING.logoSecondary; 
-  protected readonly isLogoImage = BRANDING.isLogoSecondaryImage;
+  protected readonly logo = BRANDING.logoWhite; 
+  protected readonly isLogoImage = BRANDING.isLogoWhiteImage;
 
-  protected readonly footerLogo = BRANDING.logoSecondary;
-  protected readonly isFooterLogoImage = BRANDING.isLogoSecondaryImage;
+  protected readonly footerLogo = BRANDING.logo;
+  protected readonly isFooterLogoImage = BRANDING.isLogoImage;
 
   // Signals para el formulario
   email = '';

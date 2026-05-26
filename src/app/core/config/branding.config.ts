@@ -12,4 +12,9 @@ export const BRANDING = {
   logoSecondary: '/images/Aethle_LogoSim.png',
 
   isLogoSecondaryImage: true,
+
+  logoWhite: '/images/Aethle_LogoSimWhite.png',
+
+  isLogoWhiteImage: true,
+
 };

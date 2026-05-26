@@ -26,7 +26,7 @@ export class LandingComponent {
   protected readonly isNavLogoImage = BRANDING.isLogoImage;
 
   // Logo para la sección del banner inferior (Dark background)
-  protected readonly calloutLogo = BRANDING.logoSecondary;
-  protected readonly isCalloutLogoImage = BRANDING.isLogoSecondaryImage;
+  protected readonly calloutLogo = BRANDING.logoWhite;
+  protected readonly isCalloutLogoImage = BRANDING.isLogoWhiteImage;
 }
 
