@@ -1,8 +1,8 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { DocentesService } from '../../../core/services/docentes.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-importar-docentes',
@@ -17,7 +17,7 @@ export class ImportarDocentesComponent {
   isSaving = signal(false);
   
   private router = inject(Router);
-  private http = inject(HttpClient);
+  private docentesService = inject(DocentesService);
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -30,20 +30,22 @@ export class ImportarDocentesComponent {
     if (file) this.handleFile(file);
   }
 
-  onDragOver(event: DragEvent) {
+  onDropOver(event: DragEvent) {
     event.preventDefault();
   }
 
   private handleFile(file: File) {
-    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-      alert('Por favor, selecciona únicamente un archivo PDF.');
+    // Aceptamos Excel (.xlsx, .xls) o PDF para coincidir con la compatibilidad del backend
+    const nameLower = file.name.toLowerCase();
+    if (!nameLower.endsWith('.pdf') && !nameLower.endsWith('.xlsx') && !nameLower.endsWith('.xls')) {
+      alert('Por favor, selecciona únicamente un archivo Excel (.xlsx) o PDF de plantilla.');
       return;
     }
 
     this.selectedFile.set(file);
     this.showDuplicateError.set(false);
     
-    // Simular el "Parseo de vista previa" antes de confirmar
+    // Simular el parseo de vista previa para la UX antes de confirmar el envío real al backend
     this.currentStep.set(2);
     setTimeout(() => {
       this.currentStep.set(3);
@@ -57,27 +59,23 @@ export class ImportarDocentesComponent {
   }
 
   confirmImport() {
-
     const file = this.selectedFile();
     if (!file) return;
 
     this.currentStep.set(4);
     this.isSaving.set(true);
 
-    const formData = new FormData();
-    formData.append('file', file);
-
-    this.http.post(`${environment.msUsuariosUrl}/api/v1/importar/docentes`, formData)
+    this.docentesService.importarDocentes(file)
       .subscribe({
-        next: (res: any) => {
+        next: () => {
           this.isSaving.set(false);
-          // Permanece en el paso 4 mostrando el mensaje de éxito
+          // Éxito: se mantiene en el paso 4 mostrando el éxito
         },
         error: (err: HttpErrorResponse) => {
           this.isSaving.set(false);
           this.showDuplicateError.set(true);
           this.currentStep.set(1);
-          alert('Hubo un error al procesar el archivo. Podría tener formato inválido.');
+          alert('Hubo un error al procesar el archivo. Asegúrate de que los campos coincidan con la plantilla.');
         }
       });
   }
@@ -88,6 +86,7 @@ export class ImportarDocentesComponent {
     this.showDuplicateError.set(false);
     this.isSaving.set(false);
   }
+
   goToDashboard() {
     this.router.navigate(['/admin/dashboard']);
   }

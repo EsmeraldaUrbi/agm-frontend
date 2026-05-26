@@ -1,8 +1,7 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { DocentesService, Docente } from '../../../core/services/docentes.service';
 import { AgmButtonComponent, AgmInputComponent, AgmCardComponent } from '../../../shared/components/ui';
 
 interface User {
@@ -39,7 +38,7 @@ interface User {
   `]
 })
 export class UsuariosComponent implements OnInit {
-  private http = inject(HttpClient);
+  private docentesService = inject(DocentesService);
 
   // Exponer Math para el HTML
   Math = Math;
@@ -53,15 +52,15 @@ export class UsuariosComponent implements OnInit {
   }
 
   cargarDocentes() {
-    this.http.get<any[]>(`${environment.msUsuariosUrl}/api/v1/docentes/?limit=1000`).subscribe({
-      next: (data) => {
-        const mappedUsers: User[] = data.map(d => ({
-          id: d.docente_id,
+    this.docentesService.getDocentes().subscribe({
+      next: (docentes) => {
+        const mappedUsers: User[] = docentes.map(d => ({
+          id: d.docente_id || '',
           name: d.nombre_completo,
           email: d.correo,
           cubiculo: d.cubiculo || 'N/A',
           status: d.estatus_laboral ? 'active' : 'inactive',
-          createdAt: d.created_at ? new Date(d.created_at).toISOString().split('T')[0] : 'N/A'
+          createdAt: 'N/A' // Campo no expuesto individualmente por el backend de perfiles
         }));
         this.usersList.set(mappedUsers);
       },
@@ -101,13 +100,11 @@ export class UsuariosComponent implements OnInit {
     const status = this.selectedStatusFilter();
 
     return this.usersList().filter(user => {
-      // Filtro de búsqueda textual (Nombre, Email o Cubículo)
       const matchesQuery = 
         user.name.toLowerCase().includes(query) ||
         user.email.toLowerCase().includes(query) ||
         user.cubiculo.toLowerCase().includes(query);
 
-      // Filtro de estado
       const matchesStatus = status === 'all' || user.status === status;
 
       return matchesQuery && matchesStatus;
@@ -140,7 +137,6 @@ export class UsuariosComponent implements OnInit {
     }
   }
 
-  // Resetea la página actual cuando cambian los filtros (se llama desde el template en ngModelChange)
   resetPagination() {
     this.currentPage.set(1);
   }
@@ -174,62 +170,71 @@ export class UsuariosComponent implements OnInit {
       return;
     }
 
-    if (this.isEditing()) {
-      // Operación de Edición
-      this.usersList.update(list => 
-        list.map(u => u.id === this.userId 
-          ? {
-              ...u,
-              name: this.userName,
-              email: this.userEmail,
-              cubiculo: this.userCubiculo,
-              status: this.userStatus
-            }
-          : u
-        )
-      );
-      this.triggerToast('¡Docente actualizado exitosamente!');
+    if (this.isEditing() && this.userId) {
+      // Operación de Edición Real
+      const payload: Partial<Docente> = {
+        nombre_completo: this.userName,
+        correo: this.userEmail,
+        cubiculo: this.userCubiculo,
+        estatus_laboral: this.userStatus === 'active'
+      };
+
+      this.docentesService.updateDocente(this.userId, payload).subscribe({
+        next: () => {
+          this.triggerToast('¡Docente actualizado exitosamente!');
+          this.cargarDocentes();
+          this.showModal.set(false);
+        },
+        error: (err) => {
+          console.error(err);
+          this.triggerToast('Error al actualizar el docente en el backend.');
+        }
+      });
     } else {
       // Operación de Creación
-      const newUser: User = {
-        id: Math.random().toString(36).substring(2, 9),
-        name: this.userName,
-        email: this.userEmail,
-        cubiculo: this.userCubiculo,
-        status: this.userStatus,
-        createdAt: new Date().toISOString().split('T')[0]
-      };
-      
-      this.usersList.update(list => [newUser, ...list]);
-      this.triggerToast('¡Nuevo docente agregado con éxito!');
+      // El backend MS-3 no expone creación individual (solo importación masiva)
+      // Mostramos aviso formal
+      this.triggerToast('La creación individual no está disponible. Use "Importar Docentes" (Excel) en su lugar.');
+      this.showModal.set(false);
     }
-
-    this.showModal.set(false);
   }
 
   // Alternar el estado (Activo/Inactivo) desde la lista
   toggleUserStatus(user: User) {
     const nextStatus = user.status === 'active' ? 'inactive' : 'active';
-    this.usersList.update(list =>
-      list.map(u => u.id === user.id ? { ...u, status: nextStatus } : u)
-    );
-    this.triggerToast(`Estado cambiado a ${nextStatus === 'active' ? 'Activo' : 'Inactivo'} para ${user.name}`);
+    
+    this.docentesService.updateDocente(user.id, {
+      estatus_laboral: nextStatus === 'active'
+    }).subscribe({
+      next: () => {
+        this.triggerToast(`Estado cambiado a ${nextStatus === 'active' ? 'Activo' : 'Inactivo'} para ${user.name}`);
+        this.cargarDocentes();
+      },
+      error: (err) => {
+        console.error(err);
+        this.triggerToast('Error al cambiar el estado del docente.');
+      }
+    });
   }
 
-  // Eliminar docente
+  // Desactivar docente (debido a falta de DELETE físico en el backend, desactivamos laboralmente)
   deleteUser(user: User) {
-    if (confirm(`¿Estás seguro de eliminar a ${user.name} del directorio?`)) {
-      this.usersList.update(list => list.filter(u => u.id !== user.id));
-      this.triggerToast('Docente eliminado del sistema.');
-      
-      // Ajustar la paginación si eliminamos el último elemento de la página
-      if (this.paginatedUsers().length === 0 && this.currentPage() > 1) {
-          this.currentPage.update(p => p - 1);
-      }
+    if (confirm(`¿Estás seguro de desactivar a ${user.name} del directorio escolar?`)) {
+      this.docentesService.updateDocente(user.id, {
+        estatus_laboral: false
+      }).subscribe({
+        next: () => {
+          this.triggerToast('Docente desactivado del sistema.');
+          this.cargarDocentes();
+        },
+        error: (err) => {
+          console.error(err);
+          this.triggerToast('Error al desactivar el docente.');
+        }
+      });
     }
   }
 
-  // Disparar alertas tipo Toast
   triggerToast(message: string) {
     this.toastMessage.set(message);
     this.showToast.set(true);
