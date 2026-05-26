@@ -31,9 +31,10 @@
   </label>
   <div class="relative">
     <select class="w-full bg-white border border-[#c2c7ce] rounded-xl py-3.5 px-4 appearance-none focus:ring-2 focus:ring-[#003b5c] focus:border-[#003b5c] transition-all text-[#191c1d] font-semibold shadow-sm">
-      <option selected>Sistemas Distribuidos - Sec. 001</option>
-      <option>Ingeniería de Software - Sec. 003</option>
-      <option>Inteligencia Artificial - Sec. 002</option>
+      <option selected disabled>Selecciona una materia...</option>
+      @for (mat of materias; track mat.nrc) {
+        <option [value]="mat.nrc">{{ mat.nombre }} - Sec. {{ mat.seccion }}</option>
+      }
     </select>
     <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#72787e]">
       <span class="material-symbols-outlined">expand_more</span>

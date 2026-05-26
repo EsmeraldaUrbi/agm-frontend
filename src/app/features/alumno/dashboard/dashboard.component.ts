@@ -72,19 +72,14 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   animatedPorcentaje: number = 0;
 
   alumnoInfo = {
-    nombre_completo: 'Alejandro Pavón',
-    matricula: '202145682',
-    carrera: 'Ingeniería en Ciencias de la Computación',
-    periodo_activo: 'Otoño 2024',
-    estatus: 'Regular'
+    nombre_completo: '',
+    matricula: '',
+    carrera: '',
+    periodo_activo: '',
+    estatus: ''
   };
 
-  estadisticasMaterias: MateriaStats[] = [
-    { nrc: '24589', nombre_materia: 'Arquitectura de Software', promedio: 9.8, presentes: 24, retardos: 1, faltas: 1, porcentaje_asistencia: 96.1, minimoAsegurado: 8.5, maximoPotencial: 10.0 },
-    { nrc: '24601', nombre_materia: 'Sistemas Operativos', promedio: 8.5, presentes: 20, retardos: 3, faltas: 3, porcentaje_asistencia: 88.4, minimoAsegurado: 6.5, maximoPotencial: 9.5 },
-    { nrc: '24712', nombre_materia: 'Inteligencia Artificial', promedio: 9.2, presentes: 25, retardos: 0, faltas: 1, porcentaje_asistencia: 96.1, minimoAsegurado: 7.0, maximoPotencial: 10.0 },
-    { nrc: '24855', nombre_materia: 'Base de Datos II', promedio: 7.4, presentes: 18, retardos: 5, faltas: 3, porcentaje_asistencia: 88.4, minimoAsegurado: 5.0, maximoPotencial: 8.5 },
-  ];
+  estadisticasMaterias: MateriaStats[] = [];
 
   promedioGeneral: number = 0;
   asistenciaTotal: number = 0;

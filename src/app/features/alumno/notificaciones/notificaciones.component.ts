@@ -8,5 +8,6 @@ import { Component } from '@angular/core';
   styles: ``
 })
 export class NotificacionesComponent {
+  notificaciones: any[] = [];
 
 }

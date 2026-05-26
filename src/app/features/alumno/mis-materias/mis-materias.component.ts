@@ -15,12 +15,7 @@ export class MisMateriasComponent {
   mostrarHorarioModal = false;
   mostrarBajaModal = false;
 
-  materias = [
-    { nrc: '24589', nombre: 'Arquitectura de Software', docente: 'Dr. Javier Ruiz Esparza', promedio: 9.8, creditos: 6 },
-    { nrc: '24601', nombre: 'Sistemas Operativos', docente: 'M.C. Laura Torres', promedio: 8.5, creditos: 6 },
-    { nrc: '24712', nombre: 'Inteligencia Artificial', docente: 'Dr. Roberto Mendoza', promedio: 9.2, creditos: 5 },
-    { nrc: '24855', nombre: 'Base de Datos II', docente: 'Mtra. Elena Gómez', promedio: 7.4, creditos: 5 },
-  ];
+  materias: any[] = [];
 
   abrirHorario() {
     this.mostrarHorarioModal = true;

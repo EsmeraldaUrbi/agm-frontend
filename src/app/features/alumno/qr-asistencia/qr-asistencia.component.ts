@@ -24,6 +24,8 @@ export class QrAsistenciaComponent implements OnInit, OnDestroy {
   ttlInicial = signal<number>(20);
   errorMsg = signal<string>('');
 
+  materias: any[] = [];
+
   private timerInterval: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit() {

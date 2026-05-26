@@ -3,18 +3,18 @@
     <div class="bg-white p-8 rounded-xl shadow-[0px_2px_4px_rgba(0,59,92,0.05)] border border-slate-100 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
         <div class="absolute -right-12 -top-12 w-48 h-48 bg-[#003B5C]/5 rounded-full blur-3xl"></div>
         <div class="relative z-10 text-center md:text-left">
-            <h1 class="text-3xl font-extrabold text-[#00253B] mb-2">¡Bienvenido, Alejandro!</h1>
-            <p class="text-on-surface-variant font-medium mb-4">Ingeniería en Ciencias de la Computación — <span class="text-primary-container">Periodo 2024</span></p>
+            <h1 class="text-3xl font-extrabold text-[#00253B] mb-2">¡Bienvenido, {{ alumnoInfo.nombre_completo ? alumnoInfo.nombre_completo.split(' ')[0] : 'Alumno' }}!</h1>
+            <p class="text-on-surface-variant font-medium mb-4">{{ alumnoInfo.carrera || 'Cargando...' }} — <span class="text-primary-container">{{ alumnoInfo.periodo_activo || 'Cargando...' }}</span></p>
             
             <div class="flex flex-wrap gap-4 justify-center md:justify-start">
                 <div class="px-4 py-2 bg-background rounded-lg border border-slate-100 flex flex-col">
                     <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Matrícula</span>
-                    <span class="text-sm font-bold text-[#003B5C]">202145682</span>
+                    <span class="text-sm font-bold text-[#003B5C]">{{ alumnoInfo.matricula || '---' }}</span>
                 </div>
                 <div class="px-4 py-2 bg-background rounded-lg border border-slate-100 flex flex-col">
                     <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Estatus</span>
                     <span class="text-sm font-bold text-secondary flex items-center gap-1">
-                        <span class="w-2 h-2 bg-secondary rounded-full"></span> Regular
+                        <span class="w-2 h-2 bg-secondary rounded-full"></span> {{ alumnoInfo.estatus || '---' }}
                     </span>
                 </div>
             </div>
