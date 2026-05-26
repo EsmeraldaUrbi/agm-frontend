@@ -7,7 +7,7 @@
       
       <!-- Progress Bar Active -->
       <div class="absolute top-1/2 left-0 h-0.5 bg-primary-container -translate-y-1/2 z-0 transition-all duration-500"
-           [style.width]="currentStep() === 1 ? '0%' : (currentStep() === 2 ? '33%' : '66%')"></div>
+           [style.width]="currentStep() === 1 ? '0%' : (currentStep() === 2 ? '33%' : (currentStep() === 3 ? '66%' : '100%'))"></div>
            
       <!-- Step 1: Upload -->
       <div class="relative z-10 flex flex-col items-center">
@@ -33,9 +33,10 @@
       
       <!-- Step 3: Preview -->
       <div class="relative z-10 flex flex-col items-center">
-        <div [ngClass]="currentStep() === 3 ? 'bg-white border-4 border-primary-container text-primary-container ring-4 ring-white' : 'bg-white border-2 border-slate-300 text-slate-400'"
-             class="w-10 h-10 rounded-full flex items-center justify-center transition-all">
-          <span class="text-sm font-bold">3</span>
+        <div [ngClass]="currentStep() > 3 ? 'bg-primary-container text-white border-primary-container' : (currentStep() === 3 ? 'bg-white border-4 border-primary-container text-primary-container ring-4 ring-white' : 'bg-white border-2 border-slate-300 text-slate-400')"
+             class="w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all">
+          <span *ngIf="currentStep() > 3" class="material-symbols-outlined text-sm">check</span>
+          <span *ngIf="currentStep() <= 3" class="text-sm font-bold">3</span>
         </div>
         <span [ngClass]="currentStep() >= 3 ? 'text-primary-container' : 'text-slate-400'"
               class="mt-2 text-xs font-bold uppercase tracking-tighter">Vista Previa</span>
@@ -43,10 +44,13 @@
       
       <!-- Step 4: Confirm -->
       <div class="relative z-10 flex flex-col items-center">
-        <div class="w-10 h-10 rounded-full bg-white border-2 border-slate-300 text-slate-400 flex items-center justify-center transition-all">
-          <span class="text-sm font-bold">4</span>
+        <div [ngClass]="currentStep() === 4 ? 'bg-primary-container text-white border-primary-container' : 'bg-white border-2 border-slate-300 text-slate-400'"
+             class="w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all">
+          <span *ngIf="currentStep() === 4" class="material-symbols-outlined text-sm">check</span>
+          <span *ngIf="currentStep() < 4" class="text-sm font-bold">4</span>
         </div>
-        <span class="mt-2 text-xs font-bold text-slate-400 uppercase tracking-tighter">Confirmar</span>
+        <span [ngClass]="currentStep() === 4 ? 'text-primary-container' : 'text-slate-400'"
+              class="mt-2 text-xs font-bold uppercase tracking-tighter">Confirmar</span>
       </div>
     </div>
   </div>
