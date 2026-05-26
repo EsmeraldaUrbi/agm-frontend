@@ -1,8 +1,9 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
-import { Observable, of, throwError } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
+import { API_CONFIG } from '../config/api.config';
+import { ApiClient } from './apiClient';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { normalizePeriodo, unwrapApiResponse, unwrapArrayResponse } from '../helpers/apiResponse.helpers';
 
 export interface Periodo {
   periodo_id?: string;
@@ -13,59 +14,80 @@ export interface Periodo {
 }
 
 export interface PeriodosPaginatedResponse {
-  data: {
-    items: Periodo[];
-    total: number;
-    page: number;
-    limit: number;
-  };
-  message: string;
-}
-
-export interface PeriodoResponse {
-  data: Periodo;
-  message: string;
+  items: Periodo[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class PeriodosService {
-  private http = inject(HttpClient);
-  // URL base para periodos (usando el puerto 8002 de catalogos/periodos-materias)
-  private apiUrl = `${environment.msCatalogosUrl}/api/v1/periodos`;
+  private apiClient = inject(ApiClient);
+  private apiUrl = `${API_CONFIG.catalogos}/periodos`;
 
-  // Obtener la lista de periodos
+  // GET /periodos?page=&limit=
   getPeriodos(page: number = 1, limit: number = 10, activo?: boolean): Observable<PeriodosPaginatedResponse> {
-    let params = new HttpParams().set('page', page).set('limit', limit);
+    const params: any = { page, limit };
     if (activo !== undefined) {
-      params = params.set('activo', activo);
+      params.activo = activo;
     }
-    return this.http.get<PeriodosPaginatedResponse>(this.apiUrl, { params });
+    return this.apiClient.get<any>(this.apiUrl, params).pipe(
+      map(res => {
+        // Manejar estructura { success, data: { items, total, page, limit } }
+        const unwrapped = unwrapApiResponse<any>(res);
+        const items = unwrapArrayResponse<Periodo>(unwrapped).map(normalizePeriodo);
+        return {
+          items,
+          total: unwrapped.total || items.length,
+          page: unwrapped.page || page,
+          limit: unwrapped.limit || limit
+        };
+      })
+    );
   }
 
-  // Obtener el periodo actualmente activo
-  getPeriodoActivo(): Observable<PeriodoResponse> {
-    return this.http.get<PeriodoResponse>(`${this.apiUrl}/activo`);
+  // GET /periodos/activo
+  getPeriodoActivo(): Observable<Periodo | null> {
+    return this.apiClient.get<any>(`${this.apiUrl}/activo`).pipe(
+      map(res => {
+        const data = unwrapApiResponse(res);
+        return data ? normalizePeriodo(data) : null;
+      })
+    );
   }
 
-  // Crear un nuevo periodo
-  createPeriodo(periodo: Partial<Periodo>): Observable<PeriodoResponse> {
-    return this.http.post<PeriodoResponse>(this.apiUrl, periodo);
+  // GET /periodos/:periodo_id
+  getPeriodoById(periodoId: string): Observable<Periodo> {
+    return this.apiClient.get<any>(`${this.apiUrl}/${periodoId}`).pipe(
+      map(res => normalizePeriodo(unwrapApiResponse(res)))
+    );
   }
 
-  // Actualizar un periodo existente
-  updatePeriodo(id: string, periodo: Partial<Periodo>): Observable<PeriodoResponse> {
-    return this.http.put<PeriodoResponse>(`${this.apiUrl}/${id}`, periodo);
+  // POST /periodos
+  createPeriodo(periodo: Partial<Periodo>): Observable<Periodo> {
+    return this.apiClient.post<any>(this.apiUrl, periodo).pipe(
+      map(res => normalizePeriodo(unwrapApiResponse(res)))
+    );
   }
 
-  // Activar un periodo (desactivará los demás)
-  activarPeriodo(id: string): Observable<PeriodoResponse> {
-    return this.http.post<PeriodoResponse>(`${this.apiUrl}/${id}/activar`, {});
+  // PATCH /periodos/:periodo_id
+  updatePeriodo(id: string, periodo: Partial<Periodo>): Observable<Periodo> {
+    return this.apiClient.patch<any>(`${this.apiUrl}/${id}`, periodo).pipe(
+      map(res => normalizePeriodo(unwrapApiResponse(res)))
+    );
   }
 
-  // Desactivar o "eliminar" lógicamente un periodo
-  deletePeriodo(id: string): Observable<PeriodoResponse> {
-    return this.http.delete<PeriodoResponse>(`${this.apiUrl}/${id}`);
+  // PATCH /periodos/:periodo_id/activar
+  activarPeriodo(id: string): Observable<Periodo> {
+    return this.apiClient.patch<any>(`${this.apiUrl}/${id}/activar`, {}).pipe(
+      map(res => normalizePeriodo(unwrapApiResponse(res)))
+    );
+  }
+
+  // DELETE /periodos/:periodo_id
+  deletePeriodo(id: string): Observable<any> {
+    return this.apiClient.delete<any>(`${this.apiUrl}/${id}`);
   }
 }
