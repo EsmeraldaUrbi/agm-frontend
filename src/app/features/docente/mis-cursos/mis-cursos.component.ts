@@ -99,7 +99,7 @@ export class MisCursosComponent implements OnInit {
             nrc: m.nrc || 'N/A',
             seccion: m.seccion || '001',
             nombre: m.nombre || 'Materia sin Nombre',
-            alumnos: Math.floor(Math.random() * 15) + 10, // Simulación de alumnos inscritos en UI para UX
+            alumnos: 0, // El conteo real se implementará con MS-Inscripciones
             progreso: isCanceled ? 100 : 75,
             progresoColor: isCanceled ? 'bg-red-500' : 'bg-emerald-500',
             estado: m.estado || 'ACTIVA'

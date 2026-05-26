@@ -3,11 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService, UserProfile } from '../../core/services/auth.service';
 
-interface PeriodoAcademico {
-  id: string;
-  nombre: string;
-  materias: { nrc: string; nombre: string; aprobacion: number }[];
-}
+
 
 @Component({
   selector: 'app-perfil',
@@ -26,13 +22,7 @@ export class PerfilComponent implements OnInit {
     activo: true
   };
 
-  periodosMock: PeriodoAcademico[] = [];
 
-  selectedPeriodoId = signal<string>('');
-
-  get currentPeriodoData() {
-    return this.periodosMock.find(p => p.id === this.selectedPeriodoId()) || null;
-  }
 
   ngOnInit() {
     // 1. Set local user immediately so UI doesn't get stuck on "Cargando..."

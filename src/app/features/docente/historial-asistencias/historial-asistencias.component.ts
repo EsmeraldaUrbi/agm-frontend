@@ -1,7 +1,10 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
+import { DocentesService } from '../../../core/services/docentes.service';
+import { MateriasService } from '../../../core/services/materias.service';
 
 type EstadoAsistencia = 'presente' | 'retardo' | 'falta' | 'justificado' | null;
 
@@ -30,47 +33,76 @@ interface MateriaActiva {
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './historial-asistencias.component.html'
 })
-export class HistorialAsistenciasComponent {
+export class HistorialAsistenciasComponent implements OnInit {
   
-  listaMateriasDisponibles: MateriaActiva[] = [
-    {
-      nrc: '15842',
-      nombre: 'Web Services Architecture',
-      seccion: '101',
-      horario: 'Lunes, Miércoles 16:00 - 18:00',
-      programa: 'Postgrado en Computación',
-      periodo: 'Primavera 2026',
-      alumnos: [
-        { matricula: '202145678', nombre: 'Aguilar Moreno, Mariana',    iniciales: 'AM', colorAvatar: 'bg-[#baeaff] text-[#001f29]',    hora: '08:02 AM', estado: 'presente'     },
-        { matricula: '202138902', nombre: 'Bautista Cruz, Roberto',      iniciales: 'BC', colorAvatar: 'bg-[#ffdcc3] text-[#2f1500]',    hora: '08:14 AM', estado: 'retardo'      },
-        { matricula: '202100432', nombre: 'Díaz Morales, Sofía Elena',   iniciales: 'DM', colorAvatar: 'bg-[#cce5ff] text-[#001d31]',    hora: '--:-- --',  estado: 'falta'        },
-        { matricula: '202188231', nombre: 'García Ruiz, Fernando',       iniciales: 'GR', colorAvatar: 'bg-[#42d0fe] text-[#00566d]',    hora: '08:01 AM', estado: 'presente'     },
-        { matricula: '202155612', nombre: 'Lopez Torres, Ricardo',       iniciales: 'LT', colorAvatar: 'bg-[#d29460] text-white',         hora: '--:-- --',  estado: 'justificado'  },
-      ]
-    },
-    {
-      nrc: '28491',
-      nombre: 'Sistemas Distribuidos',
-      seccion: '002',
-      horario: 'Martes, Jueves 14:00 - 16:00',
-      programa: 'Postgrado en Computación',
-      periodo: 'Primavera 2026',
-      alumnos: [
-        { matricula: '202144551', nombre: 'Carlos Mendoza Rivas', iniciales: 'CM', colorAvatar: 'bg-indigo-100 text-indigo-900', hora: '14:05 PM', estado: 'presente' },
-        { matricula: '202188992', nombre: 'Sofia Castro Vega', iniciales: 'SC', colorAvatar: 'bg-pink-100 text-pink-900', hora: '14:12 PM', estado: 'retardo' },
-        { matricula: '202199003', nombre: 'Luis Fernando Torres', iniciales: 'LT', colorAvatar: 'bg-teal-100 text-teal-900', hora: '14:01 PM', estado: 'presente' },
-      ]
-    }
-  ];
+  private authService = inject(AuthService);
+  private docentesService = inject(DocentesService);
+  private materiasService = inject(MateriasService);
 
-  materiaSeleccionadaNrc = signal<string>('15842');
-  materia = this.listaMateriasDisponibles[0];
+  listaMateriasDisponibles: MateriaActiva[] = [];
+  materiaSeleccionadaNrc = signal<string>('');
+  materia: MateriaActiva | null = null;
   fechaSeleccionada = new Date().toISOString().split('T')[0];
   busqueda = '';
+  alumnos = signal<Alumno[]>([]);
+  isLoading = signal(false);
+  docenteId: string | null = null;
 
-  alumnos = signal<Alumno[]>(this.materia.alumnos);
+  ngOnInit() {
+    this.resolverDocenteYCargarCursos();
+  }
 
-  constructor() {}
+  resolverDocenteYCargarCursos() {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+
+    this.isLoading.set(true);
+    this.docentesService.getDocentes().subscribe({
+      next: (docentes) => {
+        const matchingDocente = docentes.find(d => {
+          const docenteEmail = (d as any).email || d.correo || '';
+          return docenteEmail.toLowerCase() === user.email.toLowerCase();
+        });
+        if (matchingDocente && matchingDocente.docente_id) {
+          this.docenteId = matchingDocente.docente_id;
+          this.cargarCursos(matchingDocente.docente_id);
+        } else {
+          this.docenteId = user.user_id;
+          this.cargarCursos(user.user_id);
+        }
+      },
+      error: (err) => {
+        console.error('Error al resolver docente:', err);
+        this.docenteId = user.user_id;
+        this.cargarCursos(user.user_id);
+      }
+    });
+  }
+
+  cargarCursos(docenteId: string) {
+    this.materiasService.getMateriasByDocente(docenteId).subscribe({
+      next: (res) => {
+        this.listaMateriasDisponibles = res.items.map((m: any) => ({
+          nrc: m.nrc || 'N/A',
+          nombre: m.nombre || 'Materia sin Nombre',
+          seccion: m.seccion || '001',
+          horario: 'Por definir',
+          programa: 'Licenciatura',
+          periodo: m.periodo_id || 'Actual',
+          alumnos: []
+        }));
+        
+        if (this.listaMateriasDisponibles.length > 0) {
+          this.cambiarMateria(this.listaMateriasDisponibles[0].nrc);
+        }
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error al cargar materias:', err);
+        this.isLoading.set(false);
+      }
+    });
+  }
 
   cambiarMateria(nrc: string) {
     const mat = this.listaMateriasDisponibles.find(m => m.nrc === nrc);
@@ -90,7 +122,7 @@ export class HistorialAsistenciasComponent {
       faltas:       lista.filter(a => a.estado === 'falta').length,
       retardos:     lista.filter(a => a.estado === 'retardo').length,
       justificados: lista.filter(a => a.estado === 'justificado').length,
-      porcentaje:   Math.round((lista.filter(a => a.estado === 'presente' || a.estado === 'retardo').length / lista.length) * 100) || 0,
+      porcentaje:   lista.length > 0 ? Math.round((lista.filter(a => a.estado === 'presente' || a.estado === 'retardo').length / lista.length) * 100) : 0,
     };
   });
 

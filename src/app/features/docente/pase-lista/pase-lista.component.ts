@@ -1,8 +1,11 @@
-import { Component, signal, computed, OnDestroy, ElementRef, ViewChild, inject } from '@angular/core';
+import { Component, signal, computed, OnInit, OnDestroy, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AsistenciasService } from '../../../core/services/asistencias.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { DocentesService } from '../../../core/services/docentes.service';
+import { MateriasService } from '../../../core/services/materias.service';
 import jsQR from 'jsqr';
 
 interface AlumnoRegistrado {
@@ -20,16 +23,65 @@ type EstadoSesion = 'idle' | 'activa' | 'finalizada';
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './pase-lista.component.html'
 })
-export class PaseListaComponent implements OnDestroy {
+export class PaseListaComponent implements OnInit, OnDestroy {
   @ViewChild('videoEl', { static: false }) videoEl!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasEl', { static: false }) canvasEl!: ElementRef<HTMLCanvasElement>;
 
   private asistenciasService = inject(AsistenciasService);
+  private authService = inject(AuthService);
+  private docentesService = inject(DocentesService);
+  private materiasService = inject(MateriasService);
 
   estadoSesion = signal<EstadoSesion>('idle');
 
   materiaSeleccionada = '';
   materias: any[] = [];
+  docenteId: string | null = null;
+  isLoading = signal(false);
+
+  ngOnInit() {
+    this.resolverDocenteYCargarCursos();
+  }
+
+  resolverDocenteYCargarCursos() {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+
+    this.isLoading.set(true);
+    this.docentesService.getDocentes().subscribe({
+      next: (docentes) => {
+        const matchingDocente = docentes.find(d => {
+          const docenteEmail = (d as any).email || d.correo || '';
+          return docenteEmail.toLowerCase() === user.email.toLowerCase();
+        });
+        if (matchingDocente && matchingDocente.docente_id) {
+          this.docenteId = matchingDocente.docente_id;
+          this.cargarCursos(matchingDocente.docente_id);
+        } else {
+          this.docenteId = user.user_id;
+          this.cargarCursos(user.user_id);
+        }
+      },
+      error: (err) => {
+        console.error('Error al resolver docente:', err);
+        this.docenteId = user.user_id;
+        this.cargarCursos(user.user_id);
+      }
+    });
+  }
+
+  cargarCursos(docenteId: string) {
+    this.materiasService.getMateriasByDocente(docenteId).subscribe({
+      next: (res) => {
+        this.materias = res.items || [];
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error al cargar materias:', err);
+        this.isLoading.set(false);
+      }
+    });
+  }
 
   // Datos de sesión activa
   sessionId = signal<number | null>(null);

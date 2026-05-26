@@ -1,7 +1,10 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
+import { DocentesService } from '../../../core/services/docentes.service';
+import { MateriasService } from '../../../core/services/materias.service';
 
 interface AlumnoRendimiento {
   matricula: string;
@@ -34,90 +37,24 @@ interface MateriaActiva {
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './reportes.component.html'
 })
-export class ReportesComponent {
+export class ReportesComponent implements OnInit {
+  private authService = inject(AuthService);
+  private docentesService = inject(DocentesService);
+  private materiasService = inject(MateriasService);
+  
   // Lista de materias asignadas en el periodo activo para seleccionar dinámicamente
-  listaMateriasDisponibles: MateriaActiva[] = [
-    {
-      nrc: '15842',
-      nombre: 'Web Services Architecture',
-      seccion: '101',
-      horario: 'Lunes, Miércoles 16:00 - 18:00',
-      programa: 'Postgrado en Computación',
-      periodo: 'Primavera 2026',
-      promedioGeneral: '8.4',
-      tasaAprobacion: '75%',
-      alumnosRiesgo: '25%',
-      asistenciaPromedio: '92%',
-      alumnos: Array.from({ length: 25 }).map((_, i) => ({
-        matricula: `2020123${i < 10 ? '0'+i : i}`,
-        nombre: `Alumno Generico ${i+1}`,
-        promedioActual: Number((Math.random() * 4 + 6).toFixed(1)), // 6 to 10
-        promedioFinal: Number((Math.random() * 4 + 6).toFixed(1)),
-        promedioPonderadoReal: Number((Math.random() * 4 + 6).toFixed(1)),
-        promedioRedondeadoOficial: Math.round(Number((Math.random() * 4 + 6).toFixed(1))),
-        asistencia: Math.floor(Math.random() * 20 + 80), // 80 to 100
-        estatus: (Math.random() > 0.3) ? 'Aprobado Excelente' : 'Riesgo Moderado'
-      }))
-    },
-    {
-      nrc: '28491',
-      nombre: 'Sistemas Distribuidos',
-      seccion: '002',
-      horario: 'Martes, Jueves 14:00 - 16:00',
-      programa: 'Postgrado en Computación',
-      periodo: 'Primavera 2026',
-      promedioGeneral: '8.6',
-      tasaAprobacion: '88%',
-      alumnosRiesgo: '12%',
-      asistenciaPromedio: '95%',
-      alumnos: [
-        { matricula: '202144551', nombre: 'Carlos Mendoza Rivas', promedioActual: 8.5, promedioFinal: 8.6, promedioPonderadoReal: 8.6, promedioRedondeadoOficial: 9.0, asistencia: 95, estatus: 'Aprobado Buen Nivel' },
-        { matricula: '202188992', nombre: 'Sofia Castro Vega', promedioActual: 9.0, promedioFinal: 9.2, promedioPonderadoReal: 9.2, promedioRedondeadoOficial: 9.0, asistencia: 98, estatus: 'Aprobado Excelente' },
-        { matricula: '202199003', nombre: 'Luis Fernando Torres', promedioActual: 7.2, promedioFinal: 7.4, promedioPonderadoReal: 7.4, promedioRedondeadoOficial: 7.0, asistencia: 88, estatus: 'Aprobado Regular' },
-      ]
-    },
-    {
-      nrc: '31022',
-      nombre: 'Advanced Databases',
-      seccion: '202',
-      horario: 'Lunes, Miércoles 10:00 - 12:00',
-      programa: 'Postgrado en Computación',
-      periodo: 'Primavera 2026',
-      promedioGeneral: '9.2',
-      tasaAprobacion: '95%',
-      alumnosRiesgo: '5%',
-      asistenciaPromedio: '96%',
-      alumnos: [
-        { matricula: '202211223', nombre: 'Elena Rostova', promedioActual: 9.4, promedioFinal: 9.6, promedioPonderadoReal: 9.6, promedioRedondeadoOficial: 10.0, asistencia: 100, estatus: 'Aprobado Excelente' },
-        { matricula: '202233445', nombre: 'Miguel Angel Fox', promedioActual: 8.7, promedioFinal: 8.8, promedioPonderadoReal: 8.8, promedioRedondeadoOficial: 9.0, asistencia: 92, estatus: 'Aprobado Buen Nivel' },
-      ]
-    },
-    {
-      nrc: '22310',
-      nombre: 'Mobile Development',
-      seccion: '105',
-      horario: 'Viernes 14:00 - 18:00',
-      programa: 'Postgrado en Computación',
-      periodo: 'Primavera 2026',
-      promedioGeneral: '8.1',
-      tasaAprobacion: '80%',
-      alumnosRiesgo: '20%',
-      asistenciaPromedio: '89%',
-      alumnos: [
-        { matricula: '202355667', nombre: 'Patricia Fernandez', promedioActual: 8.1, promedioFinal: 8.4, promedioPonderadoReal: 8.4, promedioRedondeadoOficial: 8.0, asistencia: 90, estatus: 'Aprobado Buen Nivel' },
-        { matricula: '202377889', nombre: 'Roberto Gómez', promedioActual: 6.2, promedioFinal: 6.4, promedioPonderadoReal: 6.4, promedioRedondeadoOficial: 6.0, asistencia: 78, estatus: 'Riesgo Moderado' },
-      ]
-    }
-  ];
+  listaMateriasDisponibles: MateriaActiva[] = [];
 
-  materiaSeleccionadaNrc = signal<string>('15842');
-  materia = this.listaMateriasDisponibles[0];
+  materiaSeleccionadaNrc = signal<string>('');
+  materia: MateriaActiva | null = null;
   tabs = ['Alumnos', 'Ponderaciones', 'Actividades'];
-  alumnos = signal<AlumnoRendimiento[]>(this.materia.alumnos);
+  alumnos = signal<AlumnoRendimiento[]>([]);
 
   // Pagination states
   currentPage = signal(1);
   itemsPerPage = 10;
+  isLoading = signal(false);
+  docenteId: string | null = null;
 
   paginatedAlumnos = computed(() => {
     const start = (this.currentPage() - 1) * this.itemsPerPage;
@@ -127,6 +64,31 @@ export class ReportesComponent {
   totalPages = computed(() => {
     return Math.max(1, Math.ceil(this.alumnos().length / this.itemsPerPage));
   });
+
+  // --- Historial Académico ---
+  selectedPeriodoId = signal<string>('');
+
+  periodosHistoricos = computed(() => {
+    const materias = this.listaMateriasDisponibles;
+    const periodosMap = new Map<string, { id: string, nombre: string, materias: any[] }>();
+    materias.forEach(m => {
+      const p = m.periodo || 'Periodo Actual';
+      if (!periodosMap.has(p)) {
+        periodosMap.set(p, { id: p, nombre: p, materias: [] });
+      }
+      periodosMap.get(p)!.materias.push({
+        nrc: m.nrc,
+        nombre: m.nombre,
+        aprobacion: m.tasaAprobacion !== 'N/A' ? parseInt(m.tasaAprobacion) : 0
+      });
+    });
+    return Array.from(periodosMap.values());
+  });
+
+  currentPeriodoData = computed(() => {
+    return this.periodosHistoricos().find(p => p.id === this.selectedPeriodoId()) || null;
+  });
+  // ---------------------------
 
   nextPage() {
     if (this.currentPage() < this.totalPages()) {
@@ -144,7 +106,70 @@ export class ReportesComponent {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
-        this.cambiarMateria(id);
+        // Handle direct routing if necessary
+        // this.cambiarMateria(id);
+      }
+    });
+  }
+
+  ngOnInit() {
+    this.resolverDocenteYCargarCursos();
+  }
+
+  resolverDocenteYCargarCursos() {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+
+    this.isLoading.set(true);
+    this.docentesService.getDocentes().subscribe({
+      next: (docentes) => {
+        const matchingDocente = docentes.find(d => {
+          const docenteEmail = (d as any).email || d.correo || '';
+          return docenteEmail.toLowerCase() === user.email.toLowerCase();
+        });
+        if (matchingDocente && matchingDocente.docente_id) {
+          this.docenteId = matchingDocente.docente_id;
+          this.cargarCursos(matchingDocente.docente_id);
+        } else {
+          this.docenteId = user.user_id;
+          this.cargarCursos(user.user_id);
+        }
+      },
+      error: (err) => {
+        console.error('Error al resolver docente:', err);
+        this.docenteId = user.user_id;
+        this.cargarCursos(user.user_id);
+      }
+    });
+  }
+
+  cargarCursos(docenteId: string) {
+    this.materiasService.getMateriasByDocente(docenteId).subscribe({
+      next: (res) => {
+        this.listaMateriasDisponibles = res.items.map((m: any) => ({
+          nrc: m.nrc || 'N/A',
+          nombre: m.nombre || 'Materia sin Nombre',
+          seccion: m.seccion || '001',
+          horario: 'Por definir',
+          programa: 'Licenciatura',
+          periodo: m.periodo_id || 'Actual',
+          promedioGeneral: 'N/A',
+          tasaAprobacion: 'N/A',
+          alumnosRiesgo: 'N/A',
+          asistenciaPromedio: 'N/A',
+          alumnos: []
+        }));
+        
+        if (this.listaMateriasDisponibles.length > 0) {
+          this.cambiarMateria(this.listaMateriasDisponibles[0].nrc);
+          const firstPeriod = this.periodosHistoricos()[0];
+          if (firstPeriod) this.selectedPeriodoId.set(firstPeriod.id);
+        }
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error al cargar materias:', err);
+        this.isLoading.set(false);
       }
     });
   }
@@ -169,7 +194,7 @@ export class ReportesComponent {
 
     setTimeout(() => {
       this.descargando.set(null);
-      this.mensajeExito.set(`¡El reporte "${tipo}" para la materia ${this.materia.nombre} (NRC: ${this.materia.nrc}) en formato ${formato.toUpperCase()} se ha generado y descargado exitosamente vía MS-Reportes!`);
+      this.mensajeExito.set(`¡El reporte "${tipo}" para la materia ${this.materia?.nombre || ''} (NRC: ${this.materia?.nrc || ''}) en formato ${formato.toUpperCase()} se ha generado y descargado exitosamente vía MS-Reportes!`);
       
       setTimeout(() => {
         this.mensajeExito.set(null);

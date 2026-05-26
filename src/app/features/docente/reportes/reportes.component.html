@@ -25,22 +25,22 @@
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div class="flex items-center gap-2 mb-3">
-            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia.programa }}</span>
-            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia.periodo }}</span>
+            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia?.programa }}</span>
+            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia?.periodo }}</span>
           </div>
-          <h1 class="text-3xl font-extrabold tracking-tight mb-3 font-['Public_Sans']">{{ materia.nombre }}</h1>
+          <h1 class="text-3xl font-extrabold tracking-tight mb-3 font-['Public_Sans']">{{ materia?.nombre }}</h1>
           <div class="flex flex-wrap gap-4 text-white/80 font-medium text-sm">
             <div class="flex items-center gap-1.5">
               <span class="material-symbols-outlined text-sm">numbers</span>
-              NRC: {{ materia.nrc }}
+              NRC: {{ materia?.nrc }}
             </div>
             <div class="flex items-center gap-1.5">
               <span class="material-symbols-outlined text-sm">meeting_room</span>
-              Sección: {{ materia.seccion }}
+              Sección: {{ materia?.seccion }}
             </div>
             <div class="flex items-center gap-1.5">
               <span class="material-symbols-outlined text-sm">schedule</span>
-              {{ materia.horario }}
+              {{ materia?.horario }}
             </div>
           </div>
         </div>
@@ -83,7 +83,7 @@
         <span class="material-symbols-outlined text-[#003b5c] bg-[#003b5c]/10 p-2 rounded-lg text-xl">school</span>
       </div>
       <div>
-        <div class="text-3xl font-black text-[#003b5c] font-['Public_Sans']">{{ materia.promedioGeneral }} / 10</div>
+        <div class="text-3xl font-black text-[#003b5c] font-['Public_Sans']">{{ materia?.promedioGeneral }} / 10</div>
         <p class="text-xs text-emerald-600 font-bold mt-1 flex items-center gap-1">
           <span class="material-symbols-outlined text-xs">trending_up</span> Sincronizado con MS-Calificaciones
         </p>
@@ -96,7 +96,7 @@
         <span class="material-symbols-outlined text-emerald-600 bg-emerald-50 p-2 rounded-lg text-xl">verified</span>
       </div>
       <div>
-        <div class="text-3xl font-black text-emerald-700 font-['Public_Sans']">{{ materia.tasaAprobacion }}</div>
+        <div class="text-3xl font-black text-emerald-700 font-['Public_Sans']">{{ materia?.tasaAprobacion }}</div>
         <p class="text-xs text-[#72787e] mt-1">Alumnos con promedio aprobatorio</p>
       </div>
     </div>
@@ -107,7 +107,7 @@
         <span class="material-symbols-outlined text-amber-600 bg-amber-50 p-2 rounded-lg text-xl">warning</span>
       </div>
       <div>
-        <div class="text-3xl font-black text-amber-600 font-['Public_Sans']">{{ materia.alumnosRiesgo }}</div>
+        <div class="text-3xl font-black text-amber-600 font-['Public_Sans']">{{ materia?.alumnosRiesgo }}</div>
         <p class="text-xs text-amber-700 font-medium mt-1">Requieren atención académica</p>
       </div>
     </div>
@@ -118,7 +118,7 @@
         <span class="material-symbols-outlined text-blue-600 bg-blue-50 p-2 rounded-lg text-xl">co_present</span>
       </div>
       <div>
-        <div class="text-3xl font-black text-blue-700 font-['Public_Sans']">{{ materia.asistenciaPromedio }}</div>
+        <div class="text-3xl font-black text-blue-700 font-['Public_Sans']">{{ materia?.asistenciaPromedio }}</div>
         <p class="text-xs text-[#72787e] mt-1">Sincronizado con MS-Asistencias</p>
       </div>
     </div>
@@ -307,6 +307,65 @@
           Siguiente
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Historial Académico -->
+  <div class="bg-white rounded-xl shadow-sm border border-[#c2c7ce] overflow-hidden mt-8">
+    <div class="px-8 py-6 border-b border-[#c2c7ce]/60 flex flex-col md:flex-row justify-between md:items-center gap-4 bg-[#f3f4f5]/30">
+      <div>
+        <h2 class="text-xl font-black text-[#003b5c] flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#003b5c]">history_edu</span>
+          Historial Académico
+        </h2>
+        <p class="text-xs text-[#72787e] mt-1">Consulta las materias que has impartido por periodo académico.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <label class="text-xs font-bold text-[#003b5c] uppercase">Periodo:</label>
+        <select 
+          [(ngModel)]="selectedPeriodoId"
+          class="bg-white border border-[#c2c7ce] text-[#003b5c] text-sm font-bold rounded-lg px-4 py-2 outline-none focus:border-[#003b5c] focus:ring-1 focus:ring-[#003b5c] transition-all cursor-pointer">
+          @for (periodo of periodosHistoricos(); track periodo.id) {
+            <option [value]="periodo.id">{{ periodo.nombre }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="p-8">
+      @if (currentPeriodoData()) {
+        <div class="overflow-x-auto rounded-xl border border-[#c2c7ce]/60">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-[#c2c7ce]/40 text-[11px] font-extrabold text-[#72787e] uppercase tracking-widest">
+                <th class="py-4 px-6">NRC</th>
+                <th class="py-4 px-6">MATERIA</th>
+                <th class="py-4 px-6 text-center">APROBACIÓN (%)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-sm">
+              @for (materia of currentPeriodoData()!.materias; track materia.nrc) {
+                <tr class="hover:bg-[#f3f4f5]/40 transition-colors">
+                  <td class="py-4 px-6 font-mono font-bold text-[#003b5c]">{{ materia.nrc }}</td>
+                  <td class="py-4 px-6 font-bold text-[#42474e]">{{ materia.nombre }}</td>
+                  <td class="py-4 px-6 text-center">
+                    <span class="text-sm font-bold" [ngClass]="materia.aprobacion >= 80 ? 'text-[#2E7D32]' : 'text-amber-600'">
+                      {{ materia.aprobacion }}%
+                    </span>
+                  </td>
+                </tr>
+              }
+              @if (currentPeriodoData()!.materias.length === 0) {
+                <tr>
+                  <td colspan="3" class="py-8 text-center text-[#72787e] text-sm font-medium">
+                    No hay materias registradas para este periodo.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
     </div>
   </div>
 
