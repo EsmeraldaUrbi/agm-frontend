@@ -1,13 +1,15 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 import { AgmButtonComponent, AgmInputComponent, AgmCardComponent } from '../../../shared/components/ui';
 
 interface User {
   id: string;
   name: string;
   email: string;
-  cubiculo: string; // Changed from identifier and role
+  cubiculo: string; 
   status: 'active' | 'inactive';
   createdAt: string;
 }
@@ -36,54 +38,38 @@ interface User {
     }
   `]
 })
-export class UsuariosComponent {
+export class UsuariosComponent implements OnInit {
+  private http = inject(HttpClient);
+
   // Exponer Math para el HTML
   Math = Math;
 
-  // Datos iniciales de prueba (Mock) - Solo Docentes
-  usersList = signal<User[]>([
-    {
-      id: '1',
-      name: 'Adalberto Aguilar Lozano',
-      email: 'adalberto.aguilar@fcc.buap.mx',
-      cubiculo: 'Edificio 1, Cubículo 104',
-      status: 'active',
-      createdAt: '2024-02-15'
-    },
-    {
-      id: '2',
-      name: 'Esmeralda Urbieta Mora',
-      email: 'esmeralda.urbieta@fcc.buap.mx',
-      cubiculo: 'Edificio 2, Cubículo 210',
-      status: 'active',
-      createdAt: '2024-03-01'
-    },
-    {
-      id: '3',
-      name: 'Carlos Sánchez Torres',
-      email: 'carlos.sanchez@fcc.buap.mx',
-      cubiculo: 'Edificio 3, Cubículo 305',
-      status: 'active',
-      createdAt: '2020-05-10'
-    },
-    {
-      id: '4',
-      name: 'Ana Laura Mendez Ríos',
-      email: 'ana.mendez@fcc.buap.mx',
-      cubiculo: 'Edificio 1, Cubículo 105',
-      status: 'inactive',
-      createdAt: '2021-08-15'
-    },
-    // Añadimos más datos para probar la paginación
-    ...Array.from({ length: 15 }).map((_, i) => ({
-      id: `10${i}`,
-      name: `Docente de Prueba ${i + 1}`,
-      email: `docente${i + 1}@fcc.buap.mx`,
-      cubiculo: `Edificio ${Math.floor(i / 5) + 1}, Cubículo 10${i}`,
-      status: i % 3 === 0 ? 'inactive' : 'active' as 'active' | 'inactive',
-      createdAt: `2024-04-${(i % 28 + 1).toString().padStart(2, '0')}`
-    }))
-  ]);
+  // Lista dinámica obtenida desde el backend
+  usersList = signal<User[]>([]);
+
+  ngOnInit() {
+    this.cargarDocentes();
+  }
+
+  cargarDocentes() {
+    this.http.get<any[]>(`${environment.msUsuariosUrl}/api/v1/docentes/`).subscribe({
+      next: (data) => {
+        const mappedUsers: User[] = data.map(d => ({
+          id: d.docente_id,
+          name: d.nombre_completo,
+          email: d.correo,
+          cubiculo: d.cubiculo || 'N/A',
+          status: d.estatus_laboral ? 'active' : 'inactive',
+          createdAt: d.created_at ? new Date(d.created_at).toISOString().split('T')[0] : 'N/A'
+        }));
+        this.usersList.set(mappedUsers);
+      },
+      error: (err) => {
+        console.error('Error cargando docentes', err);
+        this.triggerToast('Error de conexión al obtener el padrón de docentes.');
+      }
+    });
+  }
 
   // Filtros reactivos (Signals)
   searchQuery = signal<string>('');

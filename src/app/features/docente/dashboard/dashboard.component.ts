@@ -62,7 +62,7 @@ export class DashboardComponent {
     labels: ['Excelencia (9.0 - 10)', 'Regular (6.0 - 8.9)', 'Reprobados (< 6.0)'],
     datasets: [
       {
-        data: [12, 18, 2], // Datos mock basados en la materia seleccionada
+        data: [0, 0, 0], // Datos pendientes de consumir backend
         backgroundColor: ['#2E7D32', '#0070A8', '#C62828'],
         borderRadius: 4,
         barPercentage: 0.6,
@@ -94,18 +94,15 @@ export class DashboardComponent {
     }
   };
 
-  // Escuchar el cambio del select para "recalcular" el histograma mockeado
+  // Escuchar el cambio del select para "recalcular" el histograma
   onChartMateriaChange() {
-    // Generar datos falsos basados en el ID para que se vea interactivo
-    const randomExcelencia = Math.floor(Math.random() * 15) + 5;
-    const randomRegular = Math.floor(Math.random() * 20) + 10;
-    const randomReprobados = Math.floor(Math.random() * 5);
-    
+    // TODO: Consumir MS-Calificaciones para obtener el histograma real.
+    // Por ahora, se elimina la lógica estática de Math.random() requerida en la limpieza de mocks.
     this.chartData = {
       labels: ['Excelencia (9.0 - 10)', 'Regular (6.0 - 8.9)', 'Reprobados (< 6.0)'],
       datasets: [
         {
-          data: [randomExcelencia, randomRegular, randomReprobados],
+          data: [0, 0, 0], // Datos reales pendientes de conexión a ms-calificaciones
           backgroundColor: ['#2E7D32', '#0070A8', '#C62828'],
           borderRadius: 4,
           barPercentage: 0.6,

@@ -1,6 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-importar-docentes',
@@ -12,9 +14,10 @@ export class ImportarDocentesComponent {
   currentStep = signal<1 | 2 | 3>(1);
   selectedFile = signal<File | null>(null);
   showDuplicateError = signal(false);
-  private processedHashes: string[] = [];
-
-  constructor(private router: Router) {}
+  isSaving = signal(false);
+  
+  private router = inject(Router);
+  private http = inject(HttpClient);
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -40,33 +43,11 @@ export class ImportarDocentesComponent {
     this.selectedFile.set(file);
     this.showDuplicateError.set(false);
     
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const buffer = e.target?.result as ArrayBuffer;
-      const hash = await this.calculateHash(buffer);
-      
-      if (this.processedHashes.includes(hash) || file.name.toLowerCase().includes('duplicado')) {
-        this.showDuplicateError.set(true);
-        this.selectedFile.set(null);
-      } else {
-        this.processFile(hash);
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  }
-
-  private async calculateHash(buffer: ArrayBuffer): Promise<string> {
-    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-
-  private processFile(hash: string) {
+    // Simular el "Parseo de vista previa" antes de confirmar
     this.currentStep.set(2);
     setTimeout(() => {
       this.currentStep.set(3);
-      this.processedHashes.push(hash);
-    }, 2500);
+    }, 1500);
   }
 
   cancelImport() {
@@ -76,6 +57,39 @@ export class ImportarDocentesComponent {
   }
 
   confirmImport() {
+
+    const file = this.selectedFile();
+    if (!file) return;
+
+    this.currentStep.set(4);
+    this.isSaving.set(true);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.http.post(`${environment.msUsuariosUrl}/api/v1/importar/docentes`, formData)
+      .subscribe({
+        next: (res: any) => {
+          this.isSaving.set(false);
+          // Permanece en el paso 4 mostrando el mensaje de éxito
+        },
+        error: (err: HttpErrorResponse) => {
+          this.isSaving.set(false);
+          this.showDuplicateError.set(true);
+          this.currentStep.set(1);
+          alert('Hubo un error al procesar el archivo. Podría tener formato inválido.');
+        }
+      });
+  }
+
+  resetImport() {
+    this.currentStep.set(1);
+    this.selectedFile.set(null);
+    this.showDuplicateError.set(false);
+    this.isSaving.set(false);
+  }
+
+
     this.router.navigate(['/admin/dashboard']);
   }
 }

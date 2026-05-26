@@ -16,7 +16,7 @@ export const authGuard: CanActivateFn = (route, state) => {
   const requiredRoles = route.data?.['roles'] as string[];
   if (requiredRoles && requiredRoles.length > 0) {
     const user = authService.currentUser();
-    const hasRole = user && requiredRoles.includes(user.rol);
+    const hasRole = user && requiredRoles.some(r => r.toLowerCase() === user.rol.toLowerCase());
 
     if (!hasRole) {
       router.navigate(['/acceso-denegado']);

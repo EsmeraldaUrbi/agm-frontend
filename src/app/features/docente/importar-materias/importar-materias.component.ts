@@ -1,6 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-importar-materias',
@@ -18,10 +20,10 @@ export class ImportarMateriasComponent {
   showScheduleModal = signal(false);
   selectedSchedule = signal<{ days: string, time: string, raw: string } | null>(null);
 
-  // Historial de hashes procesados (memoria volátil para pruebas)
   private processedHashes: string[] = [];
 
-  constructor(private router: Router) {}
+  private router = inject(Router);
+  private http = inject(HttpClient);
 
   openScheduleModal(scheduleStr: string) {
     const parts = scheduleStr.split(' ');
@@ -71,37 +73,11 @@ export class ImportarMateriasComponent {
     this.selectedFile.set(file);
     this.showDuplicateError.set(false);
     
-    // Leer archivo para generar hash y validar duplicados (Simulación Error 409)
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const buffer = e.target?.result as ArrayBuffer;
-      const hash = await this.calculateHash(buffer);
-      
-      // Si el archivo ya se subió en esta sesión o su nombre contiene "duplicado" (para forzar la prueba)
-      if (this.processedHashes.includes(hash) || file.name.toLowerCase().includes('duplicado')) {
-        this.showDuplicateError.set(true);
-        this.selectedFile.set(null);
-      } else {
-        this.processFile(hash);
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  }
-
-  private async calculateHash(buffer: ArrayBuffer): Promise<string> {
-    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-
-  private processFile(hash: string) {
+    // Simular tiempo de carga de vista previa
     this.currentStep.set(2);
-    
-    // Simulamos tiempo de procesamiento de backend (ej. OCR o parseo)
     setTimeout(() => {
       this.currentStep.set(3);
-      this.processedHashes.push(hash); // Registrar para evitar que lo suba de nuevo
-    }, 2500);
+    }, 1500);
   }
 
   cancelImport() {
@@ -111,7 +87,43 @@ export class ImportarMateriasComponent {
   }
 
   confirmImport() {
-    // Simular guardado exitoso
-    this.router.navigate(['/admin/dashboard']);
+
+    const file = this.selectedFile();
+    if (!file) return;
+
+    this.currentStep.set(4);
+    this.isSaving.set(true);
+
+    const formData = new FormData();
+    formData.append('archivo', file);
+    // UUIDs de prueba requeridos por el backend
+    formData.append('periodo_id', '11111111-1111-1111-1111-111111111111');
+    formData.append('plan_estudio_id', '22222222-2222-2222-2222-222222222222');
+
+    this.http.post(`${environment.msCatalogosUrl}/api/v1/importaciones/programacion-academica`, formData)
+      .subscribe({
+        next: () => {
+          this.isSaving.set(false);
+        },
+        error: () => {
+          this.isSaving.set(false);
+          this.showDuplicateError.set(true);
+          this.currentStep.set(1);
+          alert('Error al importar la carga académica. Revisa el archivo o los IDs del periodo.');
+        }
+      });
+  }
+
+  resetImport() {
+    this.currentStep.set(1);
+    this.selectedFile.set(null);
+    this.showDuplicateError.set(false);
+    this.isSaving.set(false);
+  }
+
+  goToDashboard() {
+    // Navigate back to the previous context, which might be a teacher's view or admin depending on who is logged in.
+    this.router.navigate(['/']); // Routing to root or dashboard
+
   }
 }

@@ -46,7 +46,6 @@ export class AuthService {
 
   login(email: string, contrasena: string, requestedRole?: string): Observable<LoginResponse> {
     const url = `${environment.msAuthUrl}/auth/login`;
-
     return this.http.post<{ data: LoginResponse; message: string }>(url, { email, contrasena }).pipe(
       map(res => res.data),
       tap(response => {
