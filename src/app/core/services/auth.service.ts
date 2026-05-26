@@ -120,7 +120,7 @@ export class AuthService {
       password = resetTokenOrPassword;
       // Extraer token dinámicamente de la URL de forma segura
       const urlParams = new URLSearchParams(window.location.search);
-      token = urlParams.get('token') || urlParams.get('reset_token') || 'mock';
+      token = urlParams.get('token') || urlParams.get('reset_token') || '';
     } else {
       token = resetTokenOrPassword;
       password = nuevaContrasena;

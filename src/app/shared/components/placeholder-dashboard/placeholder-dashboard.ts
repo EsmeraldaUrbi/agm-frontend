@@ -41,7 +41,7 @@ import { AgmButtonComponent } from '../ui/button';
             <span class="material-symbols-outlined text-primary text-xl">shield_person</span>
             <div>
               <h4 class="text-xs font-bold text-primary uppercase tracking-wider">Tu Rol Activo</h4>
-              <p class="text-sm font-semibold text-on-surface">{{ roleLabel }} (Sesión Mock)</p>
+              <p class="text-sm font-semibold text-on-surface">{{ roleLabel }} (Sesión Activa)</p>
             </div>
           </div>
           <div class="p-4 rounded-xl bg-surface-container border border-outline-variant/10 flex items-start gap-3">

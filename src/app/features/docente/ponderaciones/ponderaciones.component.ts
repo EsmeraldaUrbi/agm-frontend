@@ -86,7 +86,7 @@ export class PonderacionesComponent {
     this.criterios.update(list => list.filter(c => c.id !== id));
   }
 
-  // Guardar (mock — se conectará a POST :8004/calificaciones/ponderaciones)
+  // Guardar (se conectará a POST :8004/calificaciones/ponderaciones)
   guardado = signal(false);
   guardar() {
     if (!this.esValido()) return;

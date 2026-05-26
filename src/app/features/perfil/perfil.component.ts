@@ -40,18 +40,9 @@ export class PerfilComponent implements OnInit {
     if (localUser) {
       this.usuario = {
         user_id: localUser.user_id,
-        nombre_completo: localUser.nombre_completo || 'Usuario de Prueba',
+        nombre_completo: localUser.nombre_completo || 'Usuario',
         email: localUser.email,
         rol: localUser.rol || 'DOCENTE',
-        activo: true
-      };
-    } else {
-      // Si no hay local user, forzamos uno para poder ver el mock de docente
-      this.usuario = {
-        user_id: '123',
-        nombre_completo: 'Docente de Prueba',
-        email: 'docente@buap.mx',
-        rol: 'DOCENTE',
         activo: true
       };
     }
