@@ -1,9 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
+import { AuthService } from '../../../core/services/auth.service';
+import { DocentesService } from '../../../core/services/docentes.service';
+import { MateriasService } from '../../../core/services/materias.service';
 
 @Component({
   selector: 'app-docente-dashboard',
@@ -12,15 +15,70 @@ import { ChartConfiguration, ChartType } from 'chart.js';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent {
-  // Datos mockeados para la vista inicial
+export class DashboardComponent implements OnInit {
+  private authService = inject(AuthService);
+  private docentesService = inject(DocentesService);
+  private materiasService = inject(MateriasService);
+
   materias: any[] = [];
 
   selectedMateriaNrc = '';
   selectedChartNrc = '';
 
+  ngOnInit() {
+    this.cargarMaterias();
+  }
+
+  cargarMaterias() {
+    const user = this.authService.currentUser();
+    if (!user || !user.email) return;
+
+    this.docentesService.getDocentes({ limit: 100 }).subscribe({
+      next: (docentes) => {
+        const docente = docentes.find(d => {
+          const docenteEmail = (d as any).email || d.correo || '';
+          return docenteEmail.toLowerCase() === user.email.toLowerCase();
+        });
+        if (docente && (docente.docente_id || docente.id)) {
+          const docenteId = docente.docente_id || docente.id;
+          this.materiasService.getMateriasByDocente(docenteId as string, { limit: 100 }).subscribe({
+            next: (response) => {
+              this.materias = response.items || [];
+              if (this.materias.length > 0) {
+                this.selectedMateriaNrc = this.materias[0].nrc;
+                this.selectedChartNrc = this.materias[0].nrc;
+              }
+            },
+            error: (err) => console.error('Error cargando materias', err)
+          });
+        } else {
+          console.warn('Docente no encontrado en el padrón.');
+        }
+      },
+      error: (err) => console.error('Error cargando padrón docente', err)
+    });
+  }
+
   get selectedMateria() {
     return this.materias.find(m => m.nrc === this.selectedMateriaNrc) || { nrc: '', nombre: '', seccion: '', alumnos: 0, estatus: '', rendimiento: 0, asistencia: 0, asistenciaSemanal: [] };
+  }
+
+  get totalMaterias(): number {
+    return this.materias.length;
+  }
+
+  get totalAlumnos(): number {
+    return this.materias.reduce((acc, m) => acc + (m.alumnos || 0), 0);
+  }
+
+  get asistenciaPromedio(): number {
+    if (this.materias.length === 0) return 0;
+    const sum = this.materias.reduce((acc, m) => acc + (m.asistencia || 0), 0);
+    return Math.round(sum / this.materias.length);
+  }
+
+  get materiasPorCerrar(): number {
+    return this.materias.filter(m => m.estatus === 'PROXIMO_CIERRE' || m.estatus === 'POR CERRAR').length;
   }
 
   get asisLinePath(): string {

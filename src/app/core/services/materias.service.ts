@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { API_CONFIG } from '../config/api.config';
 import { ApiClient } from './apiClient';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, forkJoin, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { normalizeMateria, unwrapApiResponse, unwrapArrayResponse } from '../helpers/apiResponse.helpers';
 
 export interface PlanEstudio {
@@ -88,6 +88,7 @@ export class MateriasService {
   }
 
   // === MATERIAS OFERTADAS / REALES ===
+  // Máximo 100 por petición (restricción del backend)
   getMaterias(params?: {
     periodo?: string;
     docente_id?: string;
@@ -96,7 +97,8 @@ export class MateriasService {
     page?: number;
     limit?: number;
   }): Observable<any> {
-    return this.apiClient.get<any>(`${this.baseUrl}/materias`, params).pipe(
+    const safeParams = { ...params, limit: Math.min(params?.limit || 100, 100) };
+    return this.apiClient.get<any>(`${this.baseUrl}/materias`, safeParams).pipe(
       map(res => {
         const unwrapped = unwrapApiResponse<any>(res);
         const items = unwrapArrayResponse<any>(unwrapped).map(normalizeMateria);
@@ -104,14 +106,34 @@ export class MateriasService {
           items,
           total: unwrapped.total || items.length,
           page: unwrapped.page || params?.page || 1,
-          limit: unwrapped.limit || params?.limit || 10
+          limit: unwrapped.limit || safeParams.limit
         };
       })
     );
   }
 
+  // Obtiene TODAS las materias paginando automáticamente hasta agotar
+  getAllMaterias(params?: { periodo?: string; docente_id?: string; estado?: string; nrc?: string }): Observable<any[]> {
+    const limit = 100;
+    return this.getMaterias({ ...params, page: 1, limit }).pipe(
+      switchMap(firstPage => {
+        const total: number = firstPage.total;
+        const totalPages = Math.ceil(total / limit);
+        if (totalPages <= 1) return of(firstPage.items);
+        const requests: Observable<any>[] = [];
+        for (let p = 2; p <= totalPages; p++) {
+          requests.push(this.getMaterias({ ...params, page: p, limit }).pipe(map((r: any) => r.items)));
+        }
+        return forkJoin(requests).pipe(
+          map(pages => [...firstPage.items, ...pages.flat()])
+        );
+      })
+    );
+  }
+
   getMateriasByDocente(docenteId: string, params?: { page?: number; limit?: number }): Observable<any> {
-    return this.apiClient.get<any>(`${this.baseUrl}/materias/docente/${docenteId}`, params).pipe(
+    const safeParams = { ...params, limit: Math.min(params?.limit || 100, 100) };
+    return this.apiClient.get<any>(`${this.baseUrl}/materias/docente/${docenteId}`, safeParams).pipe(
       map(res => {
         const unwrapped = unwrapApiResponse<any>(res);
         const items = unwrapArrayResponse<any>(unwrapped).map(normalizeMateria);
@@ -119,7 +141,7 @@ export class MateriasService {
           items,
           total: unwrapped.total || items.length,
           page: unwrapped.page || params?.page || 1,
-          limit: unwrapped.limit || params?.limit || 10
+          limit: unwrapped.limit || safeParams.limit
         };
       })
     );

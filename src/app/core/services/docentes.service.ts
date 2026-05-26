@@ -7,9 +7,11 @@ import { normalizeDocente, unwrapApiResponse, unwrapArrayResponse } from '../hel
 
 export interface Docente {
   docente_id?: string;
+  id?: string;          // alias devuelto por algunos endpoints
   user_id?: string;
   nombre_completo: string;
   correo: string;
+  email?: string;       // campo normalizado por normalizeDocente
   cubiculo?: string;
   estatus_laboral?: boolean;
 }

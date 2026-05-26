@@ -49,7 +49,8 @@ export class SidebarComponent implements OnInit {
     const adminItems: NavItem[] = [
       // ── Principal ──────────────────────────────────────────
       { label: 'Dashboard',           route: '/admin/dashboard',          icon: 'dashboard',          section: 'Principal' },
-      { label: 'Directorios',         route: '/admin/usuarios',           icon: 'supervisor_account' },
+      { label: 'Directorio Docentes', route: '/admin/usuarios',           icon: 'supervisor_account' },
+      { label: 'Directorio Materias', route: '/admin/materias',           icon: 'menu_book' },
       { label: 'Periodos',            route: '/admin/periodos',           icon: 'calendar_month' },
       // ── Gestión de Datos ───────────────────────────────────
       { label: 'Importar Materias',   route: '/admin/importar-materias',  icon: 'upload_file',        section: 'Gestión de Datos' },

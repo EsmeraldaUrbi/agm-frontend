@@ -1,0 +1,90 @@
+<div class="p-6 md:p-8 space-y-6 bg-[#f8f9fa] min-h-screen font-body text-on-surface">
+  
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-black text-primary font-headline tracking-tight">Directorio de Materias</h1>
+      <p class="text-xs text-outline font-medium">Administra las materias ofertadas y su asignación docente.</p>
+    </div>
+    <agm-button (agmClick)="router.navigate(['/admin/importar-materias'])" size="md">
+      <span class="material-symbols-outlined text-base mr-1.5">upload_file</span>
+      Importar Materias
+    </agm-button>
+  </div>
+
+  <div *ngIf="materiasList().length === 0" class="flex flex-col items-center justify-center py-20 px-6 text-center bg-white rounded-3xl border border-outline-variant/15 shadow-md">
+    <div class="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center text-primary mb-6">
+      <span class="material-symbols-outlined text-4xl">book</span>
+    </div>
+    <h3 class="text-lg font-black text-primary font-headline mb-2">No hay materias</h3>
+    <p class="text-slate-500 text-sm max-w-sm mb-6">Aún no hay materias ofertadas en el sistema. Sube tu programación académica.</p>
+    <agm-button size="md" (agmClick)="router.navigate(['/admin/importar-materias'])">
+      Importar Programación
+    </agm-button>
+  </div>
+
+  <div *ngIf="materiasList().length > 0" class="space-y-6">
+    <agm-card [hoverable]="false" customClass="bg-white border-outline-variant/15 shadow-md" bodyClass="p-0">
+      <div class="p-5 border-b border-outline-variant/15 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+        <h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Listado de Materias</h2>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div class="relative min-w-[240px]">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">search</span>
+            <input type="text" [placeholder]="'Buscar por nombre, NRC o docente...'" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event || ''); resetPagination()" class="w-full h-9 pl-9 pr-4 text-xs font-medium bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface" />
+          </div>
+          <select [ngModel]="selectedStatusFilter()" (ngModelChange)="selectedStatusFilter.set($event); resetPagination()" class="h-9 px-3 text-xs font-semibold bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface cursor-pointer">
+            <option value="all">Todos los Estados</option>
+            <option value="ACTIVA">Activas</option>
+            <option value="INACTIVA">Inactivas</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-surface-variant/10 text-outline text-[10px] uppercase font-bold tracking-wider border-b border-outline-variant/15">
+              <th class="py-3 px-6">NRC / Materia</th>
+              <th class="py-3 px-6">Sección</th>
+              <th class="py-3 px-6">Docente Asignado</th>
+              <th class="py-3 px-6">Estado</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-outline-variant/10 text-xs font-medium">
+            <tr *ngFor="let m of paginatedMaterias()" class="hover:bg-surface-variant/5 transition-colors group">
+              <td class="py-4 px-6">
+                <p class="text-[10px] text-outline font-bold tracking-widest mb-0.5">NRC {{ m.nrc }}</p>
+                <p class="font-bold text-on-surface">{{ m.nombre }}</p>
+              </td>
+              <td class="py-4 px-6 text-on-surface-variant font-semibold">{{ m.seccion }}</td>
+              <td class="py-4 px-6">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[9px] uppercase">
+                    {{ m.docenteNombre ? m.docenteNombre[0] : 'S' }}
+                  </div>
+                  <span class="text-on-surface font-medium">{{ m.docenteNombre }}</span>
+                </div>
+              </td>
+              <td class="py-4 px-6">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase bg-primary/10 text-primary">
+                  {{ m.estado }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="filteredMaterias().length === 0">
+              <td colspan="4" class="py-8 text-center text-outline w-full block">No se encontraron materias que coincidan con la búsqueda.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="filteredMaterias().length > 0" class="p-4 border-t border-outline-variant/15 flex items-center justify-between text-xs font-semibold text-outline">
+        <div>Mostrando {{ (currentPage() - 1) * pageSize() + 1 }} a {{ Math.min(currentPage() * pageSize(), filteredMaterias().length) }} de {{ filteredMaterias().length }} materias</div>
+        <div class="flex gap-2">
+          <button (click)="prevPage()" [disabled]="currentPage() === 1" class="px-3 py-1.5 rounded-lg border border-outline-variant/30 hover:bg-surface-variant/20 disabled:opacity-50">Anterior</button>
+          <div class="px-3 py-1.5 font-bold text-on-surface">Página {{ currentPage() }} de {{ totalPages() }}</div>
+          <button (click)="nextPage()" [disabled]="currentPage() === totalPages()" class="px-3 py-1.5 rounded-lg border border-outline-variant/30 hover:bg-surface-variant/20 disabled:opacity-50">Siguiente</button>
+        </div>
+      </div>
+    </agm-card>
+  </div>
+</div>

@@ -22,6 +22,10 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () => import('./importar-docentes/importar-docentes').then(m => m.ImportarDocentesComponent)
   },
   {
+    path: 'materias',
+    loadComponent: () => import('./materias/materias.component').then(m => m.MateriasComponent)
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'
