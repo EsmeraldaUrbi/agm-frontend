@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 })
 export class HorarioComponent {
   @Input() scheduleData: any[] = [];
+  @Input() totalMaterias: number = 0;
 
   diasSemana = [
     { clave: 'LU', nombre: 'Lunes' },
@@ -41,10 +42,31 @@ export class HorarioComponent {
 
   getMateriaParaSlot(slotStart: string, dia: string): any {
     if (!this.scheduleData) return null;
+
+    const mapDias: { [key: string]: string } = {
+      '0': 'LU',
+      '1': 'LU', 'LUN': 'LU', 'LUNES': 'LU', 'L': 'LU',
+      '2': 'MA', 'MAR': 'MA', 'MARTES': 'MA', 'M': 'MA',
+      '3': 'MI', 'MIE': 'MI', 'MIERCOLES': 'MI', 'MIÉRCOLES': 'MI', 'I': 'MI', 'X': 'MI', 'W': 'MI',
+      '4': 'JU', 'JUE': 'JU', 'JUEVES': 'JU', 'J': 'JU',
+      '5': 'VI', 'VIE': 'VI', 'VIERNES': 'VI', 'V': 'VI',
+      '6': 'SA', 'SAB': 'SA', 'SABADO': 'SA', 'SÁBADO': 'SA', 'S': 'SA',
+      '7': 'DO', 'DOM': 'DO', 'DOMINGO': 'DO', 'D': 'DO'
+    };
+
     return this.scheduleData.find(s => {
-      // Backend puede devolver "dia" o "dia_semana" (normalizar)
-      const d = s.dia || s.dia_semana || '';
-      return s.hora_inicio === slotStart && d.toString().toUpperCase() === dia;
+      let d = (s.dia || s.dia_semana || '').toString().toUpperCase();
+      // Si el backend devuelve 1, 2... lo convertimos a LU, MA...
+      if (mapDias[d]) {
+        d = mapDias[d];
+      }
+
+      // Extraer solo la hora (ej. "08") para que si la materia empieza a las "08:15" o "08:30" 
+      // aún así encaje en la fila de las "08:00"
+      const hourBackend = s.hora_inicio ? s.hora_inicio.substring(0, 2) : '';
+      const hourSlot = slotStart ? slotStart.substring(0, 2) : '';
+
+      return hourBackend === hourSlot && d === dia;
     });
   }
 }

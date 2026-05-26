@@ -34,6 +34,12 @@
 </div>
 <!-- Rows -->
 <div class="relative z-10">
+    @if (!scheduleData || scheduleData.length === 0) {
+        <div class="p-8 text-center text-slate-500 font-bold bg-slate-50 border border-dashed border-slate-200 rounded-xl m-4">
+            No se encontraron clases programadas. Si crees que esto es un error, por favor asegúrate de que se hayan asignado horarios a esta materia desde el panel de administración (o en Postman).
+        </div>
+    }
+
     @for (slot of timeSlots; track slot.label) {
         <div class="schedule-grid border-b border-outline-variant/30">
             <div class="p-3 text-xs font-bold text-on-surface-variant border-r border-outline-variant flex items-start justify-center">{{ slot.label }}</div>
@@ -64,7 +70,7 @@
 <ul class="space-y-2 text-xs">
 <li class="flex justify-between">
 <span class="text-on-surface-variant">Materias Totales Inscritas:</span>
-<span class="font-bold text-primary">5</span>
+<span class="font-bold text-primary">{{ totalMaterias }}</span>
 </li>
 </ul>
 </div>
