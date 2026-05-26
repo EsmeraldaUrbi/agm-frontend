@@ -55,7 +55,7 @@ export class UsuariosComponent implements OnInit {
   }
 
   cargarDocentes() {
-    this.docentesService.getDocentes().subscribe({
+    this.docentesService.getDocentes({ limit: 1000 }).subscribe({
       next: (docentes) => {
         if (!docentes || !Array.isArray(docentes)) {
           this.usersList.set([]);
@@ -66,7 +66,7 @@ export class UsuariosComponent implements OnInit {
           return {
             id: d.docente_id || '',
             name: d.nombre_completo || '',
-            email: d.correo || '',
+            email: (d as any).email || d.correo || '',
             cubiculo: d.cubiculo || 'N/A',
             status: d.estatus_laboral ? 'active' : 'inactive',
             createdAt: 'N/A'

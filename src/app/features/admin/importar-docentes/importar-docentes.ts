@@ -59,11 +59,12 @@ export class ImportarDocentesComponent {
 
     const signature = `${file.name}_${file.size}`;
     const uploaded = JSON.parse(localStorage.getItem('agm_uploaded_docentes') || '[]');
-    if (uploaded.includes(signature)) {
-      this.showDuplicateError.set(true);
-      this.triggerToast('Este archivo de docentes ya fue cargado y procesado anteriormente.', 'error');
-      return;
-    }
+    // DESCOMENTAR EN PRODUCCIÓN: Evita subir el mismo archivo
+    // if (uploaded.includes(signature)) {
+    //   this.showDuplicateError.set(true);
+    //   this.triggerToast('Este archivo de docentes ya fue cargado y procesado anteriormente.', 'error');
+    //   return;
+    // }
 
     this.selectedFile.set(file);
     this.showDuplicateError.set(false);
