@@ -53,7 +53,7 @@ export class UsuariosComponent implements OnInit {
   }
 
   cargarDocentes() {
-    this.http.get<any[]>(`${environment.msUsuariosUrl}/api/v1/docentes/`).subscribe({
+    this.http.get<any[]>(`${environment.msUsuariosUrl}/api/v1/docentes/?limit=1000`).subscribe({
       next: (data) => {
         const mappedUsers: User[] = data.map(d => ({
           id: d.docente_id,
