@@ -1,9 +1,10 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { environment } from '../../../environments/environment';
-import { tap, map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { API_CONFIG } from '../config/api.config';
+import { ApiClient } from './apiClient';
+import { tap, map, catchError } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { normalizeUser, unwrapApiResponse } from '../helpers/apiResponse.helpers';
 
 export interface UserAuth {
   user_id: string;
@@ -17,6 +18,7 @@ export interface LoginResponse {
   access_token: string;
   token_type: string;
   refresh_token: string;
+  expires_in: number;
   user: UserAuth;
 }
 
@@ -32,44 +34,129 @@ export interface UserProfile {
   providedIn: 'root'
 })
 export class AuthService {
-  private http = inject(HttpClient);
+  private apiClient = inject(ApiClient);
   private router = inject(Router);
   
   currentUser = signal<UserAuth | null>(null);
 
   constructor() {
-    const savedUser = localStorage.getItem('agm_user');
-    if (savedUser) {
-      this.currentUser.set(JSON.parse(savedUser));
+    const session = this.getSession();
+    if (session && session.user) {
+      this.currentUser.set(session.user);
     }
   }
 
+  // POST /auth/login
   login(email: string, contrasena: string, requestedRole?: string): Observable<LoginResponse> {
-    const url = `${environment.msAuthUrl}/auth/login`;
-    return this.http.post<{ data: LoginResponse; message: string }>(url, { email, contrasena }).pipe(
-      map(res => res.data),
-      tap(response => {
-        localStorage.setItem('agm_token', response.access_token);
-        localStorage.setItem('agm_refresh_token', response.refresh_token);
-        localStorage.setItem('agm_user', JSON.stringify(response.user));
-        this.currentUser.set(response.user);
+    const url = `${API_CONFIG.auth}/auth/login`;
+    return this.apiClient.post<{ success: boolean; data: LoginResponse; message: string }>(url, { email, contrasena }).pipe(
+      map(res => {
+        const unwrapped = unwrapApiResponse<LoginResponse>(res);
+        return {
+          ...unwrapped,
+          user: normalizeUser(unwrapped.user)
+        };
+      }),
+      tap((response: LoginResponse) => {
+        this.saveSession(response);
       })
     );
   }
 
-  logout() {
-    // Podría consumir /auth/logout si es necesario, por ahora limpieza local
+  // GET /auth/me
+  getMe(): Observable<UserProfile> {
+    const url = `${API_CONFIG.auth}/auth/me`;
+    return this.apiClient.get<any>(url).pipe(
+      map(res => normalizeUser(unwrapApiResponse(res))),
+      tap(profile => {
+        const session = this.getSession();
+        if (session) {
+          session.user = profile;
+          localStorage.setItem('agm_user', JSON.stringify(profile));
+          this.currentUser.set(profile);
+        }
+      })
+    );
+  }
+
+  // POST /auth/refresh
+  refreshToken(refreshToken: string): Observable<any> {
+    const url = `${API_CONFIG.auth}/auth/refresh`;
+    return this.apiClient.post<any>(url, { refresh_token: refreshToken }).pipe(
+      tap(res => {
+        const data = unwrapApiResponse(res);
+        if (data && data.access_token) {
+          localStorage.setItem('agm_token', data.access_token);
+        }
+      })
+    );
+  }
+
+  // POST /auth/logout
+  logout(): Observable<any> {
+    const url = `${API_CONFIG.auth}/auth/logout`;
+    return this.apiClient.post<any>(url, {}).pipe(
+      catchError(() => of(null)), // Si falla por token inválido, igual salimos
+      tap(() => {
+        this.clearSession();
+        this.router.navigate(['/login']);
+      })
+    );
+  }
+
+  // POST /auth/forgot-password
+  forgotPassword(email: string): Observable<any> {
+    const url = `${API_CONFIG.auth}/auth/forgot-password`;
+    return this.apiClient.post<any>(url, { email });
+  }
+
+  // POST /auth/reset-password
+  resetPassword(resetToken: string, nuevaContrasena: string): Observable<any> {
+    const url = `${API_CONFIG.auth}/auth/reset-password`;
+    return this.apiClient.post<any>(url, {
+      reset_token: resetToken,
+      nueva_contrasena: nuevaContrasena
+    });
+  }
+
+  // Manejo de almacenamiento local
+  saveSession(data: LoginResponse) {
+    localStorage.setItem('agm_token', data.access_token);
+    localStorage.setItem('agm_refresh_token', data.refresh_token);
+    localStorage.setItem('agm_user', JSON.stringify(data.user));
+    // Guardar también datos individuales por compatibilidad solicitada
+    localStorage.setItem('current_user_id', data.user.user_id);
+    localStorage.setItem('current_user_email', data.user.email);
+    localStorage.setItem('current_user_role', data.user.rol);
+    localStorage.setItem('current_user_name', data.user.nombre_completo);
+    this.currentUser.set(data.user);
+  }
+
+  getSession() {
+    const access_token = localStorage.getItem('agm_token');
+    const refresh_token = localStorage.getItem('agm_refresh_token');
+    const savedUser = localStorage.getItem('agm_user');
+    const user = savedUser ? JSON.parse(savedUser) : null;
+    
+    if (access_token && refresh_token && user) {
+      return { access_token, refresh_token, user };
+    }
+    return null;
+  }
+
+  clearSession() {
     localStorage.removeItem('agm_token');
     localStorage.removeItem('agm_refresh_token');
     localStorage.removeItem('agm_user');
+    localStorage.removeItem('current_user_id');
+    localStorage.removeItem('current_user_email');
+    localStorage.removeItem('current_user_role');
+    localStorage.removeItem('current_user_name');
     this.currentUser.set(null);
-    this.router.navigate(['/login']);
   }
 
-  getProfile(): Observable<UserProfile> {
-    return this.http.get<{ data: UserProfile; message: string }>(`${environment.msAuthUrl}/auth/me`).pipe(
-      map(res => res.data)
-    );
+  getCurrentUser(): UserAuth | null {
+    return this.currentUser();
   }
 
   isAuthenticated(): boolean {
@@ -80,13 +167,9 @@ export class AuthService {
     return localStorage.getItem('agm_token');
   }
 
-  // Métodos de recuperación se adaptarían igual con this.http.post
-  recoverPassword(email: string): Observable<any> {
-    return this.http.post(`${environment.msAuthUrl}/auth/forgot-password`, { email });
-  }
-
-  resetPassword(password: string): Observable<any> {
-    // This is incomplete as reset_token is needed, but we keep the signature for the component
-    return this.http.post(`${environment.msAuthUrl}/auth/reset-password`, { reset_token: 'mock', nueva_contrasena: password });
+  hasRole(role: string): boolean {
+    const user = this.currentUser();
+    if (!user) return false;
+    return user.rol.toLowerCase() === role.toLowerCase();
   }
 }
