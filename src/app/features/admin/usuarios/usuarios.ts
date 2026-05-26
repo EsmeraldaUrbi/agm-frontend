@@ -46,6 +46,7 @@ export class UsuariosComponent implements OnInit {
 
   // Lista dinámica obtenida desde el backend
   usersList = signal<User[]>([]);
+  activeUsersCount = computed(() => this.usersList().filter(u => u.status === 'active').length);
 
   ngOnInit() {
     this.cargarDocentes();

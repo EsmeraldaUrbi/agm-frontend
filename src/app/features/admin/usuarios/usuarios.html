@@ -26,7 +26,7 @@
     <div class="bg-white p-4 rounded-2xl border border-outline-variant/15 shadow-sm flex items-center justify-between">
       <div>
         <p class="text-[10px] text-outline font-bold tracking-widest uppercase mb-1">Docentes Activos</p>
-        <p class="text-3xl font-black text-emerald-600">{{ usersList().filter(u => u.status === 'active').length }}</p>
+        <p class="text-3xl font-black text-emerald-600">{{ activeUsersCount() }}</p>
       </div>
       <div class="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600">
         <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>

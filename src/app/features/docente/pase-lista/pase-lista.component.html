@@ -203,7 +203,7 @@
               <div class="px-6 py-4 flex items-center justify-between hover:bg-[#f3f4f5] transition-colors">
                 <div class="flex items-center gap-3">
                   <div class="w-9 h-9 rounded-full bg-[#baeaff] flex items-center justify-center text-[#003b5c] font-black text-xs">
-                    {{ alumno.nombre.split(' ').map(n => n[0]).slice(0,2).join('') }}
+                    {{ getInitials(alumno.nombre) }}
                   </div>
                   <div>
                     <p class="text-sm font-bold text-[#191c1d]">{{ alumno.nombre }}</p>

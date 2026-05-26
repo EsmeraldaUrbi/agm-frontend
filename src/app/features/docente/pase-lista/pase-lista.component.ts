@@ -288,6 +288,10 @@ export class PaseListaComponent implements OnDestroy {
     this.tiempoRestante.set(600);
   }
 
+  getInitials(nombre: string): string {
+    return nombre.split(' ').map(n => n[0]).slice(0, 2).join('');
+  }
+
   get esIdle()      { return this.estadoSesion() === 'idle'; }
   get esActiva()    { return this.estadoSesion() === 'activa'; }
   get esFinalizada(){ return this.estadoSesion() === 'finalizada'; }
