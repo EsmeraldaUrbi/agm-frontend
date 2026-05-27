@@ -17,7 +17,7 @@
             </div>
             <div class="flex items-center gap-1.5">
               <span class="material-symbols-outlined text-sm">meeting_room</span>
-              SecciÃ³n: {{ materia().seccion }}
+              Sección: {{ materia().seccion }}
             </div>
             <div class="flex items-center gap-1.5">
               <span class="material-symbols-outlined text-sm">schedule</span>
@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <!-- Tabs de navegaciÃ³n -->
+    <!-- Tabs de navegación -->
     <nav class="flex border-b border-slate-100 bg-white px-6 overflow-x-auto">
       @for (tab of tabs; track tab) {
         <a class="px-5 py-4 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 cursor-pointer"
@@ -47,7 +47,7 @@
 
     <!-- Barra de Actividad Seleccionada y Acciones -->
     <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-      <!-- Breadcrumb y TÃ­tulo -->
+      <!-- Breadcrumb y Título -->
       <div class="mb-6 flex flex-col gap-2">
         <div class="flex items-center gap-2 text-sm text-[#72787e] font-semibold uppercase tracking-wider">
           <span>{{ actividadActual().ponderacion_nombre }}</span>
@@ -92,7 +92,7 @@
               <th class="py-4 px-6">MATRÃCULA</th>
               <th class="py-4 px-6">ALUMNO</th>
               <th class="py-4 px-6">CORREO INSTITUCIONAL</th>
-              <th class="py-4 px-6 text-center w-36" title="CalificaciÃ³n registrada para esta actividad">CALIFICACIÃN REGISTRADA</th>
+              <th class="py-4 px-6 text-center w-36" title="Calificación registrada para esta actividad">CALIFICACIÃN REGISTRADA</th>
               <th class="py-4 px-6 text-center w-36">ACCIONES</th>
             </tr>
           </thead>
@@ -103,7 +103,7 @@
                 <td class="py-4 px-6 font-bold text-[#42474e]">{{ item.nombre }}</td>
                 <td class="py-4 px-6 text-xs text-[#72787e]">{{ item.correo }}</td>
                 
-                <!-- CalificaciÃ³n Registrada -->
+                <!-- Calificación Registrada -->
                 <td class="p-4 align-middle text-center">
                   @if (item.calificacion !== null) {
                     <div class="inline-flex items-center justify-center px-4 py-1.5 bg-[#f3f4f5] border border-[#c2c7ce] rounded-lg shadow-sm">
@@ -145,7 +145,7 @@
           </div>
         </div>
         <div class="text-[#72787e] font-medium text-xs">
-          SincronizaciÃ³n en tiempo real vÃ­a gRPC con MS-Alumnos y MS-Calificaciones
+          Sincronización en tiempo real vía gRPC con MS-Alumnos y MS-Calificaciones
         </div>
       </div>
     </div>
@@ -177,7 +177,7 @@
         <div class="p-6 space-y-6 overflow-y-auto flex-1">
           
           @if (!resultadoImportacion()) {
-            <!-- Paso 1: SelecciÃ³n de Archivo -->
+            <!-- Paso 1: Selección de Archivo -->
             <div class="border-2 border-dashed border-[#c2c7ce] rounded-xl p-8 text-center hover:border-[#003b5c] transition-colors relative group bg-[#f3f4f5]/30">
               <input type="file" accept=".xlsx,.xls,.csv" (change)="seleccionarArchivo($event)"
                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"/>
@@ -192,7 +192,7 @@
                   <span class="material-symbols-outlined text-sm">check_circle</span> Archivo listo para importar
                 </p>
               } @else {
-                <p class="text-sm font-bold text-[#003b5c] mb-1">Haz clic para buscar o arrastra tu archivo Excel aquÃ­</p>
+                <p class="text-sm font-bold text-[#003b5c] mb-1">Haz clic para buscar o arrastra tu archivo Excel aquí</p>
                 <p class="text-xs text-[#72787e]">Formatos soportados: .xlsx, .xls, .csv</p>
               }
             </div>
@@ -201,7 +201,7 @@
               <span class="material-symbols-outlined text-amber-600 flex-shrink-0" style="font-variation-settings:'FILL' 1">warning</span>
               <div>
                 <strong class="font-bold block mb-0.5">Aviso importante sobre el formato:</strong>
-                El archivo Excel debe contener la columna de <strong>correo</strong> institucional del alumno y la columna de calificaciÃ³n. Las filas en blanco o sin puntos se considerarÃ¡n como no calificadas.
+                El archivo Excel debe contener la columna de <strong>correo</strong> institucional del alumno y la columna de calificación. Las filas en blanco o sin puntos se considerarÃ¡n como no calificadas.
               </div>
             </div>
           }
@@ -216,14 +216,14 @@
           }
 
           @if (resultadoImportacion() && !importando()) {
-            <!-- Paso 2: Resultados de ImportaciÃ³n -->
+            <!-- Paso 2: Resultados de Importación -->
             <div class="space-y-6 animate-fade-in">
               
               <!-- Banner de Ãxito -->
               <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3">
                 <span class="material-symbols-outlined text-emerald-600 text-2xl" style="font-variation-settings:'FILL' 1">check_circle</span>
                 <div>
-                  <h4 class="text-sm font-bold text-emerald-800">ImportaciÃ³n de calificaciones finalizada</h4>
+                  <h4 class="text-sm font-bold text-emerald-800">Importación de calificaciones finalizada</h4>
                   <p class="text-xs text-emerald-700 font-mono mt-0.5">Actividad ID: {{ resultadoImportacion().actividad_id }}</p>
                 </div>
               </div>
@@ -329,22 +329,22 @@
         <!-- Body Modal -->
         <div class="p-6 space-y-6 overflow-y-auto flex-1">
           
-          <!-- Tarjeta de InformaciÃ³n del Alumno -->
+          <!-- Tarjeta de Información del Alumno -->
           <div class="p-4 bg-[#f3f4f5] border border-[#c2c7ce]/60 rounded-xl flex items-center gap-4">
             <div class="w-12 h-12 rounded-full bg-[#003b5c] text-white flex items-center justify-center font-bold text-lg flex-shrink-0 font-['Public_Sans']">
               {{ alumnoSeleccionado()!.nombre.charAt(0) }}
             </div>
             <div>
               <h4 class="text-base font-bold text-[#003b5c]">{{ alumnoSeleccionado()!.nombre }}</h4>
-              <p class="text-xs text-[#72787e] font-mono mt-0.5">MatrÃ­cula: {{ alumnoSeleccionado()!.matricula }} | {{ alumnoSeleccionado()!.correo }}</p>
+              <p class="text-xs text-[#72787e] font-mono mt-0.5">Matrícula: {{ alumnoSeleccionado()!.matricula }} | {{ alumnoSeleccionado()!.correo }}</p>
             </div>
           </div>
 
-          <!-- Formulario de CalificaciÃ³n -->
+          <!-- Formulario de Calificación -->
           <div class="space-y-4">
             <div>
               <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">
-                CalificaciÃ³n Obtenida (Puntos sobre {{ actividadActual().valor_maximo }})
+                Calificación Obtenida (Puntos sobre {{ actividadActual().valor_maximo }})
               </label>
               <input type="number" [(ngModel)]="formCalificacionManual().calificacion" min="0" [max]="actividadActual().valor_maximo" step="0.1"
                 class="w-full bg-[#f8f9fa] border-2 border-[#c2c7ce] rounded-lg px-4 py-2.5 text-base font-bold text-[#003b5c] focus:border-[#003b5c] focus:ring-1 focus:ring-[#003b5c] outline-none transition-all"/>
@@ -357,19 +357,19 @@
               <select [(ngModel)]="formCalificacionManual().estatus_entrega"
                 class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-4 py-2 text-sm text-[#191c1d] focus:border-[#003b5c] outline-none transition-all">
                 <option value="Entregado a Tiempo">Entregado a Tiempo</option>
-                <option value="Entrega TardÃ­a">Entrega TardÃ­a</option>
+                <option value="Entrega Tardía">Entrega Tardía</option>
                 <option value="Justificado">Justificado</option>
-                <option value="No EntregÃ³">No EntregÃ³</option>
+                <option value="No Entregó">No Entregó</option>
               </select>
             </div>
 
             <div>
               <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">
-                Comentarios / RetroalimentaciÃ³n (Opcional)
+                Comentarios / Retroalimentación (Opcional)
               </label>
               <textarea [(ngModel)]="formCalificacionManual().observaciones" rows="3"
                 class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg p-3 text-sm text-[#191c1d] focus:border-[#003b5c] outline-none transition-all"
-                placeholder="Escribe comentarios o notas sobre el desempeÃ±o en esta actividad..."></textarea>
+                placeholder="Escribe comentarios o notas sobre el desempeño en esta actividad..."></textarea>
             </div>
           </div>
 
@@ -392,7 +392,7 @@
     </div>
   }
 
-  <!-- Toast de Ãxito CalificaciÃ³n Manual -->
+  <!-- Toast de Ãxito Calificación Manual -->
   @if (mensajeExitoManual()) {
     <div class="fixed bottom-6 right-6 z-50 flex items-center gap-3 p-4 bg-emerald-600 text-white rounded-xl shadow-2xl animate-bounce-in border border-emerald-500 max-w-md">
       <span class="material-symbols-outlined text-2xl flex-shrink-0" style="font-variation-settings:'FILL' 1">check_circle</span>
