@@ -33,7 +33,7 @@
     <nav class="flex border-b border-slate-100 bg-white px-6 overflow-x-auto">
       @for (tab of tabs; track tab) {
         <a class="px-5 py-4 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 cursor-pointer"
-          [routerLink]="['/docente/materias', materia().materia_id, tab.toLowerCase()]"
+          [routerLink]="['/docente/materias', routeId() || materia().materia_id, tab.toLowerCase()]"
           [ngClass]="tab === 'Alumnos'
             ? 'text-[#003b5c] border-[#003b5c]'
             : 'text-slate-500 hover:text-[#003b5c] border-transparent'">

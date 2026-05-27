@@ -47,6 +47,8 @@ export class ImportarAlumnosComponent {
     );
   });
 
+  routeId = signal<string>('');
+
   constructor(
     private route: ActivatedRoute,
     private materiasService: MateriasService,
@@ -55,6 +57,7 @@ export class ImportarAlumnosComponent {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
+        this.routeId.set(id);
         this.cargarDatosMateria(id);
         this.cargarAlumnosDeMateria(id);
       }
@@ -117,7 +120,7 @@ export class ImportarAlumnosComponent {
 
   // Stepper Importar PDF BUAP (Modal)
   showPdfModal = signal(false);
-  step = signal<number>(1); // 1: Subir PDF, 2: Procesando, 3: Previsualización, 4: Confirmado
+  step = signal<number>(1); // 1: Subir PDF, 2: Confirmar, 3: Procesando, 4: Confirmado
   archivoSeleccionado = signal<string>('');
   alumnosExtraidos = signal<any[]>([]);
   archivoParaSubir: File | null = null;
@@ -148,7 +151,9 @@ export class ImportarAlumnosComponent {
     
     this.step.set(3); // Procesando...
     
-    this.alumnosService.importarAlumnos(this.archivoParaSubir, this.materia().materia_id).subscribe({
+    const materiaId = this.routeId() || this.materia().materia_id;
+    
+    this.alumnosService.importarAlumnos(this.archivoParaSubir, materiaId).subscribe({
       next: (res) => {
         this.importResult.set(res);
         this.step.set(4); // Exito
@@ -166,8 +171,11 @@ export class ImportarAlumnosComponent {
     this.showPdfModal.set(false);
     // Idealmente recargar la lista de alumnos
     if (this.step() === 4) {
-      const id = this.materia().materia_id;
-      if (id) this.cargarAlumnosDeMateria(id);
+      const id = this.routeId() || this.materia().materia_id;
+      if (id) {
+        this.alumnosService.invalidateMateriaAlumnosCache(id);
+        this.cargarAlumnosDeMateria(id);
+      }
     }
   }
 }

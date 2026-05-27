@@ -42,6 +42,10 @@ export class AlumnosService {
     return this.materiaAlumnosCache.get(materiaId)!;
   }
 
+  invalidateMateriaAlumnosCache(materiaId: string): void {
+    this.materiaAlumnosCache.delete(materiaId);
+  }
+
   // GET /api/v1/alumnos/:alumno_id
   getAlumnoById(alumnoId: string): Observable<Alumno> {
     return this.apiClient.get<any>(`${this.apiUrl}/${alumnoId}`).pipe(
