@@ -51,24 +51,16 @@
   <!-- ===== Contenido de Calificaciones ===== -->
   <div class="space-y-6">
 
-    <!-- Toast de guardado exitoso -->
-    @if (guardado()) {
-      <div class="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl animate-fade-in">
-        <span class="material-symbols-outlined text-emerald-600" style="font-variation-settings:'FILL' 1">check_circle</span>
-        <span class="text-sm font-bold text-emerald-700">Calificaciones guardadas y sincronizadas con MS-Calificaciones.</span>
-      </div>
-    }
-
     <!-- Barra de Actividad Seleccionada y Acciones -->
     <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-      <div>
-        <div class="flex items-center gap-2 mb-1.5">
-          <span class="px-2.5 py-0.5 bg-[#003b5c]/8 text-[#003b5c] rounded text-xs font-bold uppercase tracking-wider">
-            {{ actividadActual.ponderacion_nombre }}
-          </span>
-          <span class="text-xs text-[#72787e] font-semibold">Valor: {{ actividadActual.valor_maximo }} pts</span>
+      <!-- Breadcrumb y Título -->
+      <div class="mb-6 flex flex-col gap-2">
+        <div class="flex items-center gap-2 text-sm text-[#72787e] font-semibold uppercase tracking-wider">
+          <span>{{ actividadActual().ponderacion_nombre }}</span>
+          <span class="w-1 h-1 rounded-full bg-[#c2c7ce]"></span>
+          <span>Valor: {{ actividadActual().valor_maximo }} pts</span>
         </div>
-        <h2 class="text-2xl font-black text-[#003b5c] font-['Public_Sans']">{{ actividadActual.nombre }}</h2>
+        <h2 class="text-3xl font-black text-[#003b5c] font-['Public_Sans']">{{ actividadActual().nombre }}</h2>
       </div>
 
       <div class="flex flex-wrap gap-3 w-full md:w-auto justify-end">
@@ -78,23 +70,24 @@
           Importar Excel
         </button>
 
-        <button (click)="guardarCalificaciones()"
-          class="flex items-center gap-2 px-6 py-2.5 bg-[#003b5c] text-white hover:bg-[#00253b] rounded-lg font-bold text-sm shadow-md transition-all flex-1 md:flex-none justify-center">
-          <span class="material-symbols-outlined text-sm">save</span>
-          Guardar Cambios
+        <button (click)="cargarDatosCalificacion(materia().materia_id, actividadActual().actividad_id)"
+          class="px-5 py-2.5 bg-[#003b5c] text-white rounded-lg shadow hover:bg-[#00253b] transition-colors font-bold text-sm flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">refresh</span>
+          Actualizar Datos
         </button>
       </div>
     </div>
 
-    <!-- Tabla Principal de Calificaciones (Alineada a Imagen 2) -->
+    <!-- Tabla Principal de Calificaciones -->
     <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden">
-      <div class="bg-[#f3f4f5] px-6 py-4 border-b border-[#c2c7ce]/60 flex justify-between items-center">
-        <div class="flex items-center gap-2 text-xs font-bold text-[#42474e] uppercase tracking-wider">
-          <span class="material-symbols-outlined text-[18px] text-[#003b5c]">group</span>
-          Lista de Alumnos Inscritos ({{ calificaciones().length }})
+      <!-- Header Tabla -->
+      <div class="flex items-center justify-between p-4 bg-[#f8f9fa] border-b border-[#c2c7ce] rounded-t-xl">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#003b5c] text-lg font-light">group</span>
+          <h3 class="text-sm font-bold text-[#42474e] uppercase tracking-wider font-['Public_Sans']">Lista de Alumnos Inscritos ({{ calificaciones().length }})</h3>
         </div>
-        <div class="text-xs text-[#72787e] font-semibold">
-          Promedio de la Actividad: <strong class="text-[#003b5c] text-sm">{{ promedioActividad() | number:'1.1-1' }} / {{ actividadActual.valor_maximo }}</strong>
+        <div class="text-sm font-bold text-[#42474e]">
+          Promedio de la Actividad: <span class="text-[#003b5c] text-base">{{ promedioActividad() | number:'1.1-2' }} / {{ actividadActual().valor_maximo }}</span>
         </div>
       </div>
 
@@ -116,16 +109,18 @@
                 <td class="py-4 px-6 font-bold text-[#42474e]">{{ item.nombre }}</td>
                 <td class="py-4 px-6 text-xs text-[#72787e]">{{ item.correo }}</td>
                 
-                <!-- Calificación Registrada (Texto / Badge) -->
-                <td class="py-3 px-6 text-center bg-slate-50/40 group-hover:bg-white transition-colors">
-                  @if (item.calificacion > 0) {
-                    <span class="px-3 py-1 bg-slate-100 rounded-lg border border-slate-200 text-sm font-bold text-[#003b5c] inline-block w-24">
-                      {{ item.calificacion }} / {{ actividadActual.valor_maximo }}
-                    </span>
+                <!-- Calificación Registrada -->
+                <td class="p-4 align-middle text-center">
+                  @if (item.calificacion !== null) {
+                    <div class="inline-flex items-center justify-center px-4 py-1.5 bg-[#f3f4f5] border border-[#c2c7ce] rounded-lg shadow-sm">
+                      <span class="font-bold text-[#003b5c] text-base">{{ item.calificacion }}</span>
+                      <span class="text-[#72787e] text-xs font-bold mx-1">/</span>
+                      <span class="text-[#72787e] text-xs font-bold">{{ actividadActual().valor_maximo }}</span>
+                    </div>
                   } @else {
-                    <span class="px-3 py-1 bg-red-50 text-red-700 rounded-lg border border-red-200 text-xs font-bold inline-block">
-                      Sin Calificar
-                    </span>
+                    <div class="inline-flex items-center justify-center px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg shadow-sm">
+                      <span class="text-xs font-bold uppercase tracking-wider">Sin Calificar</span>
+                    </div>
                   }
                 </td>
 
@@ -144,25 +139,27 @@
       </div>
 
       <!-- Table Footer -->
-      <div class="p-6 bg-white border-t border-[#c2c7ce]/40 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-semibold text-[#72787e]">
+      <div class="p-4 bg-white border-t border-[#c2c7ce] rounded-b-xl flex items-center justify-between text-sm">
         <div class="flex items-center gap-6">
-          <span class="flex items-center gap-1.5 text-[#003b5c]">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#003b5c]"></span>
-            Aprobados: {{ calificaciones().length - 1 }}
-          </span>
-          <span class="flex items-center gap-1.5 text-[#ba1a1a]">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#ba1a1a]"></span>
-            Sin Calificar / Cero: 1
-          </span>
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-[#003b5c]"></div>
+            <span class="font-bold text-[#42474e]">Aprobados: {{ alumnosAprobados() }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-[#ba1a1a]"></div>
+            <span class="font-bold text-[#42474e]">Sin Calificar / Cero: {{ alumnosSinCalificarOCero() }}</span>
+          </div>
         </div>
-        <p>Sincronización en tiempo real vía gRPC con MS-Alumnos y MS-Calificaciones</p>
+        <div class="text-[#72787e] font-medium text-xs">
+          Sincronización en tiempo real vía gRPC con MS-Alumnos y MS-Calificaciones
+        </div>
       </div>
     </div>
 
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: IMPORTAR EXCEL DE CALIFICACIONES (Imagen 1)                        -->
+  <!-- MODAL: IMPORTAR EXCEL DE CALIFICACIONES                                   -->
   <!-- ========================================================================= -->
   @if (showImportModal()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
@@ -175,7 +172,7 @@
               <span class="material-symbols-outlined text-2xl">upload_file</span>
               <h3 class="text-xl font-bold font-['Public_Sans']">Importar Calificaciones desde Excel</h3>
             </div>
-            <p class="text-xs text-white/80 font-medium pl-8">Actividad: {{ actividadActual.nombre }}</p>
+            <p class="text-xs text-white/80 font-medium pl-8">Actividad: {{ actividadActual().nombre }}</p>
           </div>
           <button (click)="cerrarImportModal()" class="text-white/80 hover:text-white transition-colors">
             <span class="material-symbols-outlined">close</span>
@@ -225,7 +222,7 @@
           }
 
           @if (resultadoImportacion() && !importando()) {
-            <!-- Paso 2: Resultados de Importación (Alineado a Imagen 1) -->
+            <!-- Paso 2: Resultados de Importación -->
             <div class="space-y-6 animate-fade-in">
               
               <!-- Banner de Éxito -->
@@ -328,7 +325,7 @@
               <span class="material-symbols-outlined text-2xl">edit_square</span>
               <h3 class="text-xl font-bold font-['Public_Sans']">Calificar Alumno Manualmente</h3>
             </div>
-            <p class="text-xs text-white/80 font-medium pl-8">Actividad: {{ actividadActual.nombre }}</p>
+            <p class="text-xs text-white/80 font-medium pl-8">Actividad: {{ actividadActual().nombre }}</p>
           </div>
           <button (click)="cerrarManualModal()" class="text-white/80 hover:text-white transition-colors">
             <span class="material-symbols-outlined">close</span>
@@ -353,9 +350,9 @@
           <div class="space-y-4">
             <div>
               <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">
-                Calificación Obtenida (Puntos sobre {{ actividadActual.valor_maximo }})
+                Calificación Obtenida (Puntos sobre {{ actividadActual().valor_maximo }})
               </label>
-              <input type="number" [(ngModel)]="formCalificacionManual().calificacion" min="0" [max]="actividadActual.valor_maximo" step="0.1"
+              <input type="number" [(ngModel)]="formCalificacionManual().calificacion" min="0" [max]="actividadActual().valor_maximo" step="0.1"
                 class="w-full bg-[#f8f9fa] border-2 border-[#c2c7ce] rounded-lg px-4 py-2.5 text-base font-bold text-[#003b5c] focus:border-[#003b5c] focus:ring-1 focus:ring-[#003b5c] outline-none transition-all"/>
             </div>
 
@@ -393,7 +390,7 @@
           <button (click)="guardarCalificacionManual()"
             class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all flex items-center gap-2">
             <span class="material-symbols-outlined text-sm">save</span>
-            Guardar Calificación
+            Guardar Calificaci�n
           </button>
         </div>
 
@@ -410,3 +407,4 @@
   }
 
 </div>
+

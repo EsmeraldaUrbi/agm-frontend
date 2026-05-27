@@ -92,6 +92,13 @@ export class CalificacionesService {
     );
   }
 
+  // GET /api/v1/calificaciones/actividad/:actividad_id
+  getCalificacionesByActividad(actividadId: string): Observable<Calificacion[]> {
+    return this.apiClient.get<any>(`${this.baseUrl}/calificaciones/actividad/${actividadId}`).pipe(
+      map(res => unwrapArrayResponse<any>(res).map(normalizeCalificacion))
+    );
+  }
+
   // POST /api/v1/calificaciones
   createCalificacion(payload: Partial<Calificacion>): Observable<Calificacion> {
     return this.apiClient.post<any>(`${this.baseUrl}/calificaciones`, payload).pipe(

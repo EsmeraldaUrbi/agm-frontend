@@ -2,19 +2,20 @@ import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { MateriasService } from '../../../core/services/materias.service';
+import { AlumnosService } from '../../../core/services/alumnos.service';
+import { CalificacionesService, Actividad, Calificacion } from '../../../core/services/calificaciones.service';
 
 interface CalificacionActividad {
-  id: string;
+  id: string; // calificacion_id si existe, vacío si no
   actividad_id: string;
   materia_id: string;
   alumno_id: string;
   matricula: string;
   nombre: string;
   correo: string;
-  calificacion: number;
-  promedio_actual: number;
-  promedio_final: number;
+  calificacion: number | null;
   observaciones: string;
   actividad_nombre: string;
   estatus_entrega?: string;
@@ -39,87 +40,32 @@ export class RegistroCalificacionesComponent {
 
   tabs = ['Alumnos', 'Ponderaciones', 'Actividades'];
 
-  actividadActual = {
-    id: '16655e27-37d5-470a-bac2-f9ebbf48e850',
-    nombre: 'Examen Parcial Semana 1',
+  // Inicializado con mock para que el HTML no rompa antes de cargar, pero los datos reales lo sobreescribirán
+  actividadActual = signal<any>({
+    id: '',
+    actividad_id: '',
+    nombre: 'Cargando actividad...',
     valor_maximo: 10.0,
-    ponderacion_nombre: 'Exámenes Parciales'
-  };
+    ponderacion_nombre: 'Cargando...'
+  });
 
-  // Calificaciones obtenidas de GET /calificaciones/actividad/{actividad_id} (Imagen 2)
-  calificaciones = signal<CalificacionActividad[]>([
-    {
-      id: '4ce31fe6-6c07-48b4-b682-140c48f21a5c',
-      actividad_id: '16655e27-37d5-470a-bac2-f9ebbf48e850',
-      materia_id: '22222222-2222-2222-2222-222222222222',
-      alumno_id: '27f6b659-c932-5909-a4ec-6e1ca8125b30',
-      matricula: '202012345',
-      nombre: 'Diego Cannata',
-      correo: 'diego.cannata@alumno.buap.mx',
-      calificacion: 10.0,
-      promedio_actual: 9.4,
-      promedio_final: 9.5,
-      observaciones: 'Buen trabajo, solo que te falto el video',
-      actividad_nombre: 'Examen Parcial Semana 1'
-    },
-    {
-      id: '42683313-7738-4452-8377-9d64f6f4ff0f',
-      actividad_id: '16655e27-37d5-470a-bac2-f9ebbf48e850',
-      materia_id: '22222222-2222-2222-2222-222222222222',
-      alumno_id: '7c116137-8fa1-5f25-a8af-36fa1dfb4fff',
-      matricula: '202015678',
-      nombre: 'Alejandro Garcia',
-      correo: 'alejandro.garciacon@alumno.buap.mx',
-      calificacion: 0.0,
-      promedio_actual: 6.8,
-      promedio_final: 7.0,
-      observaciones: 'No entregado',
-      actividad_nombre: 'Examen Parcial Semana 1'
-    },
-    {
-      id: 'cal-3',
-      actividad_id: '16655e27-37d5-470a-bac2-f9ebbf48e850',
-      materia_id: '22222222-2222-2222-2222-222222222222',
-      alumno_id: 'alu-3',
-      matricula: '202019921',
-      nombre: 'Maria Rodriguez Ortiz',
-      correo: 'maria.rodriguez@alumno.buap.mx',
-      calificacion: 9.5,
-      promedio_actual: 9.1,
-      promedio_final: 9.2,
-      observaciones: 'Excelente análisis y diagrama C4',
-      actividad_nombre: 'Examen Parcial Semana 1'
-    },
-    {
-      id: 'cal-4',
-      actividad_id: '16655e27-37d5-470a-bac2-f9ebbf48e850',
-      materia_id: '22222222-2222-2222-2222-222222222222',
-      alumno_id: 'alu-4',
-      matricula: '202113342',
-      nombre: 'Ana Beltrán López',
-      correo: 'ana.beltran@alumno.buap.mx',
-      calificacion: 8.0,
-      promedio_actual: 8.5,
-      promedio_final: 8.6,
-      observaciones: 'Faltó implementar el interceptor gRPC',
-      actividad_nombre: 'Examen Parcial Semana 1'
-    }
-  ]);
+  calificaciones = signal<CalificacionActividad[]>([]);
 
   constructor(
     private route: ActivatedRoute,
-    private materiasService: MateriasService
+    private materiasService: MateriasService,
+    private alumnosService: AlumnosService,
+    private calificacionesService: CalificacionesService
   ) {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
+      const actividadId = this.route.snapshot.queryParams['actividad'];
+      
       if (id) {
         this.cargarDatosMateria(id);
-      }
-    });
-
-    this.route.queryParams.subscribe(params => {
-      if (params['actividad']) {
-        // Podríamos cargar la actividad seleccionada
+        if (actividadId) {
+          this.cargarDatosCalificacion(id, actividadId);
+        }
       }
     });
   }
@@ -146,7 +92,7 @@ export class RegistroCalificacionesComponent {
         this.materia.set({
           materia_id: id,
           nrc: data.nrc || 'N/A',
-          nombre: data.nombre || 'Materia sin nombre',
+          nombre: data.nombre || data.materia?.nombre || 'Materia sin nombre',
           seccion: data.seccion || '001',
           horario: horarioFormat,
           programa: data.programa || 'Licenciatura en Ciencias de la Computación',
@@ -159,21 +105,76 @@ export class RegistroCalificacionesComponent {
     });
   }
 
-  guardado = signal(false);
-  guardarCalificaciones() {
-    // PUT /calificaciones/{calificacion_id}
-    this.guardado.set(true);
-    setTimeout(() => this.guardado.set(false), 3000);
+  cargarDatosCalificacion(materiaId: string, actividadId: string) {
+    // Obtener la actividad real y la ponderación
+    this.calificacionesService.getActividadById(actividadId).subscribe({
+      next: (act) => {
+        // Obtenemos ponderaciones de la materia para saber el nombre de la ponderación
+        this.calificacionesService.getPonderaciones(materiaId).subscribe({
+          next: (pondRes) => {
+            let pondNombre = 'General';
+            if (pondRes && pondRes.criterios) {
+              const pond = pondRes.criterios.find(p => (p as any).id === act.ponderacion_id || (p as any).ponderacion_id === act.ponderacion_id);
+              if (pond) pondNombre = pond.nombre;
+            }
+            this.actividadActual.set({
+              id: act.actividad_id,
+              actividad_id: act.actividad_id,
+              nombre: act.nombre,
+              valor_maximo: act.valor_maximo,
+              ponderacion_nombre: pondNombre
+            });
+          }
+        });
+      },
+      error: (err) => console.error('Error cargando actividad', err)
+    });
+
+    // Obtener alumnos inscritos en MS3 y calificaciones existentes en MS4 en paralelo
+    forkJoin({
+      alumnos: this.alumnosService.getAlumnosByMateria(materiaId),
+      calificaciones: this.calificacionesService.getCalificacionesByActividad(actividadId)
+    }).subscribe({
+      next: ({ alumnos, calificaciones }) => {
+        const actividadNombre = this.actividadActual().nombre;
+        
+        const combinados: CalificacionActividad[] = alumnos.map(alumno => {
+          // Buscar si el alumno ya tiene calificación
+          const calif = calificaciones.find(c => c.alumno_id === alumno.alumno_id);
+          
+          return {
+            id: calif?.calificacion_id || '',
+            actividad_id: actividadId,
+            materia_id: materiaId,
+            alumno_id: alumno.alumno_id || '',
+            matricula: alumno.matricula || 'S/N',
+            nombre: alumno.nombre_completo,
+            correo: alumno.correo,
+            calificacion: calif ? calif.calificacion : null,
+            observaciones: calif?.observaciones || '',
+            actividad_nombre: actividadNombre,
+            estatus_entrega: calif ? 'Entregado a Tiempo' : 'Pendiente'
+          };
+        });
+        
+        this.calificaciones.set(combinados);
+      },
+      error: (err) => {
+        console.error('Error cargando alumnos y/o calificaciones', err);
+      }
+    });
   }
 
-  // Modal Importar Excel (Mismo flujo de Imagen 1)
+  // Modal Importar Excel
   showImportModal = signal(false);
   archivoSeleccionado = signal<string>('');
+  archivoParaSubir: File | null = null;
   importando = signal(false);
   resultadoImportacion = signal<any | null>(null);
 
   abrirImportarModal() {
     this.archivoSeleccionado.set('');
+    this.archivoParaSubir = null;
     this.resultadoImportacion.set(null);
     this.showImportModal.set(true);
   }
@@ -181,47 +182,52 @@ export class RegistroCalificacionesComponent {
   seleccionarArchivo(event: any) {
     const file = event.target.files[0];
     if (file) {
+      if (!file.name.endsWith('.xls') && !file.name.endsWith('.xlsx')) {
+        alert('Por favor selecciona un archivo Excel (.xls o .xlsx)');
+        event.target.value = '';
+        return;
+      }
       this.archivoSeleccionado.set(file.name);
+      this.archivoParaSubir = file;
     }
   }
 
   confirmarImportacion() {
-    this.importando.set(true);
-    setTimeout(() => {
-      this.importando.set(false);
-      // Simular respuesta exacta de FastAPI (Imagen 1)
-      this.resultadoImportacion.set({
-        actividad_id: this.actividadActual.id,
-        materia_id: '22222222-2222-2222-2222-222222222222',
-        procesadas: 36,
-        insertadas: 30,
-        actualizadas: 0,
-        omitidas: [
-          {
-            fila: 7,
-            motivo: 'Fila sin puntos; se considera no calificada',
-            correo: 'diego.cannata@alumno.buap.mx'
-          },
-          {
-            fila: 11,
-            motivo: 'Fila sin puntos; se considera no calificada',
-            correo: 'alejandro.garciacon@alumno.buap.mx'
-          }
-        ]
-      });
+    const actId = this.actividadActual().actividad_id;
+    if (!actId) {
+      alert('Error: No se encontró el ID de la actividad.');
+      return;
+    }
+    if (!this.archivoParaSubir) {
+      alert('Por favor selecciona un archivo primero.');
+      return;
+    }
 
-      // Actualizar notas en la tabla
-      this.calificaciones.update(list => list.map(c => {
-        if (c.correo === 'diego.cannata@alumno.buap.mx') return { ...c, calificacion: 0, observaciones: 'Fila sin puntos; se considera no calificada' };
-        if (c.correo === 'alejandro.garciacon@alumno.buap.mx') return { ...c, calificacion: 0, observaciones: 'Fila sin puntos; se considera no calificada' };
-        return c;
-      }));
-    }, 1500);
+    this.importando.set(true);
+    
+    this.calificacionesService.importarCalificaciones({
+      actividad_id: actId,
+      archivo: this.archivoParaSubir
+    }).subscribe({
+      next: (res) => {
+        this.importando.set(false);
+        this.resultadoImportacion.set(res.data || res);
+        
+        // Recargar la tabla con calificaciones actualizadas desde MS4
+        this.cargarDatosCalificacion(this.materia().materia_id, actId);
+      },
+      error: (err) => {
+        this.importando.set(false);
+        console.error('Error al importar calificaciones:', err);
+        alert('Hubo un error al procesar el archivo Excel. Verifica el formato y vuelve a intentarlo.');
+      }
+    });
   }
 
   cerrarImportModal() {
     this.showImportModal.set(false);
     this.resultadoImportacion.set(null);
+    this.archivoParaSubir = null;
   }
 
   // ==========================================
@@ -253,33 +259,63 @@ export class RegistroCalificacionesComponent {
 
   guardarCalificacionManual() {
     const current = this.alumnoSeleccionado();
-    if (!current) return;
+    const actId = this.actividadActual().actividad_id;
+    
+    if (!current || !actId) return;
 
     const form = this.formCalificacionManual();
+    const isActualizacion = !!current.id;
 
-    this.calificaciones.update(list => list.map(c => {
-      if (c.alumno_id === current.alumno_id) {
-        return {
-          ...c,
-          calificacion: form.calificacion,
-          observaciones: form.observaciones,
-          estatus_entrega: form.estatus_entrega
-        };
+    const payload: Partial<Calificacion> = {
+      calificacion: form.calificacion,
+      observaciones: form.observaciones
+    };
+
+    const request$ = isActualizacion 
+      ? this.calificacionesService.updateCalificacion(current.id, payload)
+      : this.calificacionesService.createCalificacion({
+          ...payload,
+          actividad_id: actId,
+          alumno_id: current.alumno_id,
+          materia_id: current.materia_id
+        });
+
+    request$.subscribe({
+      next: (res) => {
+        this.showManualModal.set(false);
+        this.mensajeExitoManual.set(`¡Calificación de ${current.nombre} guardada exitosamente en MS4!`);
+        
+        // Recargar los datos para asegurar sincronización con MS4
+        this.cargarDatosCalificacion(this.materia().materia_id, actId);
+
+        setTimeout(() => {
+          this.mensajeExitoManual.set(null);
+        }, 4000);
+      },
+      error: (err) => {
+        console.error('Error guardando calificación manual', err);
+        alert('Hubo un error al guardar la calificación en MS-Calificaciones.');
       }
-      return c;
-    }));
-
-    this.showManualModal.set(false);
-    this.mensajeExitoManual.set(`¡Calificación de ${current.nombre} guardada exitosamente en MS-Calificaciones!`);
-
-    setTimeout(() => {
-      this.mensajeExitoManual.set(null);
-    }, 4000);
+    });
   }
 
-  // Promedio de la actividad
+  // Contadores y Promedios basados en los datos reales del MS4
+  alumnosCalificados = computed(() => {
+    return this.calificaciones().filter(c => c.calificacion !== null).length;
+  });
+
+  alumnosSinCalificarOCero = computed(() => {
+    return this.calificaciones().filter(c => c.calificacion === null || c.calificacion === 0).length;
+  });
+
+  alumnosAprobados = computed(() => {
+    const max = this.actividadActual().valor_maximo || 10;
+    const minimoAprobatorio = max * 0.6; // 60%
+    return this.calificaciones().filter(c => c.calificacion !== null && c.calificacion >= minimoAprobatorio).length;
+  });
+
   promedioActividad = computed(() => {
-    const list = this.calificaciones();
+    const list = this.calificaciones().filter(c => c.calificacion !== null);
     if (list.length === 0) return 0;
     const sum = list.reduce((acc, c) => acc + (Number(c.calificacion) || 0), 0);
     return sum / list.length;
