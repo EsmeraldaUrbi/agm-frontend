@@ -200,28 +200,9 @@ export class PeriodosComponent implements OnInit {
     }
   }
 
-  // Eliminar periodo
-  deletePeriodo(periodo: Periodo) {
-    if (periodo.activo) {
-      this.triggerToast('No se puede eliminar el periodo actualmente activo. Primero activa otro.', 'error');
-      return;
-    }
-
-    if (confirm(`¿Estás seguro de eliminar el periodo ${periodo.nombre}?`)) {
-      if (!periodo.periodo_id) return;
-      this.periodosService.deletePeriodo(periodo.periodo_id).subscribe({
-        next: () => {
-          this.triggerToast('Periodo académico eliminado.');
-          this.cargarPeriodos();
-        },
-        error: (err) => {
-          console.error(err);
-          const errorMsg = err.error?.detail || err.error?.message || err.message || 'Error al eliminar el periodo.';
-          this.triggerToast(errorMsg, 'error');
-        }
-      });
-    }
-  }
+  // Nota: La función deletePeriodo fue removida. 
+  // El backend no permite borrado físico (hard-delete) de periodos por integridad referencial,
+  // únicamente se permite desactivarlos (apagar ciclo activo).
 
   // Toast Helper
   triggerToast(message: string, type: 'success' | 'error' = 'success') {
