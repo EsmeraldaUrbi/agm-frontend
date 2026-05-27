@@ -299,12 +299,13 @@ export class ReportesComponent implements OnInit {
     this.errorDescarga.set(null);
 
     const nrc = this.materia.nrc;
+    const materiaId = this.materia.materia_id;
     let request$;
 
     if (tipo === 'Calificaciones Finales') {
-      request$ = this.reportesService.descargarReporteCalificaciones(nrc, formato as 'pdf' | 'xlsx');
+      request$ = this.reportesService.descargarReporteCalificaciones(materiaId, formato as 'pdf' | 'xlsx');
     } else {
-      request$ = this.reportesService.descargarReporteAsistencias(nrc, formato as 'pdf' | 'xlsx');
+      request$ = this.reportesService.descargarReporteAsistencias(materiaId, formato as 'pdf' | 'xlsx');
     }
 
     request$.subscribe({
