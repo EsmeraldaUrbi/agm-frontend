@@ -55,4 +55,9 @@ export class AlumnosService {
     formData.append('file', file);
     return this.apiClient.post<any>(`${API_CONFIG.usuarios}/api/v1/importar/alumnos`, formData);
   }
+
+  // DELETE /api/v1/alumnos/:alumno_id/baja?materia_id=:materia_id
+  bajaMateria(alumnoId: string, materiaId: string): Observable<any> {
+    return this.apiClient.delete<any>(`${this.apiUrl}/${alumnoId}/baja?materia_id=${materiaId}`);
+  }
 }

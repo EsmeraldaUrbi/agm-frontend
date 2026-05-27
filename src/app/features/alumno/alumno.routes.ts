@@ -36,7 +36,7 @@ export const ALUMNO_ROUTES: Routes = [
     component: QrAsistenciaComponent
   },
   {
-    path: 'calificaciones',
+    path: 'calificaciones/:materiaId',
     component: CalificacionesComponent
   },
   {

@@ -3,34 +3,38 @@
 <div class="flex items-center gap-4">
 <span class="text-slate-400">Académico</span>
 <span class="material-symbols-outlined text-xs">chevron_right</span>
+<a routerLink="/alumno/materias" class="text-slate-400 hover:text-[#003B5C] transition-colors">Mis Materias</a>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
 <span class="text-[#003B5C] font-bold border-b-2 border-[#003B5C] py-5">Detalles del Curso</span>
 </div>
 <div class="flex items-center gap-6">
 <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full text-xs font-bold text-primary-container uppercase tracking-tight">
 <span class="material-symbols-outlined text-sm">calendar_today</span>
-                    2024 - Periodo Otoño
+                    Periodo Actual
                 </div>
 </div>
 </div>
 <!-- Content Canvas -->
-<div class="p-8 max-w-7xl mx-auto space-y-8">
+<div class="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in-up">
+
+@if (materiaInfo()) {
 <!-- Subject Hero Header -->
 <div class="relative overflow-hidden rounded-xl bg-primary-container text-white p-8 shadow-lg">
 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
 <div class="space-y-2">
 <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-medium">
 <span class="material-symbols-outlined text-sm">code</span>
-                            FCC-302 • Lic. Ciencias de la Computación
+                            NRC: {{ materiaInfo()?.nrc || 'S/N' }} • Sec. {{ materiaInfo()?.seccion || '001' }}
                         </div>
-<h1 class="text-3xl font-extrabold tracking-tight">Arquitectura de Software</h1>
+<h1 class="text-3xl font-extrabold tracking-tight">{{ materiaInfo()?.nombre || 'Materia sin nombre' }}</h1>
 <p class="text-blue-100 flex items-center gap-2">
 <span class="material-symbols-outlined text-base">person</span>
-                            Titular: Dr. Javier Ruiz Esparza
+                            Titular: {{ materiaInfo()?.docente_nombre || 'Asignado' }}
                         </p>
 </div>
 <div class="flex flex-col items-end gap-2">
 <div class="text-xs text-blue-200 uppercase tracking-widest font-bold">Promedio Actual</div>
-<div class="text-5xl font-black">9.8<span class="text-xl font-normal opacity-60 ml-1">/10</span></div>
+<div class="text-5xl font-black">{{ promedioActual() }}<span class="text-xl font-normal opacity-60 ml-1">/10</span></div>
 </div>
 </div>
 <!-- Abstract BG Pattern -->
@@ -40,6 +44,12 @@
 </svg>
 </div>
 </div>
+} @else {
+    <div class="flex items-center justify-center h-32 bg-slate-50 rounded-xl border border-slate-200">
+        <span class="material-symbols-outlined animate-spin text-3xl text-primary-container">sync</span>
+    </div>
+}
+
 <!-- Main Layout Grid -->
 <div class="grid grid-cols-12 gap-8">
 <!-- Detailed Table Section -->
@@ -56,64 +66,48 @@
 <thead class="bg-[#F1F3F5] text-[11px] font-bold text-slate-500 uppercase tracking-wider">
 <tr>
 <th class="px-6 py-4">Actividad / Tarea</th>
-<th class="px-6 py-4">Peso</th>
+<th class="px-6 py-4">Puntaje Máx</th>
 <th class="px-6 py-4 text-center">Calificación</th>
-<th class="px-6 py-4">Retroalimentación</th>
+<th class="px-6 py-4">Observaciones</th>
 </tr>
 </thead>
 <tbody class="text-sm divide-y divide-slate-100">
+    
+@for (grupo of actividadesAgrupadas(); track grupo.categoria) {
 <!-- Category Header -->
 <tr class="bg-slate-50/50">
-<td class="px-6 py-2 text-[10px] font-black text-primary-container/60 uppercase tracking-widest" colspan="4">Exámenes (50%)</td>
-</tr>
-<tr class="hover:bg-slate-50 transition-colors">
-<td class="px-6 py-4 font-semibold text-slate-700">Examen Parcial 1: Patrones de Diseño</td>
-<td class="px-6 py-4 text-slate-500">25%</td>
-<td class="px-6 py-4 text-center">
-<span class="bg-primary-container text-white px-2 py-1 rounded text-xs font-bold">10.0</span>
+<td class="px-6 py-2 text-[10px] font-black text-primary-container/60 uppercase tracking-widest" colspan="4">
+    {{ grupo.categoria }} ({{ grupo.porcentaje }}%)
 </td>
-<td class="px-6 py-4 text-xs text-slate-500 italic">"Excelente análisis estructural."</td>
 </tr>
-<tr class="hover:bg-slate-50 transition-colors">
-<td class="px-6 py-4 font-semibold text-slate-700">Examen Parcial 2: Microservicios</td>
-<td class="px-6 py-4 text-slate-500">25%</td>
-<td class="px-6 py-4 text-center">
-<span class="bg-primary-container text-white px-2 py-1 rounded text-xs font-bold">9.5</span>
-</td>
-<td class="px-6 py-4 text-xs text-slate-500 italic">"Buen diseño de comunicación."</td>
-</tr>
-<!-- Category Header -->
-<tr class="bg-slate-50/50">
-<td class="px-6 py-2 text-[10px] font-black text-primary-container/60 uppercase tracking-widest" colspan="4">Tareas &amp; Prácticas (30%)</td>
-</tr>
-<tr class="hover:bg-slate-50 transition-colors">
-<td class="px-6 py-4 font-semibold text-slate-700">Práctica 04: API Gateway</td>
-<td class="px-6 py-4 text-slate-500">10%</td>
-<td class="px-6 py-4 text-center">
-<span class="bg-primary-container text-white px-2 py-1 rounded text-xs font-bold">10.0</span>
-</td>
-<td class="px-6 py-4 text-xs text-slate-500 italic">"Implementación segura."</td>
-</tr>
-<tr class="hover:bg-slate-50 transition-colors">
-<td class="px-6 py-4 font-semibold text-slate-700">Reporte 05: SOLID Principles</td>
-<td class="px-6 py-4 text-slate-500">20%</td>
-<td class="px-6 py-4 text-center">
-<span class="bg-primary-container text-white px-2 py-1 rounded text-xs font-bold">10.0</span>
-</td>
-<td class="px-6 py-4 text-xs text-slate-500 italic">"Sin observaciones."</td>
-</tr>
-<!-- Category Header -->
-<tr class="bg-slate-50/50">
-<td class="px-6 py-2 text-[10px] font-black text-primary-container/60 uppercase tracking-widest" colspan="4">Proyecto Final (20%)</td>
-</tr>
-<tr class="hover:bg-slate-50 transition-colors">
-<td class="px-6 py-4 font-semibold text-slate-700 italic text-slate-400">Entrega de Proyecto Integrador</td>
-<td class="px-6 py-4 text-slate-400">20%</td>
-<td class="px-6 py-4 text-center">
-<span class="bg-slate-200 text-slate-500 px-2 py-1 rounded text-xs font-bold">—</span>
-</td>
-<td class="px-6 py-4 text-xs text-slate-400 italic">Pendiente de evaluación.</td>
-</tr>
+    
+    @if (grupo.items.length === 0) {
+        <tr>
+            <td colspan="4" class="px-6 py-4 text-center text-slate-400 italic text-xs">Sin actividades registradas</td>
+        </tr>
+    }
+    
+    @for (act of grupo.items; track act.actividad_id) {
+    <tr class="hover:bg-slate-50 transition-colors">
+    <td class="px-6 py-4 font-semibold text-slate-700">{{ act.nombre }}</td>
+    <td class="px-6 py-4 text-slate-500">{{ act.valor_maximo }}</td>
+    <td class="px-6 py-4 text-center">
+        @if (act.calificacion !== null) {
+            <span class="bg-primary-container text-white px-2 py-1 rounded text-xs font-bold">{{ act.calificacion }}</span>
+        } @else {
+            <span class="bg-slate-200 text-slate-500 px-2 py-1 rounded text-xs font-bold">—</span>
+        }
+    </td>
+    <td class="px-6 py-4 text-xs text-slate-500 italic">
+        @if (act.observaciones) {
+            "{{ act.observaciones }}"
+        } @else {
+            <span class="text-slate-300">Sin observaciones.</span>
+        }
+    </td>
+    </tr>
+    }
+}
 </tbody>
 </table>
 </div>
@@ -139,6 +133,6 @@
 
 <!-- Modal Solicitar Baja -->
 @if (mostrarBajaModal) {
-    <app-solicitar-baja (cerrar)="cerrarBaja()"></app-solicitar-baja>
+    <app-solicitar-baja (cerrar)="cerrarBaja()" (confirmar)="ejecutarBaja()"></app-solicitar-baja>
 }
 </div>

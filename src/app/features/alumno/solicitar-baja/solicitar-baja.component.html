@@ -47,7 +47,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Escriba la palabra <span class="font-mono font-bold text-red-600 px-1 bg-red-50">CONFIRMAR</span></label>
-                        <input class="w-full h-12 px-4 rounded-lg border-2 border-slate-200 focus:border-error focus:ring-1 focus:ring-error outline-none transition-all font-mono tracking-widest uppercase text-center" placeholder="CONFIRMAR" type="text" />
+                        <input [(ngModel)]="confirmText" class="w-full h-12 px-4 rounded-lg border-2 border-slate-200 focus:border-error focus:ring-1 focus:ring-error outline-none transition-all font-mono tracking-widest uppercase text-center" placeholder="CONFIRMAR" type="text" />
                     </div>
                 </div>
             </section>
@@ -57,7 +57,7 @@
                 <button (click)="cancelar()" class="w-full sm:w-1/2 h-12 border border-slate-300 text-slate-600 font-bold rounded-lg hover:bg-slate-50 transition-all text-sm">
                     Cancelar
                 </button>
-                <button (click)="confirmarBaja()" class="w-full sm:w-1/2 h-12 bg-error text-white font-bold rounded-lg shadow-md hover:bg-red-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm">
+                <button (click)="confirmarBaja()" [disabled]="confirmText !== 'CONFIRMAR'" [class.opacity-50]="confirmText !== 'CONFIRMAR'" class="w-full sm:w-1/2 h-12 bg-error text-white font-bold rounded-lg shadow-md hover:bg-red-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed">
                     <span class="material-symbols-outlined text-base">delete_forever</span>
                     Ejecutar Baja Definitiva
                 </button>

@@ -21,6 +21,7 @@ export interface Inscripcion {
     seccion: string;
     periodo_id?: string;
   };
+  activa?: boolean;
 }
 
 @Injectable({

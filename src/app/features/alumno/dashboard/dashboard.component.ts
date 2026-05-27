@@ -131,81 +131,60 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           this.alumnoInfo.carrera = matchingAlumno.tipo_formacion || 'Ingeniería';
           this.alumnoInfo.estatus = 'Regular';
 
-          // 2. Cargar estadísticas globales del alumno (MS-7)
+          // 2. Cargar estadísticas integrales del alumno (MS-7)
           this.reportesService.getEstadisticasAlumno(alumnoId).subscribe({
-            next: (stats) => {
-              this.promedioGeneral = stats.promedio_general || 0;
-              this.asistenciaTotal = stats.porcentaje_asistencia || 0;
-              this.totalMaterias = stats.total_materias || 0;
-            },
-            error: (err) => console.error('Error al cargar estadísticas globales:', err)
-          });
-
-          // 3. Cargar inscripciones del alumno (MS-3)
-          this.inscripcionesService.getInscripcionesByAlumno(alumnoId).subscribe({
-            next: (inscripciones) => {
-              if (inscripciones.length === 0) {
+            next: (res: any) => {
+              const estadisticas = res.estadisticas || [];
+              if (estadisticas.length === 0) {
                 this.isLoading.set(false);
                 this.cdr.detectChanges();
                 return;
               }
 
-              // 4. Consultar calificaciones para cada materia inscrita
-              const califQueries = inscripciones.map(ins => {
-                return this.calificacionesService.getCalificacionesAlumnoMateria(alumnoId, ins.materia_id).pipe(
-                  catchError(() => of([]))
-                );
-              });
-
-              forkJoin(califQueries).subscribe({
-                next: (calificacionesPorMateria) => {
-                  this.estadisticasMaterias = inscripciones.map((ins, idx) => {
-                    const califs = calificacionesPorMateria[idx];
-                    const promedioMateria = califs.length > 0
-                      ? Number((califs.reduce((sum, c) => sum + c.calificacion, 0) / califs.length).toFixed(1))
-                      : 0;
-
-                    // Asignación de pases de lista dinámicos para la UI radar/donut
-                    const presentes = Math.floor(Math.random() * 8) + 12;
-                    const retardos = Math.floor(Math.random() * 3);
-                    const faltas = Math.floor(Math.random() * 2);
-                    const totalAsistencias = presentes + retardos + faltas;
-                    const pctAsistencia = totalAsistencias > 0 
-                      ? Math.round((presentes + retardos / 2) / totalAsistencias * 100) 
-                      : 100;
-
-                    return {
-                      nrc: ins.materia?.nrc || 'N/A',
-                      nombre_materia: ins.materia?.nombre || 'Materia Académica',
-                      promedio: promedioMateria,
-                      presentes,
-                      retardos,
-                      faltas,
-                      porcentaje_asistencia: pctAsistencia,
-                      minimoAsegurado: Math.max(0, promedioMateria - 1),
-                      maximoPotencial: Math.min(10, promedioMateria + 1.5)
-                    };
-                  });
-
-                  this.calcularMetricas();
-                  
-                  if (this.estadisticasMaterias.length > 0) {
-                    this.materiaSeleccionada = this.estadisticasMaterias[0];
-                    this.animatingDonut = true;
-                    this.animarDona(this.materiaSeleccionada);
-                  }
-                  
-                  this.isLoading.set(false);
-                  this.cdr.detectChanges();
-                },
-                error: (err) => {
-                  console.error('Error al consultar calificaciones:', err);
-                  this.isLoading.set(false);
+              this.estadisticasMaterias = estadisticas.map((stat: any) => {
+                const promedioMateria = stat.promedio || 0;
+                
+                const pctAsistencia = stat.porcentaje_asistencia || 0;
+                const presentes = stat.presentes || 0;
+                const retardos = stat.retardos || 0;
+                
+                // Cálculo seguro de faltas en el frontend
+                let faltas = 0;
+                const asistenciasTotales = presentes + retardos;
+                if (pctAsistencia > 0) {
+                  const total_sesiones = Math.round((asistenciasTotales * 100) / pctAsistencia);
+                  faltas = Math.max(0, total_sesiones - asistenciasTotales);
+                } else if (asistenciasTotales === 0) {
+                  // Si el porcentaje es 0% y no hay asistencias, el total es 0 (clases no impartidas aún o sin registrar)
+                  faltas = 0;
                 }
+
+                return {
+                  nrc: stat.nrc || 'N/A',
+                  nombre_materia: stat.nombre_materia || 'Materia Académica',
+                  promedio: promedioMateria,
+                  presentes,
+                  retardos,
+                  faltas,
+                  porcentaje_asistencia: Math.round(pctAsistencia),
+                  minimoAsegurado: Math.max(0, promedioMateria - 1),
+                  maximoPotencial: Math.min(10, promedioMateria + 1.5)
+                };
               });
+
+              this.calcularMetricas();
+              
+              if (this.estadisticasMaterias.length > 0) {
+                this.materiaSeleccionada = this.estadisticasMaterias[0];
+                this.animatingDonut = true;
+                this.animarDona(this.materiaSeleccionada);
+              }
+              
+              this.isLoading.set(false);
+              this.cdr.detectChanges();
             },
             error: (err) => {
-              console.error('Error al cargar inscripciones:', err);
+              console.error('Error al cargar estadísticas globales:', err);
               this.isLoading.set(false);
             }
           });

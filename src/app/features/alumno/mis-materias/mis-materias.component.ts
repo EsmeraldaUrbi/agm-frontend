@@ -21,6 +21,18 @@ export class MisMateriasComponent implements OnInit {
   mostrarHorarioModal = false;
   mostrarBajaModal = false;
 
+  filtroActivo: 'todas' | 'activas' | 'bajas' = 'todas';
+
+  get materiasFiltradas() {
+    if (this.filtroActivo === 'activas') {
+      return this.materias.filter(m => m.activa);
+    }
+    if (this.filtroActivo === 'bajas') {
+      return this.materias.filter(m => !m.activa);
+    }
+    return this.materias;
+  }
+
   materias: any[] = [];
   scheduleData: any[] = [];
 
@@ -33,6 +45,8 @@ export class MisMateriasComponent implements OnInit {
     this.cargarDatos();
   }
 
+  alumnoId: string | null = null;
+
   cargarDatos() {
     const user = this.authService.getCurrentUser();
     if (!user) return;
@@ -44,6 +58,7 @@ export class MisMateriasComponent implements OnInit {
         if (!miRegistro || !miRegistro.alumno_id) {
           return of([]);
         }
+        this.alumnoId = miRegistro.alumno_id;
         return this.inscripcionesService.getInscripcionesByAlumno(miRegistro.alumno_id);
       })
     ).subscribe({
@@ -68,24 +83,30 @@ export class MisMateriasComponent implements OnInit {
 
         forkJoin([forkJoin(infoPeticiones), forkJoin(horariosPeticiones)]).subscribe(([materiasInfo, horariosData]) => {
           this.materias = inscripciones.map((ins, index) => {
-            const info = materiasInfo[index];
+            const info = materiasInfo[index] as any;
             return {
+              materia_id: ins.materia_id,
+              inscripcion_id: ins.inscripcion_id,
               nrc: ins.nrc_materia || info?.nrc || 'S/N',
               nombre: info?.nombre || 'Materia sin nombre',
-              docente: 'Asignado',
-              creditos: 6,
-              promedio: 'N/A'
+              docente: info?.docente_nombre || 'Asignado',
+              creditos: info?.creditos || 6,
+              promedio: 'N/A',
+              activa: ins.activa !== false
             };
           });
 
           let allHorarios: any[] = [];
           horariosData.forEach((horariosMateria: any[], index) => {
+            const inscripcion = inscripciones[index];
+            if (inscripcion.activa === false) return; // No mostrar materias dadas de baja en el horario
+            
             const info = materiasInfo[index];
             horariosMateria.forEach(h => {
               allHorarios.push({
                 ...h,
                 materia_nombre: info?.nombre || 'Materia',
-                materia_id: inscripciones[index].materia_id
+                materia_id: inscripcion.materia_id
               });
             });
           });
@@ -96,6 +117,8 @@ export class MisMateriasComponent implements OnInit {
     });
   }
 
+  materiaSeleccionada: any = null;
+
   abrirHorario() {
     this.mostrarHorarioModal = true;
   }
@@ -104,11 +127,31 @@ export class MisMateriasComponent implements OnInit {
     this.mostrarHorarioModal = false;
   }
 
-  abrirBaja() {
+  abrirBaja(materia: any) {
+    this.materiaSeleccionada = materia;
     this.mostrarBajaModal = true;
   }
 
   cerrarBaja() {
+    this.materiaSeleccionada = null;
     this.mostrarBajaModal = false;
+  }
+
+  ejecutarBaja() {
+    if (!this.alumnoId || !this.materiaSeleccionada || !this.materiaSeleccionada.materia_id) {
+      console.error('No se pudo determinar la información para dar de baja.');
+      return;
+    }
+    
+    this.alumnosService.bajaMateria(this.alumnoId, this.materiaSeleccionada.materia_id).subscribe({
+      next: () => {
+        this.cargarDatos();
+        this.cerrarBaja();
+      },
+      error: (err: any) => {
+        console.error('Error al intentar dar de baja la materia:', err);
+        alert('Ocurrió un error al procesar la baja.');
+      }
+    });
   }
 }
