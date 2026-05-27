@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HorarioComponent } from '../../../shared/components/horario/horario.component';
@@ -7,10 +7,9 @@ import { InscripcionesService } from '../../../core/services/inscripciones.servi
 import { MateriasService } from '../../../core/services/materias.service';
 import { AlumnosService } from '../../../core/services/alumnos.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { MisMateriasStateService } from './mis-materias.state.service';
-import { CalificacionesService } from '../../../core/services/calificaciones.service';
+import { ReportesService } from '../../../core/services/reportes.service';
 import { forkJoin, of } from 'rxjs';
-import { catchError, switchMap, finalize } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-mis-materias',
@@ -22,10 +21,9 @@ import { catchError, switchMap, finalize } from 'rxjs/operators';
 export class MisMateriasComponent implements OnInit {
   mostrarHorarioModal = false;
   mostrarBajaModal = false;
+  cargando = true;
 
   filtroActivo: 'todas' | 'activas' | 'bajas' = 'todas';
-
-  cargando = signal<boolean>(true);
 
   get materiasFiltradas() {
     if (this.filtroActivo === 'activas') {
@@ -44,8 +42,7 @@ export class MisMateriasComponent implements OnInit {
   private materiasService = inject(MateriasService);
   private alumnosService = inject(AlumnosService);
   private authService = inject(AuthService);
-  private stateService = inject(MisMateriasStateService);
-  private calificacionesService = inject(CalificacionesService);
+  private reportesService = inject(ReportesService);
 
   ngOnInit() {
     this.cargarDatos();
@@ -53,30 +50,11 @@ export class MisMateriasComponent implements OnInit {
 
   alumnoId: string | null = null;
 
-  cargarDatos(forceRefresh = false) {
-    if (!forceRefresh && this.stateService.hasValidCache()) {
-      const cache = this.stateService.getCache();
-      this.materias = cache.materias;
-      this.scheduleData = cache.scheduleData;
-      
-      const user = this.authService.getCurrentUser();
-      if (user) {
-        this.alumnosService.getAlumnos({ limit: 1000 }).subscribe(alumnos => {
-           const miRegistro = alumnos.find(a => a.user_id === user.user_id);
-           if (miRegistro) this.alumnoId = miRegistro.alumno_id || null;
-        });
-      }
-      this.cargando.set(false);
-      return;
-    }
-
-    this.cargando.set(true);
+  cargarDatos() {
     const user = this.authService.getCurrentUser();
-    if (!user) {
-      this.cargando.set(false);
-      return;
-    }
+    if (!user) return;
     
+    // Primero buscar el alumno_id correspondiente a este user_id
     this.alumnosService.getAlumnos({ limit: 1000 }).pipe(
       switchMap(alumnos => {
         const miRegistro = alumnos.find(a => a.user_id === user.user_id);
@@ -85,15 +63,12 @@ export class MisMateriasComponent implements OnInit {
         }
         this.alumnoId = miRegistro.alumno_id;
         return this.inscripcionesService.getInscripcionesByAlumno(miRegistro.alumno_id);
-      }),
-      catchError(() => of([]))
+      })
     ).subscribe({
       next: (inscripciones) => {
         if (!inscripciones || inscripciones.length === 0) {
           this.materias = [];
           this.scheduleData = [];
-          this.stateService.setCache([], []);
-          this.cargando.set(false);
           return;
         }
 
@@ -109,25 +84,19 @@ export class MisMateriasComponent implements OnInit {
           )
         );
 
-        const calificacionesPeticiones = inscripciones.map(ins => 
-          this.alumnoId ? this.calificacionesService.getCalificacionesAlumnoMateria(this.alumnoId, ins.materia_id).pipe(
-            catchError(() => of([]))
-          ) : of([])
+        const statsPeticion = this.reportesService.getEstadisticasAlumno(this.alumnoId!).pipe(
+          catchError(() => of({ estadisticas: [] }))
         );
 
-        forkJoin([forkJoin(infoPeticiones), forkJoin(horariosPeticiones), forkJoin(calificacionesPeticiones)]).pipe(
-          finalize(() => this.cargando.set(false))
-        ).subscribe(([materiasInfo, horariosData, calificacionesData]) => {
+        forkJoin([forkJoin(infoPeticiones), forkJoin(horariosPeticiones), statsPeticion]).subscribe(([materiasInfo, horariosData, statsData]: [any[], any[], any]) => {
+          const statsMap = new Map();
+          if (statsData && statsData.estadisticas) {
+            statsData.estadisticas.forEach((s: any) => statsMap.set(s.materia_id, s.promedio));
+          }
+
           this.materias = inscripciones.map((ins, index) => {
             const info = materiasInfo[index] as any;
-            const cals = calificacionesData[index] as any[];
-            
-            let promedio = 'N/A';
-            if (cals && cals.length > 0) {
-              const suma = cals.reduce((acc, curr) => acc + (curr.calificacion || 0), 0);
-              promedio = (suma / cals.length).toFixed(1);
-            }
-
+            const promedio = statsMap.get(ins.materia_id);
             return {
               materia_id: ins.materia_id,
               inscripcion_id: ins.inscripcion_id,
@@ -135,7 +104,7 @@ export class MisMateriasComponent implements OnInit {
               nombre: info?.nombre || 'Materia sin nombre',
               docente: info?.docente_nombre || 'Asignado',
               creditos: info?.creditos || 6,
-              promedio: promedio,
+              promedio: promedio !== undefined ? promedio.toFixed(1) : 'N/A',
               activa: ins.activa !== false
             };
           });
@@ -143,7 +112,7 @@ export class MisMateriasComponent implements OnInit {
           let allHorarios: any[] = [];
           horariosData.forEach((horariosMateria: any[], index) => {
             const inscripcion = inscripciones[index];
-            if (inscripcion.activa === false) return;
+            if (inscripcion.activa === false) return; // No mostrar materias dadas de baja en el horario
             
             const info = materiasInfo[index];
             horariosMateria.forEach(h => {
@@ -155,13 +124,12 @@ export class MisMateriasComponent implements OnInit {
             });
           });
           this.scheduleData = allHorarios;
-          
-          this.stateService.setCache(this.materias, this.scheduleData);
+          this.cargando = false;
         });
       },
       error: (err) => {
         console.error("Error al cargar inscripciones", err);
-        this.cargando.set(false);
+        this.cargando = false;
       }
     });
   }
@@ -194,8 +162,7 @@ export class MisMateriasComponent implements OnInit {
     
     this.alumnosService.bajaMateria(this.alumnoId, this.materiaSeleccionada.materia_id).subscribe({
       next: () => {
-        this.stateService.clearCache();
-        this.cargarDatos(true);
+        this.cargarDatos();
         this.cerrarBaja();
       },
       error: (err: any) => {

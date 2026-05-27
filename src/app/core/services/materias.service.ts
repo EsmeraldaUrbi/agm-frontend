@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { API_CONFIG } from '../config/api.config';
 import { ApiClient } from './apiClient';
 import { Observable, forkJoin, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, shareReplay } from 'rxjs/operators';
 import { normalizeMateria, unwrapApiResponse, unwrapArrayResponse } from '../helpers/apiResponse.helpers';
 
 export interface PlanEstudio {
@@ -44,6 +44,9 @@ export interface Horario {
 export class MateriasService {
   private apiClient = inject(ApiClient);
   private baseUrl = API_CONFIG.catalogos;
+
+  private materiaCache = new Map<string, Observable<Materia>>();
+  private horariosCache = new Map<string, Observable<any>>();
 
   // === PLANES DE ESTUDIO ===
   getPlanesEstudio(): Observable<PlanEstudio[]> {
@@ -157,9 +160,14 @@ export class MateriasService {
   }
 
   getMateriaById(materiaId: string): Observable<Materia> {
-    return this.apiClient.get<any>(`${this.baseUrl}/materias/${materiaId}`).pipe(
-      map(res => normalizeMateria(unwrapApiResponse(res)))
-    );
+    if (!this.materiaCache.has(materiaId)) {
+      const req = this.apiClient.get<any>(`${this.baseUrl}/materias/${materiaId}`).pipe(
+        map(res => normalizeMateria(unwrapApiResponse(res))),
+        shareReplay(1)
+      );
+      this.materiaCache.set(materiaId, req);
+    }
+    return this.materiaCache.get(materiaId)!;
   }
 
   cancelarMateriaOfertada(materiaOfertadaId: string): Observable<any> {
@@ -168,13 +176,19 @@ export class MateriasService {
 
   // === HORARIOS ===
   getHorarios(params?: { materia_ofertada_id?: string; dia?: string; page?: number; limit?: number }): Observable<any> {
-    const safeParams = { ...params, limit: Math.min(params?.limit || 100, 100) };
-    return this.apiClient.get<any>(`${this.baseUrl}/materia-horarios`, safeParams).pipe(
-      map(res => {
-        const unwrapped = unwrapApiResponse<any>(res);
-        return unwrapArrayResponse<Horario>(unwrapped);
-      })
-    );
+    const cacheKey = JSON.stringify(params || {});
+    if (!this.horariosCache.has(cacheKey)) {
+      const safeParams = { ...params, limit: Math.min(params?.limit || 100, 100) };
+      const req = this.apiClient.get<any>(`${this.baseUrl}/materia-horarios`, safeParams).pipe(
+        map(res => {
+          const unwrapped = unwrapApiResponse<any>(res);
+          return unwrapArrayResponse<Horario>(unwrapped);
+        }),
+        shareReplay(1)
+      );
+      this.horariosCache.set(cacheKey, req);
+    }
+    return this.horariosCache.get(cacheKey)!;
   }
 
   createHorario(payload: Partial<Horario>): Observable<Horario> {

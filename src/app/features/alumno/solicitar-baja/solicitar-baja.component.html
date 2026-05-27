@@ -9,7 +9,7 @@
                 </div>
                 <div>
                     <h2 class="font-bold text-on-error-container text-lg leading-tight">Confirmación Crítica de Baja</h2>
-                    <p class="text-sm text-on-error-container opacity-90 mt-1">Esta acción es permanente y afectará su historial.</p>
+                    <p class="text-sm text-on-error-container opacity-90 mt-1">¿Estás seguro de que deseas darte de baja de <strong>{{ nombreMateria }}</strong>?</p>
                 </div>
             </div>
             <button (click)="cancelar()" class="p-1 text-on-error-container/60 hover:text-on-error-container hover:bg-error/10 rounded-lg transition-colors">
@@ -25,7 +25,7 @@
                     <span class="material-symbols-outlined text-yellow-700 shrink-0">report_problem</span>
                     <div class="text-sm text-yellow-800 leading-relaxed">
                         <strong class="block mb-1">Irreversibilidad y Pérdida de Acceso</strong>
-                        La operación es completamente irreversible y genera automáticamente una notificación por correo al docente. Una vez dado de baja, usted perderá todo acceso a los materiales y asistencias de la materia <strong>"{{ materia?.nombre }}"</strong>.
+                        La operación es completamente irreversible y genera automáticamente una notificación por correo al docente. Una vez dado de baja de <strong>{{ nombreMateria }}</strong>, usted perderá todo acceso a los materiales y asistencias de esta materia.
                     </div>
                 </div>
                 <div class="flex gap-4 p-4 rounded-lg border border-red-100 bg-red-50/50">
@@ -41,7 +41,7 @@
             <section class="bg-[#F8F9FA] p-6 rounded-xl border border-slate-200">
                 <h3 class="text-primary font-bold text-lg mb-2 text-center">Protocolo de Seguridad</h3>
                 <p class="text-xs text-slate-500 text-center mb-5">
-                    ¿Estás seguro que quieres dar de baja la materia <strong>"{{ materia?.nombre }}"</strong>? Para evitar bajas accidentales, verifique manualmente su intención de retiro.
+                    Para evitar bajas accidentales, verifique manualmente su intención de retiro.
                 </p>
                 
                 <div class="space-y-4">

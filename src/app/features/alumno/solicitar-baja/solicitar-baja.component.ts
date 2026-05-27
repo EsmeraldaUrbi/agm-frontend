@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
   styles: ``
 })
 export class SolicitarBajaComponent {
-  @Input() materia: any;
+  @Input() nombreMateria = '';
   @Output() cerrar = new EventEmitter<void>();
   @Output() confirmar = new EventEmitter<void>();
 

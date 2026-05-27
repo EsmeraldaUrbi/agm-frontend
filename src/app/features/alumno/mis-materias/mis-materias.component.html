@@ -33,68 +33,69 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    @if (cargando()) {
-                        @for (i of [1, 2, 3]; track i) {
-                            <tr class="animate-pulse border-b border-slate-100">
-                                <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-16"></div></td>
-                                <td class="px-6 py-4">
-                                    <div class="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
-                                    <div class="h-3 bg-slate-200 rounded w-1/2 md:hidden"></div>
-                                </td>
-                                <td class="px-6 py-4 hidden md:table-cell"><div class="h-4 bg-slate-200 rounded w-full"></div></td>
-                                <td class="px-6 py-4 text-center"><div class="h-4 bg-slate-200 rounded w-8 mx-auto"></div></td>
-                                <td class="px-6 py-4 text-center hidden sm:table-cell"><div class="h-6 bg-slate-200 rounded w-12 mx-auto"></div></td>
-                                <td class="px-6 py-4">
-                                    <div class="flex justify-end gap-2">
-                                        <div class="h-8 bg-slate-200 rounded w-20"></div>
-                                        <div class="h-8 bg-slate-200 rounded w-16"></div>
-                                    </div>
+                    @if (cargando) {
+                        @for (item of [1,2,3,4,5]; track item) {
+                        <tr class="animate-pulse">
+                            <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-20"></div></td>
+                            <td class="px-6 py-4">
+                                <div class="h-5 bg-slate-200 rounded w-48 mb-2"></div>
+                                <div class="h-3 bg-slate-200 rounded w-32 md:hidden"></div>
+                            </td>
+                            <td class="px-6 py-4 hidden md:table-cell"><div class="h-4 bg-slate-200 rounded w-32"></div></td>
+                            <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-8 mx-auto"></div></td>
+                            <td class="px-6 py-4 hidden sm:table-cell"><div class="h-6 bg-slate-200 rounded w-12 mx-auto"></div></td>
+                            <td class="px-6 py-4">
+                                <div class="flex justify-end gap-2">
+                                    <div class="h-8 bg-slate-200 rounded w-24"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    } @else {
+                        @if (materiasFiltradas.length === 0) {
+                            <tr>
+                                <td colspan="6" class="px-6 py-8 text-center text-slate-400 italic text-sm">
+                                    No se encontraron materias con este filtro.
                                 </td>
                             </tr>
                         }
-                    } @else if (materiasFiltradas.length === 0) {
-                        <tr>
-                            <td colspan="6" class="px-6 py-8 text-center text-slate-400 italic text-sm">
-                                No se encontraron materias con este filtro.
+                        @for (mat of materiasFiltradas; track mat.nrc) {
+                        <tr class="hover:bg-slate-50 transition-colors group" [class.opacity-50]="!mat.activa" [class.bg-slate-50]="!mat.activa">
+                            <td class="px-6 py-4 font-black text-slate-400">{{ mat.nrc }}</td>
+                            <td class="px-6 py-4">
+                                <div class="font-bold text-[#003B5C] flex items-center gap-2">
+                                    {{ mat.nombre }}
+                                    @if (!mat.activa) {
+                                        <span class="px-2 py-0.5 bg-slate-200 text-slate-500 rounded text-[10px] font-bold uppercase tracking-wider">Dada de Baja</span>
+                                    }
+                                </div>
+                                <div class="text-xs text-slate-500 md:hidden mt-1">{{ mat.docente }}</div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-600 hidden md:table-cell">{{ mat.docente }}</td>
+                            <td class="px-6 py-4 text-center text-sm font-medium">{{ mat.creditos }}</td>
+                            <td class="px-6 py-4 text-center hidden sm:table-cell">
+                                <span class="bg-blue-50 text-secondary px-3 py-1.5 rounded text-sm font-black">{{ mat.promedio }}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                @if (mat.activa) {
+                                    <div class="flex justify-end gap-2">
+                                        <a [routerLink]="['/alumno/calificaciones', mat.materia_id]" class="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-[#003B5C] bg-[#003B5C]/5 hover:bg-[#003B5C]/10 rounded-lg transition-colors border border-[#003B5C]/10" title="Ver Detalles">
+                                            <span class="material-symbols-outlined text-[16px]">visibility</span>
+                                            <span class="hidden xl:inline">Detalles</span>
+                                        </a>
+                                        <button (click)="abrirBaja(mat)" class="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-100" title="Solicitar Baja">
+                                            <span class="material-symbols-outlined text-[16px]">cancel</span>
+                                            <span class="hidden xl:inline">Baja</span>
+                                        </button>
+                                    </div>
+                                } @else {
+                                    <div class="flex justify-end">
+                                        <span class="text-xs font-bold text-slate-400 italic">Sin acceso</span>
+                                    </div>
+                                }
                             </td>
                         </tr>
-                    }
-                    @for (mat of materiasFiltradas; track mat.nrc) {
-                    <tr class="hover:bg-slate-50 transition-colors group" [class.opacity-50]="!mat.activa" [class.bg-slate-50]="!mat.activa">
-                        <td class="px-6 py-4 font-black text-slate-400">{{ mat.nrc }}</td>
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-[#003B5C] flex items-center gap-2">
-                                {{ mat.nombre }}
-                                @if (!mat.activa) {
-                                    <span class="px-2 py-0.5 bg-slate-200 text-slate-500 rounded text-[10px] font-bold uppercase tracking-wider">Dada de Baja</span>
-                                }
-                            </div>
-                            <div class="text-xs text-slate-500 md:hidden mt-1">{{ mat.docente }}</div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-slate-600 hidden md:table-cell">{{ mat.docente }}</td>
-                        <td class="px-6 py-4 text-center text-sm font-medium">{{ mat.creditos }}</td>
-                        <td class="px-6 py-4 text-center hidden sm:table-cell">
-                            <span class="bg-blue-50 text-secondary px-3 py-1.5 rounded text-sm font-black">{{ mat.promedio }}</span>
-                        </td>
-                        <td class="px-6 py-4">
-                            @if (mat.activa) {
-                                <div class="flex justify-end gap-2">
-                                    <a [routerLink]="['/alumno/calificaciones', mat.materia_id]" class="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-[#003B5C] bg-[#003B5C]/5 hover:bg-[#003B5C]/10 rounded-lg transition-colors border border-[#003B5C]/10" title="Ver Detalles">
-                                        <span class="material-symbols-outlined text-[16px]">visibility</span>
-                                        <span class="hidden xl:inline">Detalles</span>
-                                    </a>
-                                    <button (click)="abrirBaja(mat)" class="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-100" title="Solicitar Baja">
-                                        <span class="material-symbols-outlined text-[16px]">cancel</span>
-                                        <span class="hidden xl:inline">Baja</span>
-                                    </button>
-                                </div>
-                            } @else {
-                                <div class="flex justify-end">
-                                    <span class="text-xs font-bold text-slate-400 italic">Sin acceso</span>
-                                </div>
-                            }
-                        </td>
-                    </tr>
+                        }
                     }
                 </tbody>
             </table>
@@ -129,6 +130,6 @@
 
     <!-- Modal Solicitar Baja -->
     @if (mostrarBajaModal) {
-        <app-solicitar-baja [materia]="materiaSeleccionada" (cerrar)="cerrarBaja()" (confirmar)="ejecutarBaja()"></app-solicitar-baja>
+        <app-solicitar-baja [nombreMateria]="materiaSeleccionada?.nombre || 'la materia'" (cerrar)="cerrarBaja()" (confirmar)="ejecutarBaja()"></app-solicitar-baja>
     }
 </div>
