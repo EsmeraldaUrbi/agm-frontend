@@ -23,6 +23,7 @@ export class QrAsistenciaComponent implements OnInit, OnDestroy {
   tiempoVidaRestante = signal<number>(0);
   ttlInicial = signal<number>(20);
   errorMsg = signal<string>('');
+  qrExpirado = signal<boolean>(false);
 
 
   private timerInterval: ReturnType<typeof setInterval> | null = null;
@@ -33,7 +34,8 @@ export class QrAsistenciaComponent implements OnInit, OnDestroy {
       if (this.idSesion() && this.tokenQr() && this.tiempoVidaRestante() > 0) {
         this.tiempoVidaRestante.update(t => t - 1);
         if (this.tiempoVidaRestante() === 0) {
-          this.generarQr();
+          this.qrExpirado.set(true);
+          this.tokenQr.set('');
         }
       }
     }, 1000);
@@ -59,6 +61,7 @@ export class QrAsistenciaComponent implements OnInit, OnDestroy {
         this.ttlInicial.set(ttl);
         this.tiempoVidaRestante.set(ttl);
         this.errorMsg.set('');
+        this.qrExpirado.set(false);
       },
       error: (err) => {
         console.error('Error al generar código QR:', err);
