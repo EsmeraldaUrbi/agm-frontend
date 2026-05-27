@@ -1,7 +1,8 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CalificacionesService, Criterio as BackendCriterio } from '../../../core/services/calificaciones.service';
 import { MateriasService } from '../../../core/services/materias.service';
 
 interface Criterio {
@@ -18,75 +19,116 @@ interface Criterio {
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './ponderaciones.component.html'
 })
-export class PonderacionesComponent {
+export class PonderacionesComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private materiasService = inject(MateriasService);
+  private calificacionesService = inject(CalificacionesService);
 
-  materia = signal<any>({
+  materia = signal({
     materia_id: '',
     nrc: '',
-    nombre: 'Cargando materia...',
+    nombre: 'Cargando...',
     seccion: '',
-    horario: 'Sin horario asignado',
-    programa: 'Cargando programa...',
-    periodo: 'Cargando periodo...',
+    horario: '',
+    programa: 'Cargando...',
+    periodo: 'Cargando...',
   });
-
-  constructor(
-    private route: ActivatedRoute,
-    private materiasService: MateriasService
-  ) {
-    this.route.paramMap.subscribe(params => {
-      const id = params.get('id');
-      if (id) {
-        this.cargarDatosMateria(id);
-      }
-    });
-  }
-
-  cargarDatosMateria(id: string) {
-    this.materiasService.getMateriaById(id).subscribe({
-      next: (data: any) => {
-        let horarioFormat = 'Horario no definido';
-        if (data.horarios && data.horarios.length > 0) {
-          const gruposHorarios: { [key: string]: string[] } = {};
-          data.horarios.forEach((h: any) => {
-            const ini = h.hora_inicio?.substring(0, 5) || '';
-            const fin = h.hora_fin?.substring(0, 5) || '';
-            const rango = `${ini} - ${fin}`;
-            if (!gruposHorarios[rango]) gruposHorarios[rango] = [];
-            gruposHorarios[rango].push(h.dia);
-          });
-          const partes = Object.entries(gruposHorarios).map(([rango, dias]) => {
-            return `${dias.join(', ')} ${rango}`;
-          });
-          horarioFormat = partes.join(' | ');
-        }
-
-        this.materia.set({
-          materia_id: id,
-          nrc: data.nrc || 'N/A',
-          nombre: data.nombre || 'Materia sin nombre',
-          seccion: data.seccion || '001',
-          horario: horarioFormat,
-          programa: data.programa || 'Licenciatura en Ciencias de la Computación',
-          periodo: data.periodo?.nombre || 'Otoño 2024'
-        });
-      },
-      error: (err) => {
-        console.error('Error al cargar la materia', err);
-      }
-    });
-  }
 
   // Criterios de evaluación — reactivos con signal
   criterios = signal<Criterio[]>([]);
+
+  // Respaldar original para poder "Descartar"
+  private criteriosOriginales: Criterio[] = [];
+
+  ngOnInit() {
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.materia.update(m => ({ ...m, nrc: id }));
+        this.cargarMateria(id);
+      }
+    });
+  }
+
+  cargarMateria(id: string) {
+    this.materiasService.getMateriaById(id).subscribe({
+      next: (m: any) => {
+        this.materia.set({
+          materia_id: m.materia_id || m.materia_ofertada_id || m.id || '',
+          nrc: m.nrc || 'N/A',
+          nombre: m.nombre || 'Sin Nombre',
+          seccion: m.seccion || '',
+          horario: 'No especificado',
+          programa: 'Facultad de Ciencias de la Computación',
+          periodo: m.periodo_id || 'Otoño 2024'
+        });
+
+        this.cargarPonderaciones(this.materia().materia_id);
+      },
+      error: (err) => console.error('Error al cargar materia:', err)
+    });
+  }
+
+  cargarPonderaciones(materiaId: string) {
+    this.calificacionesService.getPonderaciones(materiaId).subscribe({
+      next: (pond) => {
+        if (pond && pond.criterios) {
+          const mapped = pond.criterios.map((c, index) => ({
+            id: index + 1,
+            nombre: c.nombre,
+            descripcion: '', // Backend no almacena descripción
+            icono: this.getIconForName(c.nombre),
+            porcentaje: c.porcentaje
+          }));
+          this.criterios.set(mapped);
+          this.criteriosOriginales = JSON.parse(JSON.stringify(mapped));
+          this.nextId = mapped.length > 0 ? Math.max(...mapped.map(m => m.id)) + 1 : 1;
+        } else {
+          this.criterios.set([]);
+          this.criteriosOriginales = [];
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar ponderaciones:', err);
+        this.criterios.set([]);
+        this.criteriosOriginales = [];
+      }
+    });
+  }
+
+  private getIconForName(nombre: string): string {
+    const n = nombre.toLowerCase();
+    if (n.includes('examen') || n.includes('parcial')) return 'assignment';
+    if (n.includes('tarea') || n.includes('taller') || n.includes('practica')) return 'history_edu';
+    if (n.includes('proyecto')) return 'rocket_launch';
+    if (n.includes('asistencia')) return 'how_to_reg';
+    return 'grade';
+  }
 
   // Total calculado reactivamente
   totalPonderacion = computed(() =>
     this.criterios().reduce((sum, c) => sum + (Number(c.porcentaje) || 0), 0)
   );
 
-  // ¿Es válido para guardar?
-  esValido = computed(() => this.totalPonderacion() === 100);
+  esValido = computed(() => {
+    if (this.totalPonderacion() !== 100) return false;
+    const items = this.criterios();
+    if (items.length === 0) return false;
+    
+    // Verificar nombres vacíos
+    for (let c of items) {
+      if (!c.nombre || c.nombre.trim() === '') return false;
+    }
+    
+    // Verificar nombres únicos
+    const nombres = items.map(c => c.nombre.trim().toLowerCase());
+    const unicos = new Set(nombres);
+    if (unicos.size !== items.length) return false;
+    
+    return true;
+  });
+
+  haCambiado = computed(() => JSON.stringify(this.criterios()) !== JSON.stringify(this.criteriosOriginales));
 
   // Color del indicador circular según el total
   colorIndicador = computed(() => {
@@ -105,12 +147,12 @@ export class PonderacionesComponent {
   }
 
   // Agregar nuevo criterio
-  private nextId = 5;
+  private nextId = 1;
   agregarCriterio() {
     this.criterios.update(list => [...list, {
       id: this.nextId++,
       nombre: 'Nuevo Criterio',
-      descripcion: 'Descripción del criterio',
+      descripcion: '',
       icono: 'grade',
       porcentaje: 0
     }]);
@@ -121,18 +163,34 @@ export class PonderacionesComponent {
     this.criterios.update(list => list.filter(c => c.id !== id));
   }
 
-  // Guardar (se conectará a POST :8004/calificaciones/ponderaciones)
+  // Guardar (POST /api/v1/ponderaciones/:materia_id)
   guardado = signal(false);
   guardar() {
-    if (!this.esValido()) return;
-    // POST /calificaciones/ponderaciones con criterios[]
-    this.guardado.set(true);
-    setTimeout(() => this.guardado.set(false), 3000);
+    const materiaId = this.materia().materia_id;
+    if (!this.esValido() || !materiaId) return;
+
+    const payload: any[] = this.criterios().map((c, idx) => ({
+      nombre: c.nombre.trim(),
+      porcentaje: Number(c.porcentaje) || 0,
+      orden: idx + 1
+    }));
+
+    this.calificacionesService.crearPonderaciones(materiaId, payload).subscribe({
+      next: (res) => {
+        this.guardado.set(true);
+        this.criteriosOriginales = JSON.parse(JSON.stringify(this.criterios()));
+        setTimeout(() => this.guardado.set(false), 3000);
+      },
+      error: (err) => {
+        console.error('Error al guardar ponderaciones:', err);
+        alert('Hubo un error al guardar las ponderaciones. Asegúrese de que los nombres no se repitan y no existan actividades calificadas.');
+      }
+    });
   }
 
-  // Descartar cambios — reset a valores originales
+  // Descartar cambios — reset a valores originales cargados de BD
   descartar() {
-    this.criterios.set([]);
+    this.criterios.set(JSON.parse(JSON.stringify(this.criteriosOriginales)));
   }
 
   // Altura de barra en gráfico visual (max = 100% → 192px)
@@ -146,3 +204,4 @@ export class PonderacionesComponent {
     return this.coloresBarra[i % this.coloresBarra.length];
   }
 }
+

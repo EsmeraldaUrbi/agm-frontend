@@ -40,9 +40,9 @@ export class ActividadesComponent {
     private materiasService: MateriasService
   ) {
     this.route.paramMap.subscribe(params => {
-      const id = params.get('id');
-      if (id) {
-        this.cargarDatosMateria(id);
+      const nrc = params.get('id');
+      if (nrc) {
+        this.cargarDatosMateria(nrc);
       }
     });
   }
@@ -50,6 +50,8 @@ export class ActividadesComponent {
   cargarDatosMateria(id: string) {
     this.materiasService.getMateriaById(id).subscribe({
       next: (data: any) => {
+        const materia_id = data.materia_id || data.materia_ofertada_id || data.id || '';
+
         let horarioFormat = 'Horario no definido';
         if (data.horarios && data.horarios.length > 0) {
           const gruposHorarios: { [key: string]: string[] } = {};
@@ -67,15 +69,17 @@ export class ActividadesComponent {
         }
 
         this.materia.set({
-          materia_id: id,
+          materia_id: materia_id,
           nrc: data.nrc || 'N/A',
-          nombre: data.nombre || 'Materia sin nombre',
+          nombre: data.nombre || data.materia?.nombre || 'Materia sin nombre',
           seccion: data.seccion || '001',
-          // Algunos datos aún podrían ser mock hasta tener el servicio completo:
           horario: horarioFormat,
           programa: data.programa || 'Licenciatura en Ciencias de la Computación',
           periodo: data.periodo?.nombre || 'Otoño 2024'
         });
+        
+        // Aquí podríamos cargar las actividades reales usando el materia_id
+        // this.cargarActividades(materia_id);
       },
       error: (err) => {
         console.error('Error al cargar la materia', err);
