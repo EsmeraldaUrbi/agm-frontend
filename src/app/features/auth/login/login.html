@@ -133,8 +133,9 @@
           <div *ngIf="showError()"
             class="flex items-center gap-2 p-3 bg-error-container/40 rounded-lg border border-error/20 animate-in fade-in zoom-in duration-300">
             <span class="material-symbols-outlined text-error text-lg">error</span>
-            <p class="text-on-error-container text-[11px] font-medium leading-tight">Credenciales inválidas. Por favor
-              verifique sus datos.</p>
+            <p class="text-on-error-container text-[11px] font-medium leading-tight">
+              {{ errorMessage() || 'Credenciales inválidas. Por favor verifique sus datos.' }}
+            </p>
           </div>
 
           <div class="flex items-center justify-end py-1">

@@ -35,11 +35,14 @@ export class LoginComponent {
   showError = signal(false);
   showPassword = signal(false);
 
+  errorMessage = signal<string | null>(null);
+
   constructor(private authService: AuthService, private router: Router) {}
 
   selectRole(role: 'admin' | 'docente' | 'alumno') {
     this.selectedRole.set(role);
     this.showError.set(false);
+    this.errorMessage.set(null);
   }
 
   onLogin() {
@@ -47,12 +50,28 @@ export class LoginComponent {
     if (this.email && this.password) {
       this.authService.login(this.email, this.password, this.selectedRole()).subscribe({
         next: (res) => {
-          const role = res.user.rol.toLowerCase();
-          if (role === 'administrador' || role === 'admin') {
+          const actualRole = res.user.rol.toLowerCase();
+          const selected = this.selectedRole().toLowerCase();
+
+          // Verificar si el rol seleccionado en la UI coincide con el rol real del usuario
+          const isRoleMatch = 
+            (selected === 'admin' && (actualRole === 'administrador' || actualRole === 'admin')) ||
+            (selected === 'docente' && actualRole === 'docente') ||
+            (selected === 'alumno' && actualRole === 'alumno');
+
+          if (!isRoleMatch) {
+            // El usuario existe pero no tiene el rol seleccionado. Lo expulsamos.
+            this.authService.clearSession();
+            this.showError.set(true);
+            this.errorMessage.set(`No tienes permisos para acceder como ${selected}.`);
+            return;
+          }
+
+          if (actualRole === 'administrador' || actualRole === 'admin') {
             this.router.navigate(['/admin/dashboard']);
-          } else if (role === 'docente') {
+          } else if (actualRole === 'docente') {
             this.router.navigate(['/docente/dashboard']);
-          } else if (role === 'alumno') {
+          } else if (actualRole === 'alumno') {
             this.router.navigate(['/alumno/dashboard']);
           } else {
             this.router.navigate(['/perfil']);
@@ -61,10 +80,12 @@ export class LoginComponent {
         error: (err) => {
           console.error('Error en login:', err);
           this.showError.set(true);
+          this.errorMessage.set('Credenciales incorrectas o usuario no encontrado.');
         }
       });
     } else {
       this.showError.set(true);
+      this.errorMessage.set('Por favor completa todos los campos.');
     }
   }
 }
