@@ -225,7 +225,7 @@
               [ngClass]="step() >= 3 ? 'bg-[#003b5c] text-white shadow-sm' : 'bg-[#e7e8e9] text-[#72787e]'">
               3
             </div>
-            <span class="text-[11px] font-bold" [ngClass]="step() >= 3 ? 'text-[#003b5c]' : 'text-[#72787e]'">Previsualización</span>
+            <span class="text-[11px] font-bold" [ngClass]="step() >= 3 ? 'text-[#003b5c]' : 'text-[#72787e]'">Confirmar</span>
           </div>
 
           <div class="flex flex-col items-center gap-1.5 z-10">
@@ -233,7 +233,7 @@
               [ngClass]="step() >= 4 ? 'bg-[#003b5c] text-white shadow-sm' : 'bg-[#e7e8e9] text-[#72787e]'">
               4
             </div>
-            <span class="text-[11px] font-bold" [ngClass]="step() >= 4 ? 'text-[#003b5c]' : 'text-[#72787e]'">Confirmar</span>
+            <span class="text-[11px] font-bold" [ngClass]="step() >= 4 ? 'text-[#003b5c]' : 'text-[#72787e]'">Finalizado</span>
           </div>
         </div>
 
@@ -263,40 +263,15 @@
           }
 
           @if (step() === 3) {
-            <div class="space-y-6 animate-fade-in">
-              <div class="flex justify-between items-center">
-                <div>
-                  <h4 class="text-base font-bold text-[#003b5c] font-['Public_Sans']">Alumnos Detectados en PDF ({{ alumnosExtraidos().length }})</h4>
-                  <p class="text-xs text-[#72787e]">Revisa que la información sea correcta antes de registrar en la materia.</p>
-                </div>
-              </div>
-
-              <div class="border border-[#c2c7ce] rounded-xl overflow-hidden shadow-sm">
-                <table class="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr class="bg-slate-50 text-slate-500 font-bold border-b border-[#c2c7ce]/40 tracking-wider uppercase">
-                      <th class="p-3">MATRÍCULA</th>
-                      <th class="p-3">NOMBRE DEL ALUMNO</th>
-                      <th class="p-3">CORREO INSTITUCIONAL</th>
-                      <th class="p-3">ESTATUS</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-slate-100 bg-white font-medium">
-                    @for (item of alumnosExtraidos(); track item.matricula) {
-                      <tr class="hover:bg-[#f3f4f5]/40 transition-colors">
-                        <td class="p-3 font-mono font-bold text-[#003b5c]">{{ item.matricula }}</td>
-                        <td class="p-3 text-[#42474e] font-bold">{{ item.nombre }}</td>
-                        <td class="p-3 text-[#72787e]">{{ item.correo }}</td>
-                        <td class="p-3">
-                          <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[11px] font-bold">
-                            {{ item.status }}
-                          </span>
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
+            <div class="space-y-6 animate-fade-in text-center py-10">
+              <span class="material-symbols-outlined text-6xl text-[#003b5c] mb-2 block">
+                description
+              </span>
+              <h4 class="text-xl font-bold text-[#003b5c] font-['Public_Sans']">Archivo seleccionado</h4>
+              <p class="text-base text-[#42474e] font-mono">{{ archivoSeleccionado() }}</p>
+              <p class="text-sm text-[#72787e] max-w-md mx-auto mt-4">
+                El documento está listo para ser enviado. Al confirmar, el sistema procesará el PDF e inscribirá a los alumnos encontrados.
+              </p>
             </div>
           }
 
@@ -305,9 +280,23 @@
               <span class="material-symbols-outlined text-6xl text-emerald-600 mb-2 block" style="font-variation-settings:'FILL' 1">
                 task_alt
               </span>
-              <h3 class="text-2xl font-black text-[#003b5c] font-['Public_Sans']">¡Alumnos Importados Exitosamente!</h3>
-              <p class="text-sm text-[#72787e] max-w-md mx-auto">
-                Los alumnos han sido agregados a la lista general de la materia y sincronizados con MS-Alumnos.
+              <h3 class="text-2xl font-black text-[#003b5c] font-['Public_Sans']">¡Importación Exitosa!</h3>
+              
+              @if (importResult()) {
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-4 max-w-sm mx-auto text-left space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm font-bold text-slate-600">Alumnos Procesados:</span>
+                    <span class="text-sm font-bold text-[#003b5c]">{{ importResult().resumen?.exitos || 0 }}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm font-bold text-slate-600">Errores/Omitidos:</span>
+                    <span class="text-sm font-bold text-red-600">{{ importResult().resumen?.errores || 0 }}</span>
+                  </div>
+                </div>
+              }
+              
+              <p class="text-sm text-[#72787e] max-w-md mx-auto mt-4">
+                Los alumnos han sido sincronizados y agregados a la lista general de la materia.
               </p>
             </div>
           }

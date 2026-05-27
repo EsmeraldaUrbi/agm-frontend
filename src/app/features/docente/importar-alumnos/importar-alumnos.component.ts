@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MateriasService } from '../../../core/services/materias.service';
+import { AlumnosService } from '../../../core/services/alumnos.service';
 
 interface Alumno {
   matricula: string;
@@ -47,12 +48,32 @@ export class ImportarAlumnosComponent {
 
   constructor(
     private route: ActivatedRoute,
-    private materiasService: MateriasService
+    private materiasService: MateriasService,
+    private alumnosService: AlumnosService
   ) {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
         this.cargarDatosMateria(id);
+        this.cargarAlumnosDeMateria(id);
+      }
+    });
+  }
+
+  cargarAlumnosDeMateria(materiaId: string) {
+    this.alumnosService.getAlumnosByMateria(materiaId).subscribe({
+      next: (data) => {
+        const mapped = data.map((a: any) => ({
+          matricula: a.matricula || 'N/A',
+          nombre: a.nombre_completo || 'Sin Nombre',
+          correo: a.correo || 'Sin Correo',
+          estatus: 'Inscrito'
+        }));
+        this.alumnos.set(mapped);
+      },
+      error: (err) => {
+        console.error('Error al cargar alumnos de la materia', err);
+        this.alumnos.set([]);
       }
     });
   }
@@ -122,10 +143,14 @@ export class ImportarAlumnosComponent {
   step = signal<number>(1); // 1: Subir PDF, 2: Procesando, 3: Previsualización, 4: Confirmado
   archivoSeleccionado = signal<string>('');
   alumnosExtraidos = signal<any[]>([]);
+  archivoParaSubir: File | null = null;
+  importResult = signal<any>(null);
 
   abrirPdfModal() {
     this.step.set(1);
     this.archivoSeleccionado.set('');
+    this.archivoParaSubir = null;
+    this.importResult.set(null);
     this.showPdfModal.set(true);
   }
 
@@ -133,30 +158,36 @@ export class ImportarAlumnosComponent {
     const file = event.target.files[0];
     if (file) {
       this.archivoSeleccionado.set(file.name);
-      this.step.set(2);
-      setTimeout(() => {
-        this.step.set(3);
-      }, 2000);
+      this.archivoParaSubir = file;
+      this.step.set(3); // Vamos directo a confirmar, ya que el backend no tiene previsualizacion
     }
   }
 
   confirmarImportacionPdf() {
-    this.step.set(4);
-    // Agregar extraídos a la lista general
-    setTimeout(() => {
-      this.alumnos.update(list => [
-        ...list,
-        ...this.alumnosExtraidos().map(a => ({
-          matricula: a.matricula,
-          nombre: a.nombre,
-          correo: a.correo,
-          estatus: 'Importado PDF'
-        }))
-      ]);
-    }, 1000);
+    if (!this.archivoParaSubir) return;
+    
+    this.step.set(2); // Procesando...
+    
+    this.alumnosService.importarAlumnos(this.archivoParaSubir).subscribe({
+      next: (res) => {
+        this.importResult.set(res);
+        this.step.set(4); // Exito
+      },
+      error: (err) => {
+        console.error('Error al importar PDF:', err);
+        // Volvemos al paso 1 en caso de error
+        alert('Hubo un error al procesar el PDF. Asegúrate de que sea el formato correcto.');
+        this.step.set(1);
+      }
+    });
   }
 
   cerrarPdfModal() {
     this.showPdfModal.set(false);
+    // Idealmente recargar la lista de alumnos
+    if (this.step() === 4) {
+      const id = this.materia().materia_id;
+      if (id) this.cargarAlumnosDeMateria(id);
+    }
   }
 }

@@ -28,6 +28,13 @@ export class AlumnosService {
     );
   }
 
+  // GET /api/v1/alumnos/materia/:materia_id
+  getAlumnosByMateria(materiaId: string): Observable<Alumno[]> {
+    return this.apiClient.get<any>(`${this.apiUrl}/materia/${materiaId}`).pipe(
+      map(res => unwrapArrayResponse<any>(res).map(normalizeAlumno))
+    );
+  }
+
   // GET /api/v1/alumnos/:alumno_id
   getAlumnoById(alumnoId: string): Observable<Alumno> {
     return this.apiClient.get<any>(`${this.apiUrl}/${alumnoId}`).pipe(

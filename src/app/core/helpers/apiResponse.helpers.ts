@@ -95,12 +95,12 @@ export function normalizeAlumno(alumno: any): any {
   if (!alumno) return null;
   const alumno_id = alumno.alumno_id || alumno.id_alumno || alumno.id;
   const user_id = alumno.user_id || alumno.usuario_id;
-  const email = alumno.correo || alumno.email;
+  const correo = alumno.correo || alumno.email;
   const nombre_completo = alumno.nombre_completo || alumno.nombre;
   return {
     alumno_id,
     user_id,
-    email,
+    correo,
     nombre_completo,
     matricula: alumno.matricula || '',
     tipo_formacion: alumno.tipo_formacion || ''
