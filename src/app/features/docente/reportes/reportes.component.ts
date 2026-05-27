@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { DocentesService } from '../../../core/services/docentes.service';
 import { MateriasService } from '../../../core/services/materias.service';
+import { ReportesService } from '../../../core/services/reportes.service';
 
 interface AlumnoRendimiento {
   matricula: string;
@@ -41,6 +42,7 @@ export class ReportesComponent implements OnInit {
   private authService = inject(AuthService);
   private docentesService = inject(DocentesService);
   private materiasService = inject(MateriasService);
+  private reportesService = inject(ReportesService);
   
   // Lista de materias asignadas en el periodo activo para seleccionar dinámicamente
   listaMateriasDisponibles: MateriaActiva[] = [];
@@ -187,18 +189,55 @@ export class ReportesComponent implements OnInit {
   // Estado de descarga simulada
   descargando = signal<string | null>(null);
   mensajeExito = signal<string | null>(null);
+  errorDescarga = signal<string | null>(null);
 
   descargarReporte(tipo: string, formato: string) {
+    if (!this.materia) return;
+    
     this.descargando.set(`${tipo} (${formato})`);
     this.mensajeExito.set(null);
+    this.errorDescarga.set(null);
 
-    setTimeout(() => {
-      this.descargando.set(null);
-      this.mensajeExito.set(`¡El reporte "${tipo}" para la materia ${this.materia?.nombre || ''} (NRC: ${this.materia?.nrc || ''}) en formato ${formato.toUpperCase()} se ha generado y descargado exitosamente vía MS-Reportes!`);
-      
-      setTimeout(() => {
-        this.mensajeExito.set(null);
-      }, 5000);
-    }, 2500);
+    const nrc = this.materia.nrc;
+    let request$;
+
+    if (tipo === 'Calificaciones Finales') {
+      request$ = this.reportesService.descargarReporteCalificaciones(nrc, formato as 'pdf' | 'xlsx');
+    } else {
+      request$ = this.reportesService.descargarReporteAsistencias(nrc, formato as 'pdf' | 'xlsx');
+    }
+
+    request$.subscribe({
+      next: (blob: Blob) => {
+        this.descargando.set(null);
+        
+        // Trigger browser download
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        const timestamp = new Date().toISOString().split('T')[0];
+        const extension = formato.toLowerCase();
+        const filename = `${tipo.replace(/ /g, '_')}_${nrc}_${timestamp}.${extension}`;
+        
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        
+        window.URL.revokeObjectURL(url);
+        a.remove();
+
+        this.mensajeExito.set(`¡El reporte "${tipo}" para la materia ${this.materia?.nombre || ''} (NRC: ${nrc}) en formato ${formato.toUpperCase()} se ha generado y descargado exitosamente vía MS-Reportes!`);
+        
+        setTimeout(() => {
+          this.mensajeExito.set(null);
+        }, 5000);
+      },
+      error: (err) => {
+        console.error('Error al descargar el reporte:', err);
+        this.descargando.set(null);
+        this.errorDescarga.set(`Ocurrió un error al descargar el reporte "${tipo}". Por favor intente de nuevo.`);
+      }
+    });
   }
 }

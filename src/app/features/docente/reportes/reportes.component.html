@@ -75,6 +75,16 @@
     </div>
   }
 
+  @if (errorDescarga()) {
+    <div class="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-800 animate-fade-in shadow-sm">
+      <span class="material-symbols-outlined text-red-600 text-2xl flex-shrink-0" style="font-variation-settings:'FILL' 1">error</span>
+      <div>
+        <h4 class="text-sm font-bold">Error en la descarga</h4>
+        <p class="text-xs text-red-700 mt-0.5">{{ errorDescarga() }}</p>
+      </div>
+    </div>
+  }
+
   <!-- ===== Estadísticas de Rendimiento ===== -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
     <div class="bg-white p-6 rounded-xl border border-[#c2c7ce] shadow-sm flex flex-col justify-between">
