@@ -103,7 +103,18 @@
     </div>
     <!-- Gráfica -->
     <div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
-      <h3 class="text-sm font-black text-primary font-headline uppercase tracking-wider mb-4">Distribución del Padrón</h3>
+      <div class="mb-4">
+        <div class="flex items-center gap-2">
+          <h3 class="text-sm font-black text-primary font-headline uppercase tracking-wider">Distribución del Padrón</h3>
+          <div class="relative group cursor-help">
+            <span class="material-symbols-outlined text-[16px] text-secondary bg-blue-50 rounded-full p-0.5 shadow-sm hover:bg-secondary hover:text-white transition-all transform hover:scale-110">info</span>
+            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-64 bg-slate-800 text-white text-xs p-3 rounded-xl shadow-xl z-50 font-normal leading-relaxed text-center pointer-events-none">
+              Muestra la proporción de usuarios inscritos en el sistema (docentes y alumnos).
+            </div>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mt-1">Comparativa de usuarios del sistema</p>
+      </div>
       <div class="h-64 relative w-full flex justify-center">
         <canvas baseChart
           [data]="chartData()"
