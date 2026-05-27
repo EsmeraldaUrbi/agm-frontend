@@ -26,6 +26,10 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () => import('./materias/materias.component').then(m => m.MateriasComponent)
   },
   {
+    path: 'planes-estudio',
+    loadComponent: () => import('./planes-estudio/planes-estudio.component').then(m => m.PlanesEstudioComponent)
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'

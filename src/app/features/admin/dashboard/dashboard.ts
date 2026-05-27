@@ -135,6 +135,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       color: 'bg-[#4f46e5]/10 text-[#4f46e5] hover:bg-[#4f46e5]/20'
     },
     {
+      label: 'Planes de Estudio',
+      description: 'Configurar vigencia de planes',
+      icon: 'auto_stories',
+      route: '/admin/planes-estudio',
+      color: 'bg-teal-500/10 text-teal-600 hover:bg-teal-500/20'
+    },
+    {
       label: 'Mi Perfil',
       description: 'Ver datos y cambiar contraseña',
       icon: 'manage_accounts',

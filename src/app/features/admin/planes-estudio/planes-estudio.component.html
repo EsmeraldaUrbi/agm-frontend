@@ -1,0 +1,149 @@
+<div class="p-6 md:p-8 space-y-6 bg-[#f8f9fa] min-h-screen font-body text-on-surface">
+  
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-black text-primary font-headline tracking-tight">Planes de Estudio</h1>
+      <p class="text-xs text-outline font-medium">Gestiona y configura los planes de estudio vigentes de la institución.</p>
+    </div>
+    <agm-button (agmClick)="openCreateModal()" size="md">
+      <span class="material-symbols-outlined text-base mr-1.5">auto_stories</span>
+      Crear Plan de Estudio
+    </agm-button>
+  </div>
+
+  <!-- Content -->
+  <div class="space-y-4">
+    <div *ngIf="isLoading()" class="py-12 flex justify-center items-center">
+      <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
+    <div *ngIf="!isLoading()" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <div *ngIf="planes().length === 0" class="col-span-3 text-center py-12 text-outline">
+        <span class="material-symbols-outlined text-4xl mb-3 opacity-50">menu_book</span>
+        <p class="font-bold">No hay planes de estudio registrados.</p>
+        <p class="text-xs mt-1">Crea uno nuevo para comenzar.</p>
+      </div>
+
+      <agm-card 
+        *ngFor="let plan of planes()" 
+        [title]="plan.nombre"
+        [subtitle]="plan.activo ? 'Plan Activo' : 'Plan Inactivo'"
+        [accent]="plan.activo"
+        [hoverable]="true"
+        customClass="bg-white border-outline-variant/15 shadow-md flex flex-col justify-between"
+        bodyClass="p-5 flex flex-col justify-between h-full"
+      >
+        <div class="space-y-4 flex-grow">
+          <div>
+            <span 
+              [ngClass]="plan.activo ? 'bg-emerald-50 text-emerald-700' : 'bg-outline/10 text-outline'"
+              class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase"
+            >
+              {{ plan.activo ? 'Vigente' : 'Inactivo' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between border-t border-outline-variant/10 mt-5 pt-4">
+          <div class="flex items-center gap-1 w-full justify-end">
+            <button 
+              (click)="openEditModal(plan)"
+              title="Editar plan"
+              class="p-1.5 rounded-lg text-outline hover:bg-primary/10 hover:text-primary transition-all"
+            >
+              <span class="material-symbols-outlined text-base">edit</span>
+            </button>
+            <button 
+              *ngIf="plan.activo"
+              (click)="deactivatePlan(plan)"
+              title="Desactivar plan"
+              class="p-1.5 rounded-lg text-outline hover:bg-red-500/10 hover:text-red-600 transition-all"
+            >
+              <span class="material-symbols-outlined text-base">block</span>
+            </button>
+          </div>
+        </div>
+      </agm-card>
+    </div>
+  </div>
+
+  <!-- Interactive Create/Edit Dialog Modal -->
+  <div 
+    *ngIf="showModal()" 
+    class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-modal-in"
+  >
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-outline-variant/10 overflow-hidden">
+      
+      <div class="p-6 border-b border-outline-variant/10 flex justify-between items-center bg-surface-variant/5">
+        <div>
+          <h3 class="text-base font-black text-primary font-headline">
+            {{ isEditing() ? 'Editar Plan de Estudio' : 'Crear Plan de Estudio' }}
+          </h3>
+          <p class="text-[10px] text-outline font-semibold mt-0.5">Ingresa los datos del plan.</p>
+        </div>
+        <button 
+          (click)="showModal.set(false)" 
+          class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:bg-surface-variant/20 hover:text-on-surface transition-all"
+        >
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <form (ngSubmit)="savePlan()" class="p-6 space-y-4">
+        
+        <agm-input 
+          label="Nombre del Plan" 
+          placeholder="Ej. MIN-2026, Plan Semestral..." 
+          [(ngModel)]="planNombre" 
+          name="nombre" 
+          [required]="true"
+        >
+          <span iconLeft class="material-symbols-outlined text-base">text_fields</span>
+        </agm-input>
+
+        <div class="flex items-center gap-2 mt-4">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="planActivo" 
+            name="activo" 
+            id="planActivoCheck"
+            class="w-4 h-4 text-primary bg-surface-variant border-outline-variant rounded focus:ring-primary focus:ring-2 cursor-pointer"
+          >
+          <label for="planActivoCheck" class="text-xs font-bold text-outline cursor-pointer">
+            Plan activo y vigente
+          </label>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-6 border-t border-outline-variant/10 mt-6">
+          <agm-button 
+            type="button" 
+            variant="outline" 
+            (agmClick)="showModal.set(false)"
+          >
+            Cancelar
+          </agm-button>
+          
+          <agm-button type="submit">
+            {{ isEditing() ? 'Guardar Cambios' : 'Crear Plan' }}
+          </agm-button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom Alert Toast Popup Notification -->
+  <div 
+    *ngIf="showToast()" 
+    [ngClass]="toastType() === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50' : 'bg-[#ffdad6] text-[#93000a] border-[#93000a]/15'"
+    class="fixed bottom-6 right-6 px-5 py-3.5 rounded-2xl border flex items-center gap-3 shadow-lg z-50 animate-bounce max-w-sm transition-all"
+  >
+    <span class="material-symbols-outlined text-lg">
+      {{ toastType() === 'success' ? 'check_circle' : 'warning' }}
+    </span>
+    <span class="text-xs font-bold font-sans leading-none">{{ toastMessage() }}</span>
+  </div>
+
+</div>
