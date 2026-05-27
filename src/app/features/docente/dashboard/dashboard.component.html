@@ -185,11 +185,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let materia of materiasResumen; let last = last" [class.border-b]="!last" class="border-slate-50 group hover:bg-slate-50/50 transition-colors">
+            <tr *ngFor="let materia of materias; let last = last" [class.border-b]="!last" class="border-slate-50 group hover:bg-slate-50/50 transition-colors">
               
               <td class="py-4">
                 <div class="text-[10px] font-bold text-slate-400 tracking-wider mb-0.5">NRC {{ materia.nrc }}</div>
-                <div class="text-sm font-bold text-[#0070A8]">{{ materia.materia_nombre || materia.nombre }}</div>
+                <div class="text-sm font-bold text-[#0070A8]">{{ materia.nombre }}</div>
               </td>
               
               <td class="py-4 text-center">
@@ -202,7 +202,7 @@
               
               <td class="py-4 text-center">
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-widest uppercase bg-[#E8F5E9] text-[#2E7D32]">
-                  {{ materia.estatus || 'ACTIVA' }}
+                  {{ materia.estado || materia.estatus || 'ACTIVA' }}
                 </span>
               </td>
               
