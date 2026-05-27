@@ -38,10 +38,10 @@
               <span class="material-symbols-outlined text-sm">meeting_room</span>
               Sección: {{ materia?.seccion }}
             </div>
-            <button (click)="abrirHorario()" class="flex items-center gap-1.5 px-2.5 py-1 -ml-2 rounded-md hover:bg-white/15 transition-all focus:outline-none border border-transparent hover:border-white/20">
+            <div class="flex items-center gap-1.5">
               <span class="material-symbols-outlined text-sm">schedule</span>
-              Ver Horario
-            </button>
+              {{ materia?.horario }}
+            </div>
           </div>
         </div>
 

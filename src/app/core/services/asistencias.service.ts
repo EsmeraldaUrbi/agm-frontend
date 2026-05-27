@@ -131,11 +131,11 @@ export class AsistenciasService {
     return this.escanearAsistencia({ token_cifrado: tokenQr });
   }
 
-  obtenerAsistenciasHoy(idMateria: number): Observable<any[]> {
+  obtenerAsistenciasHoy(idMateria: string | number): Observable<any[]> {
     return this.getAsistenciasHoy(idMateria);
   }
 
-  obtenerHistorial(idMateria: number): Observable<any[]> {
+  obtenerHistorial(idMateria: string | number): Observable<any[]> {
     return this.getHistorialAsistencias(idMateria);
   }
 

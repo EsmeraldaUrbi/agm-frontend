@@ -41,7 +41,7 @@ interface MateriaActiva {
 @Component({
   selector: 'app-reportes',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, HorarioComponent],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './reportes.component.html'
 })
 export class ReportesComponent implements OnInit {
@@ -62,7 +62,6 @@ export class ReportesComponent implements OnInit {
 
   // Horario modal state
   scheduleData: any[] = [];
-  mostrarHorarioModal = false;
 
   // Pagination states
   currentPage = signal(1);
@@ -105,6 +104,21 @@ export class ReportesComponent implements OnInit {
         if (periodos.length > 0) {
           this.selectedPeriodoId.set(periodos[0].periodo_id);
         }
+
+        // Actualizar la asistencia promedio de las materias disponibles con los datos reales
+        this.listaMateriasDisponibles.forEach(mat => {
+           for (const p of periodos) {
+              const mStats = p.materias.find((m: any) => m.materia_id === mat.materia_id);
+              if (mStats) {
+                 mat.asistenciaPromedio = (mStats.porcentaje_asistencia || 0) + '%';
+                 // Actualizar también la lista local de alumnos para la tabla
+                 mat.alumnos.forEach((a: any) => {
+                    a.asistencia = mStats.porcentaje_asistencia || 0; 
+                 });
+              }
+           }
+        });
+
         this.isLoadingHistorial.set(false);
       },
       error: (err) => {
@@ -128,13 +142,7 @@ export class ReportesComponent implements OnInit {
     }
   }
 
-  abrirHorario() {
-    this.mostrarHorarioModal = true;
-  }
 
-  cerrarHorario() {
-    this.mostrarHorarioModal = false;
-  }
 
   constructor(private route: ActivatedRoute) {
     this.route.paramMap.subscribe(params => {
@@ -215,6 +223,31 @@ export class ReportesComponent implements OnInit {
     if (mat) {
       this.materiaSeleccionadaNrc.set(mat.nrc);
       this.materia = mat;
+      
+      // Consultar detalles de la materia para obtener horario y programa reales
+      this.materiasService.getMateriaById(mat.materia_id).subscribe({
+        next: (data: any) => {
+          let horarioFormat = 'Horario no definido';
+          if (data.horarios && data.horarios.length > 0) {
+            const gruposHorarios: { [key: string]: string[] } = {};
+            data.horarios.forEach((h: any) => {
+              const ini = h.hora_inicio?.substring(0, 5) || '';
+              const fin = h.hora_fin?.substring(0, 5) || '';
+              const rango = `${ini} - ${fin}`;
+              if (!gruposHorarios[rango]) gruposHorarios[rango] = [];
+              gruposHorarios[rango].push(h.dia);
+            });
+            const partes = Object.entries(gruposHorarios).map(([rango, dias]) => {
+              return `${dias.join(', ')} ${rango}`;
+            });
+            horarioFormat = partes.join(' | ');
+          }
+
+          mat.horario = horarioFormat;
+          mat.programa = data.programa || 'Licenciatura en Ciencias de la Computación';
+          mat.periodo = data.periodo?.nombre || 'Otoño 2024';
+        }
+      });
       this.alumnos.set(mat.alumnos);
       this.currentPage.set(1);
       
@@ -265,11 +298,21 @@ export class ReportesComponent implements OnInit {
                 };
               });
 
+              // Buscar en el historial (si ya cargó) el porcentaje real
+              let asisPromedio = '0%';
+              for (const p of this.periodosHistorial()) {
+                const mStats = p.materias.find((m: any) => m.materia_id === mat.materia_id);
+                if (mStats) {
+                  asisPromedio = (mStats.porcentaje_asistencia || 0) + '%';
+                  break;
+                }
+              }
+
               const total = alumnosRendimiento.length;
               mat.promedioGeneral = (sumaPromedios / total).toFixed(2);
               mat.tasaAprobacion = Math.round((alumnosAprobados / total) * 100).toString() + '%';
               mat.alumnosRiesgo = enRiesgo.toString();
-              mat.asistenciaPromedio = '100%';
+              mat.asistenciaPromedio = asisPromedio;
             } else {
               mat.promedioGeneral = '0.00';
               mat.tasaAprobacion = '0%';

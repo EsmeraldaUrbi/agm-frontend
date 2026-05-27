@@ -2,7 +2,8 @@
 <div class="w-full pb-24 font-['Inter'] space-y-6">
 
   <!-- ===== Selector Dinámico de Materia Activa ===== -->
-  <div class="bg-white p-5 rounded-2xl border border-[#c2c7ce] shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+  <div
+    class="bg-white p-5 rounded-2xl border border-[#c2c7ce] shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
     <div class="flex items-center gap-3 text-sm font-bold text-[#003b5c]">
       <div class="w-10 h-10 rounded-xl bg-[#003b5c]/10 flex items-center justify-center flex-shrink-0">
         <span class="material-symbols-outlined text-xl">qr_code_scanner</span>
@@ -15,7 +16,7 @@
     <select [ngModel]="materiaSeleccionadaNrc()" (ngModelChange)="cambiarMateria($event)"
       class="bg-[#f8f9fa] border-2 border-[#003b5c] rounded-xl px-4 py-2.5 text-sm font-bold text-[#003b5c] focus:border-[#00566d] outline-none cursor-pointer w-full md:w-auto shadow-sm">
       @for (m of listaMateriasDisponibles; track m.nrc) {
-        <option [value]="m.nrc">{{ m.nombre }} (NRC: {{ m.nrc }} - Sec: {{ m.seccion }})</option>
+      <option [value]="m.nrc">{{ m.nombre }} (NRC: {{ m.nrc }} - Sec: {{ m.seccion }})</option>
       }
     </select>
   </div>
@@ -26,8 +27,10 @@
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div class="flex items-center gap-2 mb-3">
-            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia()?.programa }}</span>
-            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia()?.periodo }}</span>
+            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{
+              materia()?.programa }}</span>
+            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{
+              materia()?.periodo }}</span>
           </div>
           <h1 class="text-3xl font-extrabold tracking-tight mb-3 font-['Public_Sans']">{{ materia()?.nombre }}</h1>
           <div class="flex flex-wrap gap-4 text-white/80 font-medium text-sm">
@@ -50,21 +53,24 @@
   </div>
 
   @if (mensajeInfo()) {
-    <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3 text-amber-800 animate-fade-in shadow-sm">
-      <span class="material-symbols-outlined text-amber-600 text-2xl flex-shrink-0" style="font-variation-settings:'FILL' 1">info</span>
-      <div>
-        <h4 class="text-sm font-bold">{{ mensajeInfo() }}</h4>
-      </div>
+  <div
+    class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3 text-amber-800 animate-fade-in shadow-sm">
+    <span class="material-symbols-outlined text-amber-600 text-2xl flex-shrink-0"
+      style="font-variation-settings:'FILL' 1">info</span>
+    <div>
+      <h4 class="text-sm font-bold">{{ mensajeInfo() }}</h4>
     </div>
+  </div>
   }
 
   @if (isLoading()) {
-    <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-4 text-blue-800 animate-fade-in shadow-sm">
-      <div class="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
-      <div>
-        <h4 class="text-sm font-bold">Consultando historial en tiempo real...</h4>
-      </div>
+  <div
+    class="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-4 text-blue-800 animate-fade-in shadow-sm">
+    <div class="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+    <div>
+      <h4 class="text-sm font-bold">Consultando historial en tiempo real...</h4>
     </div>
+  </div>
   }
 
   <div class="grid grid-cols-12 gap-6">
@@ -75,11 +81,13 @@
     <section class="col-span-12 lg:col-span-4 flex flex-col gap-6">
 
       <!-- Banner de Fecha Actual -->
-      <div class="bg-gradient-to-br from-[#003B5C]/5 to-[#00566d]/10 p-5 rounded-xl border border-[#c2c7ce] shadow-sm flex items-center gap-4 relative overflow-hidden">
+      <div
+        class="bg-gradient-to-br from-[#003B5C]/5 to-[#00566d]/10 p-5 rounded-xl border border-[#c2c7ce] shadow-sm flex items-center gap-4 relative overflow-hidden">
         <div class="absolute -right-6 -top-6 opacity-5 pointer-events-none">
           <span class="material-symbols-outlined text-[80px]">calendar_today</span>
         </div>
-        <div class="w-12 h-12 rounded-xl bg-[#003b5c] text-white flex flex-col items-center justify-center shadow-md flex-shrink-0">
+        <div
+          class="w-12 h-12 rounded-xl bg-[#003b5c] text-white flex flex-col items-center justify-center shadow-md flex-shrink-0">
           <span class="text-[10px] font-bold uppercase leading-none mt-1">{{ mesActual }}</span>
           <span class="text-lg font-black leading-none mb-1">{{ diaActual }}</span>
         </div>
@@ -88,9 +96,10 @@
           <span class="text-base font-extrabold text-[#00253b] font-['Public_Sans'] block capitalize">
             {{ fechaFormateada }}
           </span>
-          <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[10px] font-bold uppercase tracking-wider">
+          <span
+            class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[10px] font-bold uppercase tracking-wider">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            Hoy (En Vivo)
+            Hoy
           </span>
         </div>
       </div>
@@ -109,11 +118,9 @@
             <!-- Donut chart SVG -->
             <div class="relative w-20 h-20 flex items-center justify-center flex-shrink-0">
               <svg class="w-full h-full -rotate-90" viewBox="0 0 80 80">
-                <circle cx="40" cy="40" r="34" fill="transparent" stroke="#003b5c" stroke-width="8"/>
-                <circle cx="40" cy="40" r="34" fill="transparent" stroke="#5cd4ff"
-                  stroke-width="8"
-                  stroke-dasharray="213.6"
-                  [attr.stroke-dashoffset]="213.6 - (213.6 * resumen().porcentaje / 100)"/>
+                <circle cx="40" cy="40" r="34" fill="transparent" stroke="#003b5c" stroke-width="8" />
+                <circle cx="40" cy="40" r="34" fill="transparent" stroke="#5cd4ff" stroke-width="8"
+                  stroke-dasharray="213.6" [attr.stroke-dashoffset]="213.6 - (213.6 * resumen().porcentaje / 100)" />
               </svg>
               <span class="absolute text-[10px] font-bold text-[#a0cbf3]">HOY</span>
             </div>
@@ -168,48 +175,49 @@
             <thead class="bg-[#e7e8e9] border-b border-[#c2c7ce]">
               <tr>
                 <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider">Matrícula</th>
-                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider">Nombre del Alumno</th>
+                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider">Nombre del Alumno
+                </th>
                 <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider">Hora Escaneo</th>
-                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider text-center">Estado Oficial</th>
-                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider text-center">Acciones</th>
+                <th class="px-6 py-3 text-[10px] font-bold text-[#42474e] uppercase tracking-wider text-center">Estado
+                  Oficial</th>
+
               </tr>
             </thead>
             <tbody class="divide-y divide-[#c2c7ce]/50">
               @for (alumno of alumnosFiltrados(); track alumno.matricula) {
-                <tr class="hover:bg-[#f3f4f5]/60 transition-colors">
+              <tr class="hover:bg-[#f3f4f5]/60 transition-colors">
 
-                  <td class="px-6 py-4 text-sm font-bold text-[#003b5c]">{{ alumno.matricula }}</td>
+                <td class="px-6 py-4 text-sm font-bold text-[#003b5c]">{{ alumno.matricula }}</td>
 
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 bg-[#003b5c]/10 text-[#003b5c]">
-                        {{ getInitials(alumno.nombre) }}
-                      </div>
-                      <span class="text-sm font-medium text-[#191c1d]">{{ alumno.nombre }}</span>
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 bg-[#003b5c]/10 text-[#003b5c]">
+                      {{ getInitials(alumno.nombre) }}
                     </div>
-                  </td>
+                    <span class="text-sm font-medium text-[#191c1d]">{{ alumno.nombre }}</span>
+                  </div>
+                </td>
 
-                  <td class="px-6 py-4 text-xs text-[#42474e] font-mono">{{ alumno.hora }}</td>
+                <td class="px-6 py-4 text-xs text-[#42474e] font-mono">{{ alumno.hora }}</td>
 
-                  <!-- Estado en Badge (Solo lectura visual) -->
-                  <td class="px-6 py-4 text-center">
-                    <span class="px-3 py-1 rounded-md text-xs font-bold tracking-wide shadow-sm flex items-center justify-center w-28 mx-auto"
-                      [ngClass]="{
+                <!-- Estado en Badge (Solo lectura visual) -->
+                <td class="px-6 py-4 text-center">
+                  <span
+                    class="px-3 py-1 rounded-md text-xs font-bold tracking-wide shadow-sm flex items-center justify-center w-28 mx-auto"
+                    [ngClass]="{
                         'bg-emerald-50 text-emerald-700 border border-emerald-200': alumno.estado === 'PRESENTE',
                         'bg-amber-50 text-amber-700 border border-amber-200': alumno.estado === 'RETARDO',
                         'bg-red-50 text-red-700 border border-red-200': alumno.estado === 'FALTA',
                         'bg-blue-50 text-blue-700 border border-blue-200': alumno.estado === 'JUSTIFICADO'
                       }">
-                      {{ alumno.estado }}
-                    </span>
-                  </td>
+                    {{ alumno.estado }}
+                  </span>
+                </td>
 
-                  <!-- Acciones (Justificar) - Deshabilitado porque el backend no lo soporta aún -->
-                  <td class="px-6 py-4 text-center">
-                    <span class="text-[10px] text-slate-300">-</span>
-                  </td>
 
-                </tr>
+
+              </tr>
               }
             </tbody>
           </table>
@@ -217,7 +225,8 @@
 
         <!-- Paginación -->
         <div class="p-4 border-t border-[#c2c7ce] bg-[#f3f4f5]/50 flex justify-between items-center">
-          <span class="text-xs text-[#42474e] font-medium">Mostrando {{ historialAlumnos().length }} alumnos listados</span>
+          <span class="text-xs text-[#42474e] font-medium">Mostrando {{ historialAlumnos().length }} alumnos
+            listados</span>
         </div>
 
       </div>
@@ -225,5 +234,3 @@
 
   </div>
 </div>
-
-

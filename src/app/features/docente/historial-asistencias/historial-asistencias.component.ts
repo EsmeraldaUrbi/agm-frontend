@@ -23,6 +23,7 @@ interface Alumno {
 }
 
 interface MateriaActiva {
+  materia_id: string;
   nrc: string;
   nombre: string;
   seccion: string;
@@ -122,6 +123,7 @@ export class HistorialAsistenciasComponent implements OnInit {
     this.materiasService.getMateriasByDocente(docenteId).subscribe({
       next: (res) => {
         this.listaMateriasDisponibles = res.items.map((m: any) => ({
+          materia_id: m.materia_ofertada_id,
           nrc: m.nrc || 'N/A',
           nombre: m.nombre || 'Materia sin Nombre',
           seccion: m.seccion || '001',
@@ -146,7 +148,36 @@ export class HistorialAsistenciasComponent implements OnInit {
     const mat = this.listaMateriasDisponibles.find(m => m.nrc === nrc);
     if (mat) {
       this.materiaSeleccionadaNrc.set(mat.nrc);
-      this.materia.set(mat);
+      this.materia.set({ ...mat });
+      
+      // Consultar detalles de la materia para obtener horario y programa reales
+      this.materiasService.getMateriaById(mat.materia_id).subscribe({
+        next: (data: any) => {
+          let horarioFormat = 'Horario no definido';
+          if (data.horarios && data.horarios.length > 0) {
+            const gruposHorarios: { [key: string]: string[] } = {};
+            data.horarios.forEach((h: any) => {
+              const ini = h.hora_inicio?.substring(0, 5) || '';
+              const fin = h.hora_fin?.substring(0, 5) || '';
+              const rango = `${ini} - ${fin}`;
+              if (!gruposHorarios[rango]) gruposHorarios[rango] = [];
+              gruposHorarios[rango].push(h.dia);
+            });
+            const partes = Object.entries(gruposHorarios).map(([rango, dias]) => {
+              return `${dias.join(', ')} ${rango}`;
+            });
+            horarioFormat = partes.join(' | ');
+          }
+
+          this.materia.set({
+            ...mat,
+            horario: horarioFormat,
+            programa: data.programa || 'Licenciatura en Ciencias de la Computación',
+            periodo: data.periodo?.nombre || 'Otoño 2024'
+          });
+        }
+      });
+
       this.alumnosInscritos.set([]);
       this.historialAlumnos.set([]);
       this.estadisticas.set(null);
@@ -156,11 +187,11 @@ export class HistorialAsistenciasComponent implements OnInit {
   }
 
   cargarDatosMateria() {
-    const nrc = this.materiaSeleccionadaNrc();
-    if (!nrc) return;
+    const mat = this.materia();
+    if (!mat) return;
     
-    // Obtenemos alumnos inscritos reales
-    this.alumnosService.getAlumnosByMateria(nrc).subscribe({
+    // Obtenemos alumnos inscritos reales usando el materia_id
+    this.alumnosService.getAlumnosByMateria(mat.materia_id).subscribe({
       next: (alumnos) => {
         this.alumnosInscritos.set(alumnos);
         this.consultarHoy();
@@ -169,18 +200,34 @@ export class HistorialAsistenciasComponent implements OnInit {
   }
 
   consultarHoy() {
-    const nrc = this.materiaSeleccionadaNrc();
-    if (!nrc) return;
+    const mat = this.materia();
+    if (!mat) return;
 
     this.isLoading.set(true);
     this.mensajeInfo.set(null);
     this.historialAlumnos.set([]);
     this.estadisticas.set(null);
 
-    this.asistenciasService.obtenerAsistenciasHoy(nrc as any).subscribe({
+    this.asistenciasService.obtenerAsistenciasHoy(mat.materia_id).subscribe({
       next: (asistencias) => {
         if (!asistencias || asistencias.length === 0) {
-          this.mensajeInfo.set('No hay sesión de asistencia registrada para esta fecha.');
+          // Aunque no haya registros de escaneo, debemos listar a los alumnos inscritos como FALTA.
+          const totalInscritos = this.alumnosInscritos().length;
+          this.estadisticas.set({
+              total_alumnos: totalInscritos,
+              presentes: 0,
+              retardos: 0,
+              ausentes: totalInscritos,
+              porcentaje_asistencia: 0
+          });
+          this.mapearHistorial([]);
+          
+          if (totalInscritos === 0) {
+              this.mensajeInfo.set('No hay alumnos inscritos en esta materia.');
+          } else {
+              this.mensajeInfo.set('No hay asistencias registradas hoy. Todos aparecen con falta.');
+          }
+          
           this.isLoading.set(false);
           return;
         }
