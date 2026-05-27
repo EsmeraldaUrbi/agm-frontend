@@ -5,6 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { DocentesService } from '../../../core/services/docentes.service';
 import { MateriasService } from '../../../core/services/materias.service';
+import { AlumnosService } from '../../../core/services/alumnos.service';
+import { forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 interface Curso {
   materia_id: string;
@@ -27,6 +30,7 @@ export class MisCursosComponent implements OnInit {
   private authService = inject(AuthService);
   private docentesService = inject(DocentesService);
   private materiasService = inject(MateriasService);
+  private alumnosService = inject(AlumnosService);
 
   cursos = signal<Curso[]>([]);
   docenteId: string | null = null;
@@ -99,14 +103,41 @@ export class MisCursosComponent implements OnInit {
             nrc: m.nrc || 'N/A',
             seccion: m.seccion || '001',
             nombre: m.nombre || 'Materia sin Nombre',
-            alumnos: 0, // El conteo real se implementará con MS-Inscripciones
+            alumnos: 0,
             progreso: isCanceled ? 100 : 75,
             progresoColor: isCanceled ? 'bg-red-500' : 'bg-emerald-500',
             estado: m.estado || 'ACTIVA'
           };
         });
-        this.cursos.set(mappedCursos);
-        this.isLoading.set(false);
+
+        if (mappedCursos.length === 0) {
+          this.cursos.set([]);
+          this.isLoading.set(false);
+          return;
+        }
+
+        const requests = mappedCursos.map((curso: any) => {
+          if (!curso.materia_id) return of(0);
+          return this.alumnosService.getAlumnosByMateria(curso.materia_id).pipe(
+            map(alumnos => alumnos.length),
+            catchError(() => of(0))
+          );
+        });
+
+        forkJoin(requests).subscribe({
+          next: (counts: any) => {
+            mappedCursos.forEach((curso: any, index: number) => {
+              curso.alumnos = counts[index];
+            });
+            this.cursos.set(mappedCursos);
+            this.isLoading.set(false);
+          },
+          error: (err) => {
+            console.error('Error al obtener conteos de alumnos:', err);
+            this.cursos.set(mappedCursos);
+            this.isLoading.set(false);
+          }
+        });
       },
       error: (err) => {
         console.error('Error al cargar cursos de docente:', err);

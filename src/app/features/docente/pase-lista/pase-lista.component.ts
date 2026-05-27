@@ -6,6 +6,9 @@ import { AsistenciasService } from '../../../core/services/asistencias.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DocentesService } from '../../../core/services/docentes.service';
 import { MateriasService } from '../../../core/services/materias.service';
+import { AlumnosService, Alumno } from '../../../core/services/alumnos.service';
+import { Subject, timer, forkJoin, of } from 'rxjs';
+import { switchMap, takeUntil, catchError, filter } from 'rxjs/operators';
 import jsQR from 'jsqr';
 
 interface AlumnoRegistrado {
@@ -31,6 +34,10 @@ export class PaseListaComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private docentesService = inject(DocentesService);
   private materiasService = inject(MateriasService);
+  private alumnosService = inject(AlumnosService);
+
+  private destroy$ = new Subject<void>();
+  private pollingActivo = signal(false);
 
   estadoSesion = signal<EstadoSesion>('idle');
 
@@ -99,12 +106,13 @@ export class PaseListaComponent implements OnInit, OnDestroy {
   timerPorcentaje = computed(() => (this.tiempoRestante() / 600) * 100);
 
   alumnosRegistrados = signal<AlumnoRegistrado[]>([]);
+  alumnosInscritos = signal<Alumno[]>([]);
+  estadisticas = signal<any>(null);
 
-  presentes  = computed(() => this.alumnosRegistrados().filter(a => a.estado === 'presente').length);
-  retardos   = computed(() => this.alumnosRegistrados().filter(a => a.estado === 'retardo').length);
-  totalGrupo = 35;
-
-  pendientes = computed(() => this.totalGrupo - this.alumnosRegistrados().length);
+  presentes  = computed(() => this.estadisticas()?.presentes || 0);
+  retardos   = computed(() => this.estadisticas()?.retardos || 0);
+  totalGrupo = computed(() => this.estadisticas()?.total_alumnos || 0);
+  pendientes = computed(() => this.estadisticas()?.ausentes || 0);
 
   // --- ESCÁNER STATES ---
   camaraActiva = signal(false);
@@ -170,11 +178,62 @@ export class PaseListaComponent implements OnInit, OnDestroy {
       this.tiempoRestante.update(t => t - 1);
     }, 1000);
 
-    // Intentar cargar historial inicial por si existen alumnos registrados
-    this.cargarHistorial();
+    // Cargar alumnos inscritos para poder mapear la matrícula al nombre
+    const idMateriaStr = String(this.materiaSeleccionada || sesion.id_materia);
+    this.alumnosService.getAlumnosByMateria(idMateriaStr).subscribe({
+      next: (alumnos) => {
+        this.alumnosInscritos.set(alumnos);
+        this.iniciarPolling();
+      },
+      error: (err) => {
+        console.error('Error al cargar alumnos inscritos:', err);
+        // Iniciamos el polling aunque falle, usarán el fallback
+        this.iniciarPolling();
+      }
+    });
 
     // Iniciar cámara web para el escaneo directo
     setTimeout(() => this.iniciarCamara(), 100);
+  }
+
+  private iniciarPolling() {
+    this.pollingActivo.set(true);
+    timer(0, 3000).pipe(
+      filter(() => this.pollingActivo()),
+      takeUntil(this.destroy$),
+      switchMap(() => {
+        const idSesion = this.sessionId();
+        if (!idSesion) return of(null);
+
+        return forkJoin({
+          historial: this.asistenciasService.obtenerHistorial(idSesion).pipe(catchError(() => of([]))),
+          estadisticas: this.asistenciasService.obtenerEstadisticasSesion(idSesion).pipe(catchError(() => of(null)))
+        });
+      })
+    ).subscribe({
+      next: (res) => {
+        if (!res) return;
+        
+        if (res.estadisticas) {
+          this.estadisticas.set(res.estadisticas);
+        }
+
+        if (res.historial) {
+          const listaMapeada: AlumnoRegistrado[] = res.historial.map((h: any) => {
+            const alumnoInfo = this.alumnosInscritos().find(a => a.matricula === h.matricula);
+            return {
+              nombre: alumnoInfo ? alumnoInfo.nombre_completo : `Alumno ${h.matricula}`,
+              matricula: h.matricula,
+              hora: new Date(h.fecha_hora_registro).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+              estado: h.estado_asistencia.toLowerCase() as 'presente' | 'retardo'
+            };
+          });
+          
+          // Solo actualizar si hay cambios
+          this.alumnosRegistrados.set(listaMapeada);
+        }
+      }
+    });
   }
 
   private manejarErrorSesion(error: any, defaultMsg: string) {
@@ -244,59 +303,31 @@ export class PaseListaComponent implements OnInit, OnDestroy {
 
     this.asistenciasService.registrarAsistencia(data).subscribe({
       next: (res) => {
-        // Consultar el historial para obtener la matrícula real del alumno escaneado
-        const idSesion = this.sessionId();
-        if (idSesion) {
-          this.asistenciasService.obtenerHistorial(idSesion).subscribe({
-            next: (historial: any[]) => {
-              const registroMatch = historial.find((h: any) => h.id_asistencia === res.id_asistencia);
-              const matricula = registroMatch ? registroMatch.matricula : 'Desconocida';
+        // Consultar el historial local o esperar al próximo polling
+        // Como tenemos polling, el historial se actualizará solo.
+        // Haremos un fallback temporal visual para feedback inmediato
+        const alumnoInfo = this.alumnosInscritos().find(a => a.matricula === res.matricula) || 
+                           this.alumnosInscritos().find(a => String(a.alumno_id) === String(res.id_alumno));
+                           
+        const nombre = alumnoInfo ? alumnoInfo.nombre_completo : (res.matricula ? `Alumno ${res.matricula}` : 'Desconocido');
+        const matricula = res.matricula || (alumnoInfo ? alumnoInfo.matricula : 'Desconocida');
 
-              const nuevo: AlumnoRegistrado = {
-                nombre: `Alumno ${matricula}`,
-                matricula: matricula,
-                hora: new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
-                estado: res.estado.toLowerCase() as 'presente' | 'retardo'
-              };
+        const nuevo: AlumnoRegistrado = {
+          nombre: nombre,
+          matricula: matricula || '',
+          hora: new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+          estado: res.estado.toLowerCase() as 'presente' | 'retardo'
+        };
 
-              this.ultimoEscaneado.set(nuevo);
+        this.ultimoEscaneado.set(nuevo);
 
-              const listaMapeada: AlumnoRegistrado[] = historial.map((h: any) => ({
-                nombre: `Alumno ${h.matricula}`,
-                matricula: h.matricula,
-                hora: new Date(h.fecha_hora_registro).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
-                estado: h.estado_asistencia.toLowerCase() as 'presente' | 'retardo'
-              }));
-              this.alumnosRegistrados.set(listaMapeada);
-
-              // Feedback visual de 1.5s y reiniciar cámara
-              setTimeout(() => {
-                this.ultimoEscaneado.set(null);
-                this.lecturaBloqueada = false;
-                this.escaneando.set(true);
-                this.escanearFrame();
-              }, 1500);
-            },
-            error: () => {
-              // Fallback básico
-              const nuevo: AlumnoRegistrado = {
-                nombre: 'Alumno Registrado',
-                matricula: 'Confirmado',
-                hora: new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
-                estado: res.estado.toLowerCase() as 'presente' | 'retardo'
-              };
-              this.ultimoEscaneado.set(nuevo);
-              this.alumnosRegistrados.update(list => [nuevo, ...list]);
-
-              setTimeout(() => {
-                this.ultimoEscaneado.set(null);
-                this.lecturaBloqueada = false;
-                this.escaneando.set(true);
-                this.escanearFrame();
-              }, 1500);
-            }
-          });
-        }
+        // Feedback visual de 1.5s y reiniciar cámara
+        setTimeout(() => {
+          this.ultimoEscaneado.set(null);
+          this.lecturaBloqueada = false;
+          this.escaneando.set(true);
+          this.escanearFrame();
+        }, 1500);
       },
       error: (error) => {
         let msg = 'Error al procesar el código QR o asistencia ya registrada.';
@@ -319,26 +350,11 @@ export class PaseListaComponent implements OnInit, OnDestroy {
   }
 
   cargarHistorial() {
-    const idSesion = this.sessionId();
-    if (!idSesion) return;
-
-    this.asistenciasService.obtenerHistorial(idSesion).subscribe({
-      next: (historial: any[]) => {
-        const listaMapeada: AlumnoRegistrado[] = historial.map((h: any) => ({
-          nombre: `Alumno ${h.matricula}`,
-          matricula: h.matricula,
-          hora: new Date(h.fecha_hora_registro).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
-          estado: h.estado_asistencia.toLowerCase() as 'presente' | 'retardo'
-        }));
-        this.alumnosRegistrados.set(listaMapeada);
-      },
-      error: (err) => {
-        console.error('Error al cargar historial inicial:', err);
-      }
-    });
+    // Ya no es necesario cargar el historial individualmente, el polling lo hace.
   }
 
   finalizarSesion() {
+    this.pollingActivo.set(false);
     const idSesion = this.sessionId();
     if (!idSesion) {
       this.detenerCamara();
@@ -390,6 +406,9 @@ export class PaseListaComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     if (this.timerInterval) clearInterval(this.timerInterval);
+    this.pollingActivo.set(false);
+    this.destroy$.next();
+    this.destroy$.complete();
     this.detenerCamara();
   }
 }

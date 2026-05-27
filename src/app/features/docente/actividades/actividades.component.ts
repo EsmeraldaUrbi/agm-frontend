@@ -4,6 +4,9 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MateriasService } from '../../../core/services/materias.service';
 import { CalificacionesService } from '../../../core/services/calificaciones.service';
+import { AlumnosService } from '../../../core/services/alumnos.service';
+import { forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 interface Actividad {
   id: string;
@@ -39,7 +42,8 @@ export class ActividadesComponent {
   constructor(
     private route: ActivatedRoute,
     private materiasService: MateriasService,
-    private calificacionesService: CalificacionesService
+    private calificacionesService: CalificacionesService,
+    private alumnosService: AlumnosService
   ) {
     this.route.paramMap.subscribe(params => {
       const nrc = params.get('id');
@@ -131,25 +135,75 @@ export class ActividadesComponent {
   }
 
   cargarActividades(materiaId: string) {
-    this.calificacionesService.getActividadesByMateria(materiaId).subscribe({
-      next: (data) => {
-        const mapped = data.map(act => {
-          const pond = this.ponderaciones.find(p => p.id === act.ponderacion_id);
-          return {
-            ...act,
-            id: act.actividad_id || '',
-            ponderacion_nombre: pond ? pond.nombre : 'General',
-            estado: act.estado || 'activa',
-            evaluados: 0,
-            total: 0,
-            promedio: 0.0
-          } as Actividad;
-        });
-        this.actividades.set(mapped);
-      },
-      error: (err) => {
-        console.error('Error cargando actividades', err);
-      }
+    this.alumnosService.getAlumnosByMateria(materiaId).pipe(
+      catchError(() => of([]))
+    ).subscribe(alumnos => {
+      const totalAlumnos = alumnos.length;
+
+      this.calificacionesService.getActividadesByMateria(materiaId).subscribe({
+        next: (data) => {
+          if (data.length === 0) {
+            this.actividades.set([]);
+            return;
+          }
+
+          const requests = data.map(act => {
+            const actividadId = act.actividad_id || '';
+            if (!actividadId) return of({ evaluados: 0, promedio: 0.0 });
+
+            return this.calificacionesService.getCalificacionesByActividad(actividadId).pipe(
+              map(califs => {
+                const evaluados = califs.length;
+                let promedio = 0.0;
+                if (evaluados > 0) {
+                  const sum = califs.reduce((s, c) => s + (c.calificacion || 0), 0);
+                  promedio = Number((sum / evaluados).toFixed(1));
+                }
+                return { evaluados, promedio };
+              }),
+              catchError(() => of({ evaluados: 0, promedio: 0.0 }))
+            );
+          });
+
+          forkJoin(requests).subscribe({
+            next: (statsList: any[]) => {
+              const mapped = data.map((act, index) => {
+                const pond = this.ponderaciones.find(p => p.id === act.ponderacion_id);
+                const stats = statsList[index];
+                return {
+                  ...act,
+                  id: act.actividad_id || '',
+                  ponderacion_nombre: pond ? pond.nombre : 'General',
+                  estado: act.estado || 'activa',
+                  evaluados: stats.evaluados,
+                  total: totalAlumnos,
+                  promedio: stats.promedio
+                } as Actividad;
+              });
+              this.actividades.set(mapped);
+            },
+            error: (err) => {
+              console.error('Error al obtener estadísticas de calificaciones:', err);
+              const mapped = data.map(act => {
+                const pond = this.ponderaciones.find(p => p.id === act.ponderacion_id);
+                return {
+                  ...act,
+                  id: act.actividad_id || '',
+                  ponderacion_nombre: pond ? pond.nombre : 'General',
+                  estado: act.estado || 'activa',
+                  evaluados: 0,
+                  total: totalAlumnos,
+                  promedio: 0.0
+                } as Actividad;
+              });
+              this.actividades.set(mapped);
+            }
+          });
+        },
+        error: (err) => {
+          console.error('Error cargando actividades', err);
+        }
+      });
     });
   }
 

@@ -26,22 +26,22 @@
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div class="flex items-center gap-2 mb-3">
-            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia?.programa }}</span>
-            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia?.periodo }}</span>
+            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia()?.programa }}</span>
+            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia()?.periodo }}</span>
           </div>
-          <h1 class="text-3xl font-extrabold tracking-tight mb-3 font-['Public_Sans']">{{ materia?.nombre }}</h1>
+          <h1 class="text-3xl font-extrabold tracking-tight mb-3 font-['Public_Sans']">{{ materia()?.nombre }}</h1>
           <div class="flex flex-wrap gap-4 text-white/80 font-medium text-sm">
             <div class="flex items-center gap-1.5">
               <span class="material-symbols-outlined text-sm">numbers</span>
-              NRC: {{ materia?.nrc }}
+              NRC: {{ materia()?.nrc }}
             </div>
             <div class="flex items-center gap-1.5">
               <span class="material-symbols-outlined text-sm">meeting_room</span>
-              Sección: {{ materia?.seccion }}
+              Sección: {{ materia()?.seccion }}
             </div>
             <div class="flex items-center gap-1.5">
               <span class="material-symbols-outlined text-sm">schedule</span>
-              {{ materia?.horario }}
+              {{ materia()?.horario }}
             </div>
           </div>
         </div>
@@ -49,21 +49,20 @@
     </div>
   </div>
 
-  <!-- Alertas de estado -->
-  @if (mensajeExito()) {
-    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 text-emerald-800 animate-fade-in shadow-sm">
-      <span class="material-symbols-outlined text-emerald-600 text-2xl flex-shrink-0" style="font-variation-settings:'FILL' 1">info</span>
+  @if (mensajeInfo()) {
+    <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3 text-amber-800 animate-fade-in shadow-sm">
+      <span class="material-symbols-outlined text-amber-600 text-2xl flex-shrink-0" style="font-variation-settings:'FILL' 1">info</span>
       <div>
-        <h4 class="text-sm font-bold">{{ mensajeExito() }}</h4>
+        <h4 class="text-sm font-bold">{{ mensajeInfo() }}</h4>
       </div>
     </div>
   }
 
-  @if (guardando()) {
+  @if (isLoading()) {
     <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-4 text-blue-800 animate-fade-in shadow-sm">
       <div class="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
       <div>
-        <h4 class="text-sm font-bold">Procesando y sincronizando con MS-Asistencias...</h4>
+        <h4 class="text-sm font-bold">Consultando historial en tiempo real...</h4>
       </div>
     </div>
   }
@@ -75,21 +74,24 @@
     <!-- ============================================================ -->
     <section class="col-span-12 lg:col-span-4 flex flex-col gap-6">
 
-      <!-- Filtros -->
-      <div class="bg-white p-6 rounded-xl border border-[#c2c7ce] shadow-sm">
-        <h3 class="font-black text-[#00253b] mb-5 flex items-center gap-2 font-['Public_Sans']">
-          <span class="material-symbols-outlined text-xl">filter_list</span>
-          Filtros de Búsqueda
-        </h3>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">Fecha de Registro</label>
-            <input type="date" [(ngModel)]="fechaSeleccionada"
-              class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-4 py-2 text-sm text-[#191c1d] focus:border-[#00253b] focus:ring-1 focus:ring-[#00253b] outline-none transition-all"/>
-          </div>
-          <button class="w-full mt-2 bg-[#1a4a6c] text-white py-2.5 rounded-lg font-bold text-sm shadow-sm hover:bg-[#003b5c] transition-all">
-            Consultar Fecha
-          </button>
+      <!-- Banner de Fecha Actual -->
+      <div class="bg-gradient-to-br from-[#003B5C]/5 to-[#00566d]/10 p-5 rounded-xl border border-[#c2c7ce] shadow-sm flex items-center gap-4 relative overflow-hidden">
+        <div class="absolute -right-6 -top-6 opacity-5 pointer-events-none">
+          <span class="material-symbols-outlined text-[80px]">calendar_today</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-[#003b5c] text-white flex flex-col items-center justify-center shadow-md flex-shrink-0">
+          <span class="text-[10px] font-bold uppercase leading-none mt-1">{{ mesActual }}</span>
+          <span class="text-lg font-black leading-none mb-1">{{ diaActual }}</span>
+        </div>
+        <div class="z-10">
+          <span class="block text-[10px] text-[#72787e] uppercase font-bold tracking-wider">Fecha de Consulta</span>
+          <span class="text-base font-extrabold text-[#00253b] font-['Public_Sans'] block capitalize">
+            {{ fechaFormateada }}
+          </span>
+          <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[10px] font-bold uppercase tracking-wider">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Hoy (En Vivo)
+          </span>
         </div>
       </div>
 
@@ -113,7 +115,7 @@
                   stroke-dasharray="213.6"
                   [attr.stroke-dashoffset]="213.6 - (213.6 * resumen().porcentaje / 100)"/>
               </svg>
-              <span class="absolute text-[10px] font-bold text-[#a0cbf3]">{{ fechaSeleccionada | date:'dd/MM' }}</span>
+              <span class="absolute text-[10px] font-bold text-[#a0cbf3]">HOY</span>
             </div>
           </div>
 
@@ -165,8 +167,13 @@
                 class="pl-9 pr-4 py-1.5 text-sm bg-[#f8f9fa] border border-[#c2c7ce] rounded-full w-56 focus:border-[#00253b] outline-none"
                 placeholder="Buscar por nombre..."/>
             </div>
-            <button class="p-2 rounded-lg border border-[#c2c7ce] hover:bg-[#edeeef] transition-colors" title="Descargar lista">
-              <span class="material-symbols-outlined text-sm text-[#42474e]">download</span>
+            <button (click)="descargarReporte()" [disabled]="descargandoReporte()"
+              class="p-2 rounded-lg border border-[#c2c7ce] hover:bg-[#edeeef] transition-colors disabled:opacity-50" title="Descargar lista">
+              @if (descargandoReporte()) {
+                <span class="material-symbols-outlined text-sm text-[#42474e] animate-spin">sync</span>
+              } @else {
+                <span class="material-symbols-outlined text-sm text-[#42474e]">download</span>
+              }
             </button>
           </div>
         </div>
@@ -184,16 +191,15 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-[#c2c7ce]/50">
-              @for (alumno of alumnos(); track alumno.matricula) {
+              @for (alumno of alumnosFiltrados(); track alumno.matricula) {
                 <tr class="hover:bg-[#f3f4f5]/60 transition-colors">
 
                   <td class="px-6 py-4 text-sm font-bold text-[#003b5c]">{{ alumno.matricula }}</td>
 
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
-                      <div class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                           [ngClass]="alumno.colorAvatar">
-                        {{ alumno.iniciales }}
+                      <div class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 bg-[#003b5c]/10 text-[#003b5c]">
+                        {{ getInitials(alumno.nombre) }}
                       </div>
                       <span class="text-sm font-medium text-[#191c1d]">{{ alumno.nombre }}</span>
                     </div>
@@ -205,30 +211,18 @@
                   <td class="px-6 py-4 text-center">
                     <span class="px-3 py-1 rounded-md text-xs font-bold tracking-wide shadow-sm flex items-center justify-center w-28 mx-auto"
                       [ngClass]="{
-                        'bg-emerald-50 text-emerald-700 border border-emerald-200': alumno.estado === 'presente',
-                        'bg-amber-50 text-amber-700 border border-amber-200': alumno.estado === 'retardo',
-                        'bg-red-50 text-red-700 border border-red-200': alumno.estado === 'falta',
-                        'bg-blue-50 text-blue-700 border border-blue-200': alumno.estado === 'justificado'
+                        'bg-emerald-50 text-emerald-700 border border-emerald-200': alumno.estado === 'PRESENTE',
+                        'bg-amber-50 text-amber-700 border border-amber-200': alumno.estado === 'RETARDO',
+                        'bg-red-50 text-red-700 border border-red-200': alumno.estado === 'FALTA',
+                        'bg-blue-50 text-blue-700 border border-blue-200': alumno.estado === 'JUSTIFICADO'
                       }">
-                      {{ alumno.estado | uppercase }}
+                      {{ alumno.estado }}
                     </span>
                   </td>
 
-                  <!-- Acciones (Justificar) -->
+                  <!-- Acciones (Justificar) - Deshabilitado porque el backend no lo soporta aún -->
                   <td class="px-6 py-4 text-center">
-                    @if (alumno.estado === 'falta' || alumno.estado === 'retardo') {
-                      <button (click)="justificarFalta(alumno.matricula)" 
-                        class="text-xs font-bold text-[#0070A8] bg-[#0070A8]/10 hover:bg-[#0070A8]/20 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 mx-auto">
-                        <span class="material-symbols-outlined text-[16px]">health_and_safety</span>
-                        Justificar
-                      </button>
-                    } @else if (alumno.estado === 'justificado') {
-                      <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
-                        <span class="material-symbols-outlined text-[14px]">done</span> Justificado
-                      </span>
-                    } @else {
-                      <span class="text-[10px] text-slate-300">-</span>
-                    }
+                    <span class="text-[10px] text-slate-300">-</span>
                   </td>
 
                 </tr>
@@ -239,7 +233,7 @@
 
         <!-- Paginación -->
         <div class="p-4 border-t border-[#c2c7ce] bg-[#f3f4f5]/50 flex justify-between items-center">
-          <span class="text-xs text-[#42474e] font-medium">Mostrando {{ alumnos().length }} alumnos listados</span>
+          <span class="text-xs text-[#42474e] font-medium">Mostrando {{ historialAlumnos().length }} alumnos listados</span>
         </div>
 
       </div>

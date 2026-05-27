@@ -5,6 +5,14 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { normalizeAsistencia, unwrapApiResponse, unwrapArrayResponse } from '../helpers/apiResponse.helpers';
 
+export interface EstadisticasAsistenciaResponse {
+  total_alumnos: number;
+  presentes: number;
+  retardos: number;
+  ausentes: number;
+  porcentaje_asistencia: number;
+}
+
 export interface SesionAsistencia {
   id_sesion: number;
   id_materia: string | number;
@@ -60,6 +68,13 @@ export class AsistenciasService {
   obtenerSesion(idSesion: string | number): Observable<SesionAsistencia> {
     return this.apiClient.get<any>(`${this.baseUrl}/sesiones/${idSesion}`).pipe(
       map(res => unwrapApiResponse<SesionAsistencia>(res))
+    );
+  }
+
+  // GET /asistencias/sesion/:id_sesion/estadisticas
+  obtenerEstadisticasSesion(idSesion: string | number): Observable<EstadisticasAsistenciaResponse> {
+    return this.apiClient.get<any>(`${this.baseUrl}/asistencias/sesion/${idSesion}/estadisticas`).pipe(
+      map(res => unwrapApiResponse<EstadisticasAsistenciaResponse>(res))
     );
   }
 
