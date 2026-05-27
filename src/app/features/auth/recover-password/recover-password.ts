@@ -1,7 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { AgmButtonComponent, AgmInputComponent, AgmCardComponent } from '../../../shared/components/ui';
 
@@ -23,7 +23,7 @@ import { AgmButtonComponent, AgmInputComponent, AgmCardComponent } from '../../.
     }
   `]
 })
-export class RecoverPasswordComponent {
+export class RecoverPasswordComponent implements OnInit {
   email = '';
   tempPassword = '';
   newPassword = '';
@@ -36,8 +36,17 @@ export class RecoverPasswordComponent {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['step'] === '2') {
+        this.isSubmitted.set(true);
+      }
+    });
+  }
 
   onSubmit() {
     this.showError.set(false);
