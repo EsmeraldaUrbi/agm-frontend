@@ -2,6 +2,7 @@ import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HorarioComponent } from '../../../shared/components/horario/horario.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { DocentesService } from '../../../core/services/docentes.service';
 import { MateriasService } from '../../../core/services/materias.service';
@@ -19,6 +20,7 @@ interface AlumnoRendimiento {
 }
 
 interface MateriaActiva {
+  materia_id: string;
   nrc: string;
   nombre: string;
   seccion: string;
@@ -35,7 +37,7 @@ interface MateriaActiva {
 @Component({
   selector: 'app-reportes',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, HorarioComponent],
   templateUrl: './reportes.component.html'
 })
 export class ReportesComponent implements OnInit {
@@ -51,6 +53,10 @@ export class ReportesComponent implements OnInit {
   materia: MateriaActiva | null = null;
   tabs = ['Alumnos', 'Ponderaciones', 'Actividades'];
   alumnos = signal<AlumnoRendimiento[]>([]);
+
+  // Horario modal state
+  scheduleData: any[] = [];
+  mostrarHorarioModal = false;
 
   // Pagination states
   currentPage = signal(1);
@@ -104,6 +110,14 @@ export class ReportesComponent implements OnInit {
     }
   }
 
+  abrirHorario() {
+    this.mostrarHorarioModal = true;
+  }
+
+  cerrarHorario() {
+    this.mostrarHorarioModal = false;
+  }
+
   constructor(private route: ActivatedRoute) {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
@@ -149,6 +163,7 @@ export class ReportesComponent implements OnInit {
     this.materiasService.getMateriasByDocente(docenteId).subscribe({
       next: (res) => {
         this.listaMateriasDisponibles = res.items.map((m: any) => ({
+          materia_id: m.materia_id || m.id_materia || '',
           nrc: m.nrc || 'N/A',
           nombre: m.nombre || 'Materia sin Nombre',
           seccion: m.seccion || '001',
@@ -183,6 +198,20 @@ export class ReportesComponent implements OnInit {
       this.materia = mat;
       this.alumnos.set(mat.alumnos);
       this.currentPage.set(1);
+      
+      this.scheduleData = [];
+      if (mat.materia_id) {
+        this.materiasService.getHorarios({ materia_ofertada_id: mat.materia_id }).subscribe({
+          next: (horarios) => {
+            this.scheduleData = (horarios || []).map((h: any) => ({
+              ...h,
+              materia_nombre: mat.nombre,
+              materia_id: mat.materia_id
+            }));
+          },
+          error: (err) => console.error('Error al cargar horarios de la materia:', err)
+        });
+      }
     }
   }
 

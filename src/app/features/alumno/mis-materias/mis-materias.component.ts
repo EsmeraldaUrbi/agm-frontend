@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { HorarioComponent } from '../horario/horario.component';
+import { HorarioComponent } from '../../../shared/components/horario/horario.component';
 import { SolicitarBajaComponent } from '../solicitar-baja/solicitar-baja.component';
 import { InscripcionesService } from '../../../core/services/inscripciones.service';
 import { MateriasService } from '../../../core/services/materias.service';

@@ -40,7 +40,7 @@ export class SidebarComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   closeSidebar() {
     this.layoutService.closeSidebar();
@@ -57,28 +57,28 @@ export class SidebarComponent implements OnInit {
   generateMenu(role: string) {
     const adminItems: NavItem[] = [
       // ── Principal ──────────────────────────────────────────
-      { label: 'Dashboard',           route: '/admin/dashboard',          icon: 'dashboard',          section: 'Principal' },
-      { label: 'Directorio Docentes', route: '/admin/usuarios',           icon: 'supervisor_account' },
-      { label: 'Directorio Materias', route: '/admin/materias',           icon: 'menu_book' },
-      { label: 'Periodos',            route: '/admin/periodos',           icon: 'calendar_month' },
+      { label: 'Dashboard', route: '/admin/dashboard', icon: 'dashboard', section: 'Principal' },
+      { label: 'Directorio Docentes', route: '/admin/usuarios', icon: 'supervisor_account' },
+      { label: 'Directorio Materias', route: '/admin/materias', icon: 'menu_book' },
+      { label: 'Periodos', route: '/admin/periodos', icon: 'calendar_month' },
       // ── Gestión de Datos ───────────────────────────────────
-      { label: 'Importar Materias',   route: '/admin/importar-materias',  icon: 'upload_file',        section: 'Gestión de Datos' },
-      { label: 'Importar Docentes',   route: '/admin/importar-docentes',  icon: 'group_add' },
+      { label: 'Importar Materias', route: '/admin/importar-materias', icon: 'upload_file', section: 'Gestión de Datos' },
+      { label: 'Importar Docentes', route: '/admin/importar-docentes', icon: 'group_add' },
       // ── Cuenta ─────────────────────────────────────────────
-      { label: 'Mi Perfil',           route: '/profile',                  icon: 'person',             section: 'Cuenta' },
+      { label: 'Mi Perfil', route: '/profile', icon: 'person', section: 'Cuenta' },
     ];
 
     const docenteItems: NavItem[] = [
       // ── Principal ──────────────────────────────────────────
-      { label: 'Dashboard',           route: '/docente/dashboard',        icon: 'dashboard',          section: 'Principal' },
-      { label: 'Mis Cursos',          route: '/docente/mis-cursos',       icon: 'school' },
+      { label: 'Dashboard', route: '/docente/dashboard', icon: 'dashboard', section: 'Principal' },
+      { label: 'Mis Cursos', route: '/docente/mis-cursos', icon: 'school' },
       // ── Asistencias ────────────────────────────────────────
-      { label: 'Pase de Lista (QR)',  route: '/docente/pase-lista',       icon: 'qr_code_scanner',    section: 'Asistencias' },
-      { label: 'Historial',           route: '/docente/historial-asistencias', icon: 'calendar_month' },
+      { label: 'Pase de Lista (QR)', route: '/docente/pase-lista', icon: 'qr_code_scanner', section: 'Asistencias' },
+      { label: 'Historial', route: '/docente/historial-asistencias', icon: 'calendar_month' },
       // ── Reportes ───────────────────────────────────────────
-      // { label: 'Reportes y estadísticas',  route: '/docente/materias/15842/reportes',    icon: 'analytics',          section: 'Reportes' },
+      { label: 'Reportes y estadísticas', route: '/docente/materias/15842/reportes', icon: 'analytics', section: 'Reportes' },
       // ── Cuenta ─────────────────────────────────────────────
-      { label: 'Mi Perfil',           route: '/profile',                  icon: 'person',             section: 'Cuenta' },
+      { label: 'Mi Perfil', route: '/profile', icon: 'person', section: 'Cuenta' },
     ];
 
     const alumnoItems: NavItem[] = [

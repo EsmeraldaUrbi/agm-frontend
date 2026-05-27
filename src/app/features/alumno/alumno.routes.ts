@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { GalleryComponent } from './gallery/gallery.component';
-import { HorarioComponent } from './horario/horario.component';
+import { HorarioComponent } from '../../shared/components/horario/horario.component';
 import { QrAsistenciaComponent } from './qr-asistencia/qr-asistencia.component';
 import { CalificacionesComponent } from './calificaciones/calificaciones.component';
 import { SolicitarBajaComponent } from './solicitar-baja/solicitar-baja.component';

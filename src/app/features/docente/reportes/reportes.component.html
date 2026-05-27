@@ -38,10 +38,10 @@
               <span class="material-symbols-outlined text-sm">meeting_room</span>
               Sección: {{ materia?.seccion }}
             </div>
-            <div class="flex items-center gap-1.5">
+            <button (click)="abrirHorario()" class="flex items-center gap-1.5 px-2.5 py-1 -ml-2 rounded-md hover:bg-white/15 transition-all focus:outline-none border border-transparent hover:border-white/20">
               <span class="material-symbols-outlined text-sm">schedule</span>
-              {{ materia?.horario }}
-            </div>
+              Ver Horario
+            </button>
           </div>
         </div>
         <div class="flex gap-3 flex-shrink-0">
@@ -144,7 +144,7 @@
         </div>
         <p class="text-xs text-[#72787e] mt-0.5">Descarga actas y concentrados generados en tiempo real mediante librerías especializadas en MS-Reportes.</p>
       </div>
-      <span class="px-3 py-1 bg-[#003b5c]/10 text-[#003b5c] font-bold rounded-lg text-xs">XLSX / PDF / ZIP</span>
+      <span class="px-3 py-1 bg-[#003b5c]/10 text-[#003b5c] font-bold rounded-lg text-xs">XLSX / PDF</span>
     </div>
 
     <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50">
@@ -354,5 +354,31 @@
       }
     </div>
   </div>
+
+  <!-- Modal Mi Horario -->
+  @if (mostrarHorarioModal) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in-up">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col relative animate-scale-up">
+          <!-- Modal Header -->
+          <div class="sticky top-0 z-10 flex justify-between items-center bg-white px-8 py-5 border-b border-slate-100 shadow-sm">
+              <div>
+                  <h2 class="text-xl font-black text-[#003B5C] flex items-center gap-3">
+                      <span class="material-symbols-outlined text-2xl text-secondary">calendar_today</span>
+                      Horario de la Materia
+                  </h2>
+                  <p class="text-xs text-slate-500 font-medium mt-1">{{ materia?.nombre }} - NRC: {{ materia?.nrc }}</p>
+              </div>
+              <button (click)="cerrarHorario()" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center">
+                  <span class="material-symbols-outlined">close</span>
+              </button>
+          </div>
+          
+          <!-- Modal Content (App Horario) -->
+          <div class="p-8 overflow-y-auto bg-slate-50/30">
+              <app-horario [scheduleData]="scheduleData" [totalMaterias]="1" [isDocente]="true"></app-horario>
+          </div>
+      </div>
+  </div>
+  }
 
 </div>

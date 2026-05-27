@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 export class HorarioComponent {
   @Input() scheduleData: any[] = [];
   @Input() totalMaterias: number = 0;
+  @Input() isDocente: boolean = false;
 
   diasSemana = [
     { clave: 'LU', nombre: 'Lunes' },
