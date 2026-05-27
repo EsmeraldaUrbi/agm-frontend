@@ -76,7 +76,7 @@ export class SidebarComponent implements OnInit {
       { label: 'Pase de Lista (QR)',  route: '/docente/pase-lista',       icon: 'qr_code_scanner',    section: 'Asistencias' },
       { label: 'Historial',           route: '/docente/historial-asistencias', icon: 'calendar_month' },
       // ── Reportes ───────────────────────────────────────────
-      { label: 'Reportes y estadísticas',  route: '/docente/materias/15842/reportes',    icon: 'analytics',          section: 'Reportes' },
+      // { label: 'Reportes y estadísticas',  route: '/docente/materias/15842/reportes',    icon: 'analytics',          section: 'Reportes' },
       // ── Cuenta ─────────────────────────────────────────────
       { label: 'Mi Perfil',           route: '/profile',                  icon: 'person',             section: 'Cuenta' },
     ];
@@ -84,8 +84,8 @@ export class SidebarComponent implements OnInit {
     const alumnoItems: NavItem[] = [
       { label: 'Dashboard', route: '/alumno/dashboard', icon: 'dashboard', section: 'Principal' },
       { label: 'Mis Materias', route: '/alumno/materias', icon: 'menu_book' },
-      { label: 'Generar QR', route: '/alumno/qr', icon: 'qr_code_scanner', section: 'Asistencia' },
-      { label: 'Reportes', route: '/alumno/reportes', icon: 'assessment' }
+      { label: 'Generar QR', route: '/alumno/qr', icon: 'qr_code_scanner', section: 'Asistencia' }
+      // { label: 'Reportes', route: '/alumno/reportes', icon: 'assessment' }
     ];
 
     if (role === 'admin') {
