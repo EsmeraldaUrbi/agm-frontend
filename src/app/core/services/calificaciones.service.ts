@@ -114,10 +114,9 @@ export class CalificacionesService {
     return this.apiClient.post<any>(`${this.baseUrl}/calificaciones/importar`, formData);
   }
 
-  // GET /api/v1/concentrado/:materia_id?modo=actual
-  getConcentrado(materiaId: string, modo: 'actual' | 'historico' = 'actual'): Observable<any[]> {
+  getConcentrado(materiaId: string, modo: 'actual' | 'historico' = 'actual'): Observable<any> {
     return this.apiClient.get<any>(`${this.baseUrl}/concentrado/${materiaId}`, { modo }).pipe(
-      map(res => unwrapArrayResponse<any>(res))
+      map(res => unwrapApiResponse<any>(res))
     );
   }
 }

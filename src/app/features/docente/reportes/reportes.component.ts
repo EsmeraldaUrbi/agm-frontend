@@ -7,6 +7,10 @@ import { AuthService } from '../../../core/services/auth.service';
 import { DocentesService } from '../../../core/services/docentes.service';
 import { MateriasService } from '../../../core/services/materias.service';
 import { ReportesService } from '../../../core/services/reportes.service';
+import { CalificacionesService } from '../../../core/services/calificaciones.service';
+import { AlumnosService } from '../../../core/services/alumnos.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 interface AlumnoRendimiento {
   matricula: string;
@@ -45,6 +49,8 @@ export class ReportesComponent implements OnInit {
   private docentesService = inject(DocentesService);
   private materiasService = inject(MateriasService);
   private reportesService = inject(ReportesService);
+  private calificacionesService = inject(CalificacionesService);
+  private alumnosService = inject(AlumnosService);
   
   // Lista de materias asignadas en el periodo activo para seleccionar dinámicamente
   listaMateriasDisponibles: MateriaActiva[] = [];
@@ -210,6 +216,58 @@ export class ReportesComponent implements OnInit {
             }));
           },
           error: (err) => console.error('Error al cargar horarios de la materia:', err)
+        });
+
+        // Obtener alumnos y concentrado (estadísticas reales)
+        forkJoin({
+          alumnosDetalle: this.alumnosService.getAlumnosByMateria(mat.materia_id).pipe(catchError(() => of([]))),
+          concentrado: this.calificacionesService.getConcentrado(mat.materia_id).pipe(catchError(() => of({ alumnos: [] } as any)))
+        }).subscribe({
+          next: ({ alumnosDetalle, concentrado }) => {
+            let alumnosRendimiento: AlumnoRendimiento[] = [];
+            let sumaPromedios = 0;
+            let alumnosAprobados = 0;
+            let enRiesgo = 0;
+
+            const listaAlumnosConcentrado = concentrado?.alumnos || [];
+            
+            if (listaAlumnosConcentrado.length > 0) {
+              alumnosRendimiento = listaAlumnosConcentrado.map((ac: any) => {
+                const infoAlumno = alumnosDetalle.find((a: any) => a.alumno_id === ac.alumno_id);
+                const promedioReal = ac.promedio_real || 0;
+                
+                sumaPromedios += promedioReal;
+                if (promedioReal >= 6) alumnosAprobados++;
+                if (promedioReal < 6) enRiesgo++;
+                
+                return {
+                  matricula: infoAlumno?.matricula || 'S/N',
+                  nombre: infoAlumno?.nombre_completo || 'Alumno Desconocido',
+                  promedioActual: promedioReal,
+                  promedioFinal: ac.promedio_redondeado || 0,
+                  promedioPonderadoReal: ac.peso_considerado || 0,
+                  promedioRedondeadoOficial: ac.promedio_redondeado || 0,
+                  asistencia: 100, // Puedes conectar asistencias reales después
+                  estatus: promedioReal >= 6 ? 'Regular' : 'En Riesgo'
+                };
+              });
+
+              const total = alumnosRendimiento.length;
+              mat.promedioGeneral = (sumaPromedios / total).toFixed(2);
+              mat.tasaAprobacion = Math.round((alumnosAprobados / total) * 100).toString() + '%';
+              mat.alumnosRiesgo = enRiesgo.toString();
+              mat.asistenciaPromedio = '100%';
+            } else {
+              mat.promedioGeneral = '0.00';
+              mat.tasaAprobacion = '0%';
+              mat.alumnosRiesgo = '0';
+              mat.asistenciaPromedio = '0%';
+            }
+
+            mat.alumnos = alumnosRendimiento;
+            this.alumnos.set(alumnosRendimiento);
+          },
+          error: (err) => console.error('Error al cargar concentrado y alumnos:', err)
         });
       }
     }
