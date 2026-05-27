@@ -122,12 +122,14 @@ export class ImportarAlumnosComponent {
   alumnosExtraidos = signal<any[]>([]);
   archivoParaSubir: File | null = null;
   importResult = signal<any>(null);
+  confirmacionNrc = signal<boolean>(false);
 
   abrirPdfModal() {
     this.step.set(1);
     this.archivoSeleccionado.set('');
     this.archivoParaSubir = null;
     this.importResult.set(null);
+    this.confirmacionNrc.set(false);
     this.showPdfModal.set(true);
   }
 
@@ -136,14 +138,15 @@ export class ImportarAlumnosComponent {
     if (file) {
       this.archivoSeleccionado.set(file.name);
       this.archivoParaSubir = file;
-      this.step.set(3); // Vamos directo a confirmar, ya que el backend no tiene previsualizacion
+      this.confirmacionNrc.set(false);
+      this.step.set(2); // Vamos directo a confirmar
     }
   }
 
   confirmarImportacionPdf() {
-    if (!this.archivoParaSubir) return;
+    if (!this.archivoParaSubir || !this.confirmacionNrc()) return;
     
-    this.step.set(2); // Procesando...
+    this.step.set(3); // Procesando...
     
     this.alumnosService.importarAlumnos(this.archivoParaSubir, this.materia().materia_id).subscribe({
       next: (res) => {

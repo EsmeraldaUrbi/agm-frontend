@@ -154,7 +154,7 @@
               [ngClass]="step() >= 2 ? 'bg-[#003b5c] text-white shadow-sm' : 'bg-[#e7e8e9] text-[#72787e]'">
               2
             </div>
-            <span class="text-[11px] font-bold" [ngClass]="step() >= 2 ? 'text-[#003b5c]' : 'text-[#72787e]'">Procesando</span>
+            <span class="text-[11px] font-bold" [ngClass]="step() >= 2 ? 'text-[#003b5c]' : 'text-[#72787e]'">Confirmar</span>
           </div>
 
           <div class="flex flex-col items-center gap-1.5 z-10">
@@ -162,7 +162,7 @@
               [ngClass]="step() >= 3 ? 'bg-[#003b5c] text-white shadow-sm' : 'bg-[#e7e8e9] text-[#72787e]'">
               3
             </div>
-            <span class="text-[11px] font-bold" [ngClass]="step() >= 3 ? 'text-[#003b5c]' : 'text-[#72787e]'">Confirmar</span>
+            <span class="text-[11px] font-bold" [ngClass]="step() >= 3 ? 'text-[#003b5c]' : 'text-[#72787e]'">Procesando</span>
           </div>
 
           <div class="flex flex-col items-center gap-1.5 z-10">
@@ -192,23 +192,39 @@
           }
 
           @if (step() === 2) {
-            <div class="py-16 text-center space-y-4 animate-fade-in">
-              <div class="w-12 h-12 border-4 border-[#003b5c]/20 border-t-[#003b5c] rounded-full animate-spin mx-auto"></div>
-              <p class="text-sm font-bold text-[#003b5c]">Analizando documento PDF y extrayendo matrículas...</p>
-              <p class="text-xs text-[#72787e]">Conectando con MS-Alumnos para verificar estatus de inscripción.</p>
-            </div>
-          }
-
-          @if (step() === 3) {
             <div class="space-y-6 animate-fade-in text-center py-10">
               <span class="material-symbols-outlined text-6xl text-[#003b5c] mb-2 block">
                 description
               </span>
               <h4 class="text-xl font-bold text-[#003b5c] font-['Public_Sans']">Archivo seleccionado</h4>
               <p class="text-base text-[#42474e] font-mono">{{ archivoSeleccionado() }}</p>
-              <p class="text-sm text-[#72787e] max-w-md mx-auto mt-4">
-                El documento está listo para ser enviado. Al confirmar, el sistema procesará el PDF e inscribirá a los alumnos encontrados.
-              </p>
+              
+              <!-- Nuevo Aviso -->
+              <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 max-w-lg mx-auto text-left flex gap-3 items-start mt-6 shadow-sm">
+                <span class="material-symbols-outlined text-amber-600 mt-0.5" style="font-variation-settings:'FILL' 1">warning</span>
+                <div>
+                  <h5 class="text-sm font-bold text-amber-800">Verificación Estricta de NRC</h5>
+                  <p class="text-xs text-amber-700 mt-1 leading-relaxed">
+                    El sistema extraerá el NRC del PDF y asignará a los alumnos a <strong>esa materia exacta</strong> ignorando la ventana en la que te encuentras. Si subes un acta ajena a esta clase, los alumnos terminarán en otra lista.
+                  </p>
+                  
+                  <label class="flex items-center gap-2 mt-4 cursor-pointer group p-2 -ml-2 rounded-lg hover:bg-amber-100/50 transition-colors">
+                    <input type="checkbox" [(ngModel)]="confirmacionNrc" 
+                      class="w-4 h-4 text-[#003b5c] rounded border-[#c2c7ce] focus:ring-[#003b5c] cursor-pointer">
+                    <span class="text-xs font-bold text-slate-700 group-hover:text-[#003b5c] transition-colors">
+                      Confirmo que el PDF que estoy subiendo contiene el NRC: {{ materia().nrc }}
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          }
+
+          @if (step() === 3) {
+            <div class="py-16 text-center space-y-4 animate-fade-in">
+              <div class="w-12 h-12 border-4 border-[#003b5c]/20 border-t-[#003b5c] rounded-full animate-spin mx-auto"></div>
+              <p class="text-sm font-bold text-[#003b5c]">Analizando documento PDF y extrayendo matrículas...</p>
+              <p class="text-xs text-[#72787e]">Conectando con MS-Alumnos para verificar estatus de inscripción.</p>
             </div>
           }
 
@@ -249,13 +265,15 @@
             </button>
           }
 
-          @if (step() === 3) {
+          @if (step() === 2) {
             <button (click)="cerrarPdfModal()"
               class="px-5 py-2.5 text-sm font-bold text-[#42474e] hover:bg-slate-200 rounded-lg transition-colors">
               Cancelar
             </button>
             <button (click)="confirmarImportacionPdf()"
-              class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all flex items-center gap-2">
+              [disabled]="!confirmacionNrc()"
+              [ngClass]="!confirmacionNrc() ? 'opacity-50 cursor-not-allowed bg-slate-400' : 'bg-[#003b5c] hover:bg-[#00253b]'"
+              class="px-6 py-2.5 text-sm font-bold text-white rounded-lg shadow-md transition-all flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">check_circle</span>
               Confirmar e Inscribir Alumnos
             </button>
