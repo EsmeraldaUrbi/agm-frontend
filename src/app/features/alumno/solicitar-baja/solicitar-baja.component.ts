@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
   styles: ``
 })
 export class SolicitarBajaComponent {
+  @Input() materia: any;
   @Output() cerrar = new EventEmitter<void>();
   @Output() confirmar = new EventEmitter<void>();
 

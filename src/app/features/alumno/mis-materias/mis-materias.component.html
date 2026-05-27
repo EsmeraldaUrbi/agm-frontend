@@ -33,7 +33,26 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    @if (materiasFiltradas.length === 0) {
+                    @if (cargando()) {
+                        @for (i of [1, 2, 3]; track i) {
+                            <tr class="animate-pulse border-b border-slate-100">
+                                <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-16"></div></td>
+                                <td class="px-6 py-4">
+                                    <div class="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
+                                    <div class="h-3 bg-slate-200 rounded w-1/2 md:hidden"></div>
+                                </td>
+                                <td class="px-6 py-4 hidden md:table-cell"><div class="h-4 bg-slate-200 rounded w-full"></div></td>
+                                <td class="px-6 py-4 text-center"><div class="h-4 bg-slate-200 rounded w-8 mx-auto"></div></td>
+                                <td class="px-6 py-4 text-center hidden sm:table-cell"><div class="h-6 bg-slate-200 rounded w-12 mx-auto"></div></td>
+                                <td class="px-6 py-4">
+                                    <div class="flex justify-end gap-2">
+                                        <div class="h-8 bg-slate-200 rounded w-20"></div>
+                                        <div class="h-8 bg-slate-200 rounded w-16"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    } @else if (materiasFiltradas.length === 0) {
                         <tr>
                             <td colspan="6" class="px-6 py-8 text-center text-slate-400 italic text-sm">
                                 No se encontraron materias con este filtro.
@@ -110,6 +129,6 @@
 
     <!-- Modal Solicitar Baja -->
     @if (mostrarBajaModal) {
-        <app-solicitar-baja (cerrar)="cerrarBaja()" (confirmar)="ejecutarBaja()"></app-solicitar-baja>
+        <app-solicitar-baja [materia]="materiaSeleccionada" (cerrar)="cerrarBaja()" (confirmar)="ejecutarBaja()"></app-solicitar-baja>
     }
 </div>

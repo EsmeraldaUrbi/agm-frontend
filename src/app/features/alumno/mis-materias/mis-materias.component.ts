@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HorarioComponent } from '../../../shared/components/horario/horario.component';
@@ -7,8 +7,10 @@ import { InscripcionesService } from '../../../core/services/inscripciones.servi
 import { MateriasService } from '../../../core/services/materias.service';
 import { AlumnosService } from '../../../core/services/alumnos.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { MisMateriasStateService } from './mis-materias.state.service';
+import { CalificacionesService } from '../../../core/services/calificaciones.service';
 import { forkJoin, of } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, switchMap, finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-mis-materias',
@@ -22,6 +24,8 @@ export class MisMateriasComponent implements OnInit {
   mostrarBajaModal = false;
 
   filtroActivo: 'todas' | 'activas' | 'bajas' = 'todas';
+
+  cargando = signal<boolean>(true);
 
   get materiasFiltradas() {
     if (this.filtroActivo === 'activas') {
@@ -40,6 +44,8 @@ export class MisMateriasComponent implements OnInit {
   private materiasService = inject(MateriasService);
   private alumnosService = inject(AlumnosService);
   private authService = inject(AuthService);
+  private stateService = inject(MisMateriasStateService);
+  private calificacionesService = inject(CalificacionesService);
 
   ngOnInit() {
     this.cargarDatos();
@@ -47,11 +53,30 @@ export class MisMateriasComponent implements OnInit {
 
   alumnoId: string | null = null;
 
-  cargarDatos() {
+  cargarDatos(forceRefresh = false) {
+    if (!forceRefresh && this.stateService.hasValidCache()) {
+      const cache = this.stateService.getCache();
+      this.materias = cache.materias;
+      this.scheduleData = cache.scheduleData;
+      
+      const user = this.authService.getCurrentUser();
+      if (user) {
+        this.alumnosService.getAlumnos({ limit: 1000 }).subscribe(alumnos => {
+           const miRegistro = alumnos.find(a => a.user_id === user.user_id);
+           if (miRegistro) this.alumnoId = miRegistro.alumno_id || null;
+        });
+      }
+      this.cargando.set(false);
+      return;
+    }
+
+    this.cargando.set(true);
     const user = this.authService.getCurrentUser();
-    if (!user) return;
+    if (!user) {
+      this.cargando.set(false);
+      return;
+    }
     
-    // Primero buscar el alumno_id correspondiente a este user_id
     this.alumnosService.getAlumnos({ limit: 1000 }).pipe(
       switchMap(alumnos => {
         const miRegistro = alumnos.find(a => a.user_id === user.user_id);
@@ -60,12 +85,15 @@ export class MisMateriasComponent implements OnInit {
         }
         this.alumnoId = miRegistro.alumno_id;
         return this.inscripcionesService.getInscripcionesByAlumno(miRegistro.alumno_id);
-      })
+      }),
+      catchError(() => of([]))
     ).subscribe({
       next: (inscripciones) => {
         if (!inscripciones || inscripciones.length === 0) {
           this.materias = [];
           this.scheduleData = [];
+          this.stateService.setCache([], []);
+          this.cargando.set(false);
           return;
         }
 
@@ -81,9 +109,25 @@ export class MisMateriasComponent implements OnInit {
           )
         );
 
-        forkJoin([forkJoin(infoPeticiones), forkJoin(horariosPeticiones)]).subscribe(([materiasInfo, horariosData]) => {
+        const calificacionesPeticiones = inscripciones.map(ins => 
+          this.alumnoId ? this.calificacionesService.getCalificacionesAlumnoMateria(this.alumnoId, ins.materia_id).pipe(
+            catchError(() => of([]))
+          ) : of([])
+        );
+
+        forkJoin([forkJoin(infoPeticiones), forkJoin(horariosPeticiones), forkJoin(calificacionesPeticiones)]).pipe(
+          finalize(() => this.cargando.set(false))
+        ).subscribe(([materiasInfo, horariosData, calificacionesData]) => {
           this.materias = inscripciones.map((ins, index) => {
             const info = materiasInfo[index] as any;
+            const cals = calificacionesData[index] as any[];
+            
+            let promedio = 'N/A';
+            if (cals && cals.length > 0) {
+              const suma = cals.reduce((acc, curr) => acc + (curr.calificacion || 0), 0);
+              promedio = (suma / cals.length).toFixed(1);
+            }
+
             return {
               materia_id: ins.materia_id,
               inscripcion_id: ins.inscripcion_id,
@@ -91,7 +135,7 @@ export class MisMateriasComponent implements OnInit {
               nombre: info?.nombre || 'Materia sin nombre',
               docente: info?.docente_nombre || 'Asignado',
               creditos: info?.creditos || 6,
-              promedio: 'N/A',
+              promedio: promedio,
               activa: ins.activa !== false
             };
           });
@@ -99,7 +143,7 @@ export class MisMateriasComponent implements OnInit {
           let allHorarios: any[] = [];
           horariosData.forEach((horariosMateria: any[], index) => {
             const inscripcion = inscripciones[index];
-            if (inscripcion.activa === false) return; // No mostrar materias dadas de baja en el horario
+            if (inscripcion.activa === false) return;
             
             const info = materiasInfo[index];
             horariosMateria.forEach(h => {
@@ -111,9 +155,14 @@ export class MisMateriasComponent implements OnInit {
             });
           });
           this.scheduleData = allHorarios;
+          
+          this.stateService.setCache(this.materias, this.scheduleData);
         });
       },
-      error: (err) => console.error("Error al cargar inscripciones", err)
+      error: (err) => {
+        console.error("Error al cargar inscripciones", err);
+        this.cargando.set(false);
+      }
     });
   }
 
@@ -145,7 +194,8 @@ export class MisMateriasComponent implements OnInit {
     
     this.alumnosService.bajaMateria(this.alumnoId, this.materiaSeleccionada.materia_id).subscribe({
       next: () => {
-        this.cargarDatos();
+        this.stateService.clearCache();
+        this.cargarDatos(true);
         this.cerrarBaja();
       },
       error: (err: any) => {
