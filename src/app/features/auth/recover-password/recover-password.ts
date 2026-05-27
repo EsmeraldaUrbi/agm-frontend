@@ -25,8 +25,12 @@ import { AgmButtonComponent, AgmInputComponent, AgmCardComponent } from '../../.
 })
 export class RecoverPasswordComponent {
   email = '';
+  tempPassword = '';
+  newPassword = '';
   isSubmitted = signal<boolean>(false);
   isLoading = signal<boolean>(false);
+  isResetting = signal<boolean>(false);
+  resetSuccess = signal<boolean>(false);
   showError = signal<boolean>(false);
   errorMessage = signal<string>('El correo ingresado no es válido o no está registrado.');
 
@@ -52,10 +56,36 @@ export class RecoverPasswordComponent {
       next: () => {
         this.isLoading.set(false);
         this.isSubmitted.set(true);
+        this.showError.set(false);
       },
       error: () => {
         this.isLoading.set(false);
         this.errorMessage.set('Ocurrió un error al procesar tu solicitud. Intenta nuevamente.');
+        this.showError.set(true);
+      }
+    });
+  }
+
+  onResetPassword() {
+    this.showError.set(false);
+    
+    if (!this.tempPassword || !this.newPassword) {
+      this.errorMessage.set('Por favor, completa ambos campos de contraseña.');
+      this.showError.set(true);
+      return;
+    }
+
+    this.isResetting.set(true);
+    
+    this.authService.resetPassword(this.tempPassword, this.newPassword).subscribe({
+      next: () => {
+        this.isResetting.set(false);
+        this.resetSuccess.set(true);
+        this.showError.set(false);
+      },
+      error: () => {
+        this.isResetting.set(false);
+        this.errorMessage.set('El token de recuperación es inválido o ha expirado.');
         this.showError.set(true);
       }
     });
