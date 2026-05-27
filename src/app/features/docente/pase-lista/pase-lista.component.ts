@@ -116,52 +116,78 @@ export class PaseListaComponent implements OnInit, OnDestroy {
   private rafId: number | null = null;
   private lecturaBloqueada = false;
 
+  idSesionInput: number | null = null;
+
   iniciarSesion() {
     if (!this.materiaSeleccionada) return;
 
     const idMateria = String(this.materiaSeleccionada);
 
     this.asistenciasService.iniciarSesion(idMateria).subscribe({
-      next: (sesion) => {
-        this.sessionId.set(sesion.id_sesion);
-        this.estadoSesion.set('activa');
-
-        const fechaFin = new Date(sesion.fecha_hora_fin).getTime();
-        const ahora = Date.now();
-        const segundosRestantes = Math.max(0, Math.floor((fechaFin - ahora) / 1000));
-
-        this.tiempoRestante.set(segundosRestantes);
-        this.alumnosRegistrados.set([]);
-
-        if (this.timerInterval) clearInterval(this.timerInterval);
-
-        this.timerInterval = setInterval(() => {
-          if (this.tiempoRestante() <= 0) {
-            this.finalizarSesion();
-            return;
-          }
-          this.tiempoRestante.update(t => t - 1);
-        }, 1000);
-
-        // Intentar cargar historial inicial por si existen alumnos registrados
-        this.cargarHistorial();
-
-        // Iniciar cámara web para el escaneo directo
-        setTimeout(() => this.iniciarCamara(), 100);
-      },
-      error: (error) => {
-        console.error('Error al iniciar sesión de asistencia:', error);
-        let msg = 'No se pudo iniciar la sesión de asistencia.';
-        if (error.error?.detail) {
-          if (typeof error.error.detail === 'string') {
-            msg = error.error.detail;
-          } else if (Array.isArray(error.error.detail)) {
-            msg = error.error.detail.map((e: any) => e.msg).join(', ');
-          }
-        }
-        alert(msg);
-      }
+      next: (sesion) => this.activarSesion(sesion),
+      error: (error) => this.manejarErrorSesion(error, 'No se pudo iniciar la sesión de asistencia.')
     });
+  }
+
+  reanudarSesion() {
+    if (!this.idSesionInput || this.idSesionInput <= 0) {
+      alert("Ingrese un ID de sesión válido.");
+      return;
+    }
+    
+    this.asistenciasService.obtenerSesion(this.idSesionInput).subscribe({
+      next: (sesion) => {
+        if (sesion.estado_sesion !== 'ACTIVA') {
+          alert(`Esta sesión no está activa (Estado: ${sesion.estado_sesion}).`);
+          return;
+        }
+        // Configurar la materia seleccionada para la UI
+        this.materiaSeleccionada = String(sesion.id_materia);
+        this.activarSesion(sesion);
+      },
+      error: (error) => this.manejarErrorSesion(error, 'No se pudo reanudar la sesión.')
+    });
+  }
+
+  private activarSesion(sesion: any) {
+    this.sessionId.set(sesion.id_sesion);
+    this.estadoSesion.set('activa');
+
+    const fechaFin = new Date(sesion.fecha_hora_fin).getTime();
+    const ahora = Date.now();
+    const segundosRestantes = Math.max(0, Math.floor((fechaFin - ahora) / 1000));
+
+    this.tiempoRestante.set(segundosRestantes);
+    this.alumnosRegistrados.set([]);
+
+    if (this.timerInterval) clearInterval(this.timerInterval);
+
+    this.timerInterval = setInterval(() => {
+      if (this.tiempoRestante() <= 0) {
+        this.finalizarSesion();
+        return;
+      }
+      this.tiempoRestante.update(t => t - 1);
+    }, 1000);
+
+    // Intentar cargar historial inicial por si existen alumnos registrados
+    this.cargarHistorial();
+
+    // Iniciar cámara web para el escaneo directo
+    setTimeout(() => this.iniciarCamara(), 100);
+  }
+
+  private manejarErrorSesion(error: any, defaultMsg: string) {
+    console.error('Error de sesión:', error);
+    let msg = defaultMsg;
+    if (error.error?.detail) {
+      if (typeof error.error.detail === 'string') {
+        msg = error.error.detail;
+      } else if (Array.isArray(error.error.detail)) {
+        msg = error.error.detail.map((e: any) => e.msg).join(', ');
+      }
+    }
+    alert(msg);
   }
 
   async iniciarCamara() {

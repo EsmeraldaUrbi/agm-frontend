@@ -56,6 +56,13 @@ export class AsistenciasService {
     return this.apiClient.delete<any>(`${this.baseUrl}/sesiones/${idSesion}/cerrar`);
   }
 
+  // GET /sesiones/:id_sesion
+  obtenerSesion(idSesion: string | number): Observable<SesionAsistencia> {
+    return this.apiClient.get<any>(`${this.baseUrl}/sesiones/${idSesion}`).pipe(
+      map(res => unwrapApiResponse<SesionAsistencia>(res))
+    );
+  }
+
   // POST /asistencias/registrar (ó /asistencias/escanear)
   escanearAsistencia(payload: any): Observable<RegistroAsistencia> {
     // Normalizar el token cifrado que pueda venir en variantes
