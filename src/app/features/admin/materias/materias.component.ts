@@ -33,6 +33,8 @@ export class MateriasComponent implements OnInit {
 
   Math = Math;
 
+  isLoading = signal<boolean>(true);
+
   materiasList = signal<MateriaView[]>([]);
   docentesList = signal<Docente[]>([]);
 
@@ -41,6 +43,7 @@ export class MateriasComponent implements OnInit {
   }
 
   cargarDocentesYMaterias() {
+    this.isLoading.set(true);
     this.docentesService.getDocentes({ limit: 1000 }).subscribe({
       next: (docentes) => {
         this.docentesList.set(docentes || []);
@@ -70,10 +73,16 @@ export class MateriasComponent implements OnInit {
           };
         });
         this.materiasList.set(mappedMaterias);
+        setTimeout(() => {
+          this.isLoading.set(false);
+        }, 2000);
       },
       error: (err) => {
         console.error('Error cargando materias', err);
         this.triggerToast('Error de conexión al obtener el directorio de materias.', 'error');
+        setTimeout(() => {
+          this.isLoading.set(false);
+        }, 2000);
       }
     });
   }

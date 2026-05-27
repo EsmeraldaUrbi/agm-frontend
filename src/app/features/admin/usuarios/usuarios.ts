@@ -46,6 +46,9 @@ export class UsuariosComponent implements OnInit {
   // Exponer Math para el HTML
   Math = Math;
 
+  // Estado de carga
+  isLoading = signal<boolean>(true);
+
   // Lista dinámica obtenida desde el backend
   usersList = signal<User[]>([]);
   activeUsersCount = computed(() => this.usersList().filter(u => u.status === 'active').length);
@@ -55,10 +58,12 @@ export class UsuariosComponent implements OnInit {
   }
 
   cargarDocentes() {
+    this.isLoading.set(true);
     this.docentesService.getDocentes({ limit: 1000 }).subscribe({
       next: (docentes) => {
         if (!docentes || !Array.isArray(docentes)) {
           this.usersList.set([]);
+          this.isLoading.set(false);
           return;
         }
         const mappedUsers: User[] = docentes.map(d => {
@@ -73,10 +78,16 @@ export class UsuariosComponent implements OnInit {
           };
         }).filter((u): u is User => u !== null);
         this.usersList.set(mappedUsers);
+        setTimeout(() => {
+          this.isLoading.set(false);
+        }, 2000);
       },
       error: (err) => {
         console.error('Error cargando docentes', err);
         this.triggerToast('Error de conexión al obtener el padrón de docentes.', 'error');
+        setTimeout(() => {
+          this.isLoading.set(false);
+        }, 2000);
       }
     });
   }

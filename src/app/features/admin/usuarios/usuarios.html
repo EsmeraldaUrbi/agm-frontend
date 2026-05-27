@@ -12,9 +12,19 @@
     </agm-button>
   </div>
 
+  <!-- Loading State -->
+  <div 
+    *ngIf="isLoading()" 
+    class="flex flex-col items-center justify-center py-20 px-6 text-center animate-fade-in bg-white rounded-3xl border border-outline-variant/15 shadow-md"
+  >
+    <div class="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+    <h3 class="text-lg font-black text-primary font-headline">Cargando directorio...</h3>
+    <p class="text-slate-500 text-sm">Obteniendo información del servidor</p>
+  </div>
+
   <!-- Empty State Card -->
   <div 
-    *ngIf="usersList().length === 0" 
+    *ngIf="!isLoading() && usersList().length === 0" 
     class="flex flex-col items-center justify-center py-20 px-6 text-center animate-fade-in bg-white rounded-3xl border border-outline-variant/15 shadow-md"
   >
     <div class="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center text-primary mb-6 animate-pulse">
@@ -28,7 +38,7 @@
     </agm-button>
   </div>
 
-  <div *ngIf="usersList().length > 0" class="space-y-6">
+  <div *ngIf="!isLoading() && usersList().length > 0" class="space-y-6">
     <!-- Metric Summary Cards -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="bg-white p-4 rounded-2xl border border-outline-variant/15 shadow-sm flex items-center justify-between">

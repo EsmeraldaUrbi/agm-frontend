@@ -11,7 +11,14 @@
     </agm-button>
   </div>
 
-  <div *ngIf="materiasList().length === 0" class="flex flex-col items-center justify-center py-20 px-6 text-center bg-white rounded-3xl border border-outline-variant/15 shadow-md">
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-20 px-6 text-center animate-fade-in bg-white rounded-3xl border border-outline-variant/15 shadow-md">
+    <div class="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+    <h3 class="text-lg font-black text-primary font-headline">Cargando materias...</h3>
+    <p class="text-slate-500 text-sm">Obteniendo información del servidor</p>
+  </div>
+
+  <div *ngIf="!isLoading() && materiasList().length === 0" class="flex flex-col items-center justify-center py-20 px-6 text-center bg-white rounded-3xl border border-outline-variant/15 shadow-md">
     <div class="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center text-primary mb-6">
       <span class="material-symbols-outlined text-4xl">book</span>
     </div>
@@ -22,7 +29,7 @@
     </agm-button>
   </div>
 
-  <div *ngIf="materiasList().length > 0" class="space-y-6">
+  <div *ngIf="!isLoading() && materiasList().length > 0" class="space-y-6">
     <agm-card [hoverable]="false" customClass="bg-white border-outline-variant/15 shadow-md" bodyClass="p-0">
       <div class="p-5 border-b border-outline-variant/15 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
         <h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Listado de Materias</h2>
