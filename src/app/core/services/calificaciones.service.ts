@@ -106,9 +106,9 @@ export class CalificacionesService {
     );
   }
 
-  // PATCH /api/v1/calificaciones/:calificacion_id
+  // PUT /api/v1/calificaciones/:calificacion_id
   updateCalificacion(calificacionId: string, payload: Partial<Calificacion>): Observable<Calificacion> {
-    return this.apiClient.patch<any>(`${this.baseUrl}/calificaciones/${calificacionId}`, payload).pipe(
+    return this.apiClient.put<any>(`${this.baseUrl}/calificaciones/${calificacionId}`, payload).pipe(
       map(res => normalizeCalificacion(unwrapApiResponse(res)))
     );
   }

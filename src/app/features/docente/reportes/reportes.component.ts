@@ -81,27 +81,39 @@ export class ReportesComponent implements OnInit {
 
   // --- Historial Académico ---
   selectedPeriodoId = signal<string>('');
-
-  periodosHistoricos = computed(() => {
-    const materias = this.listaMateriasDisponibles;
-    const periodosMap = new Map<string, { id: string, nombre: string, materias: any[] }>();
-    materias.forEach(m => {
-      const p = m.periodo || 'Periodo Actual';
-      if (!periodosMap.has(p)) {
-        periodosMap.set(p, { id: p, nombre: p, materias: [] });
-      }
-      periodosMap.get(p)!.materias.push({
-        nrc: m.nrc,
-        nombre: m.nombre,
-        aprobacion: m.tasaAprobacion !== 'N/A' ? parseInt(m.tasaAprobacion) : 0
-      });
-    });
-    return Array.from(periodosMap.values());
-  });
+  periodosHistorial = signal<import('../../../core/services/reportes.service').EstadisticasPeriodo[]>([]);
+  isLoadingHistorial = signal(false);
+  errorHistorial = signal<string | null>(null);
 
   currentPeriodoData = computed(() => {
-    return this.periodosHistoricos().find(p => p.id === this.selectedPeriodoId()) || null;
+    return this.periodosHistorial().find(p => p.periodo_id === this.selectedPeriodoId()) || null;
   });
+
+  getPorcentajeAprobacion(aprobados: number, reprobados: number): number {
+    const total = aprobados + reprobados;
+    if (total === 0) return 0;
+    return Math.round((aprobados / total) * 100);
+  }
+
+  cargarHistorialAcademico(docenteId: string) {
+    this.isLoadingHistorial.set(true);
+    this.errorHistorial.set(null);
+    this.reportesService.getEstadisticasDocente(docenteId).subscribe({
+      next: (res) => {
+        const periodos = res?.periodos || [];
+        this.periodosHistorial.set(periodos);
+        if (periodos.length > 0) {
+          this.selectedPeriodoId.set(periodos[0].periodo_id);
+        }
+        this.isLoadingHistorial.set(false);
+      },
+      error: (err) => {
+        console.error('Error cargando historial académico:', err);
+        this.errorHistorial.set('No se pudo cargar el historial académico. Intente nuevamente más tarde.');
+        this.isLoadingHistorial.set(false);
+      }
+    });
+  }
   // ---------------------------
 
   nextPage() {
@@ -152,15 +164,18 @@ export class ReportesComponent implements OnInit {
         if (matchingDocente && matchingDocente.docente_id) {
           this.docenteId = matchingDocente.docente_id;
           this.cargarCursos(matchingDocente.docente_id);
+          this.cargarHistorialAcademico(matchingDocente.docente_id);
         } else {
           this.docenteId = user.user_id;
           this.cargarCursos(user.user_id);
+          this.cargarHistorialAcademico(user.user_id);
         }
       },
       error: (err) => {
         console.error('Error al resolver docente:', err);
         this.docenteId = user.user_id;
         this.cargarCursos(user.user_id);
+        this.cargarHistorialAcademico(user.user_id);
       }
     });
   }
@@ -185,8 +200,6 @@ export class ReportesComponent implements OnInit {
         
         if (this.listaMateriasDisponibles.length > 0) {
           this.cambiarMateria(this.listaMateriasDisponibles[0].nrc);
-          const firstPeriod = this.periodosHistoricos()[0];
-          if (firstPeriod) this.selectedPeriodoId.set(firstPeriod.id);
         }
         this.isLoading.set(false);
       },

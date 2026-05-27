@@ -13,11 +13,28 @@ export interface EstadisticasAlumno {
   porcentaje_asistencia: number;
 }
 
-export interface EstadisticasDocente {
-  total_materias: number;
-  total_alumnos: number;
+export interface EstadisticasMateria {
+  periodo_id: string;
+  periodo_nombre: string;
+  materia_id: string;
+  materia_nombre: string;
+  nrc: string;
   promedio_grupal: number;
-  porcentaje_asistencia_promedio: number;
+  aprobados: number;
+  reprobados: number;
+  porcentaje_asistencia: number;
+}
+
+export interface EstadisticasPeriodo {
+  periodo_id: string;
+  periodo_nombre: string;
+  materias: EstadisticasMateria[];
+}
+
+export interface EstadisticasDocenteResponse {
+  success: boolean;
+  periodos: EstadisticasPeriodo[];
+  message: string;
 }
 
 @Injectable({
@@ -35,9 +52,9 @@ export class ReportesService {
   }
 
   // GET /api/v1/estadisticas/docente/:docente_id
-  getEstadisticasDocente(docenteId: string): Observable<EstadisticasDocente> {
+  getEstadisticasDocente(docenteId: string): Observable<EstadisticasDocenteResponse> {
     return this.apiClient.get<any>(`${this.baseUrl}/api/v1/estadisticas/docente/${docenteId}`).pipe(
-      map(res => unwrapApiResponse<EstadisticasDocente>(res))
+      map(res => unwrapApiResponse<EstadisticasDocenteResponse>(res))
     );
   }
 

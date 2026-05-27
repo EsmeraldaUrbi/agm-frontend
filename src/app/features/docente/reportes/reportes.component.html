@@ -44,12 +44,7 @@
             </button>
           </div>
         </div>
-        <div class="flex gap-3 flex-shrink-0">
-          <button class="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg text-sm font-bold transition-all">
-            <span class="material-symbols-outlined text-sm">download</span>
-            Exportar Concentrado
-          </button>
-        </div>
+
       </div>
     </div>
   </div>
@@ -311,40 +306,62 @@
         <select 
           [(ngModel)]="selectedPeriodoId"
           class="bg-white border border-[#c2c7ce] text-[#003b5c] text-sm font-bold rounded-lg px-4 py-2 outline-none focus:border-[#003b5c] focus:ring-1 focus:ring-[#003b5c] transition-all cursor-pointer">
-          @for (periodo of periodosHistoricos(); track periodo.id) {
-            <option [value]="periodo.id">{{ periodo.nombre }}</option>
+          @for (periodo of periodosHistorial(); track periodo.periodo_id) {
+            <option [value]="periodo.periodo_id">{{ periodo.periodo_nombre }}</option>
           }
         </select>
       </div>
     </div>
 
     <div class="p-8">
-      @if (currentPeriodoData()) {
+      @if (isLoadingHistorial()) {
+        <div class="flex justify-center items-center py-8">
+          <span class="material-symbols-outlined animate-spin text-[#003b5c] text-4xl">autorenew</span>
+          <span class="ml-3 text-[#003b5c] font-bold">Cargando historial académico...</span>
+        </div>
+      } @else if (errorHistorial()) {
+        <div class="bg-red-50 text-red-600 p-4 rounded-xl border border-red-200 text-sm font-medium flex items-center gap-2">
+          <span class="material-symbols-outlined">error</span>
+          {{ errorHistorial() }}
+        </div>
+      } @else if (periodosHistorial().length === 0) {
+        <div class="py-8 text-center text-[#72787e] text-sm font-medium">
+          No hay periodos disponibles
+        </div>
+      } @else if (currentPeriodoData()) {
         <div class="overflow-x-auto rounded-xl border border-[#c2c7ce]/60">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-slate-50 border-b border-[#c2c7ce]/40 text-[11px] font-extrabold text-[#72787e] uppercase tracking-widest">
                 <th class="py-4 px-6">NRC</th>
                 <th class="py-4 px-6">MATERIA</th>
+                <th class="py-4 px-6 text-center">PROMEDIO GRUPAL</th>
+                <th class="py-4 px-6 text-center">APROBADOS</th>
+                <th class="py-4 px-6 text-center">REPROBADOS</th>
                 <th class="py-4 px-6 text-center">APROBACIÓN (%)</th>
+                <th class="py-4 px-6 text-center">ASISTENCIA (%)</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-sm">
               @for (materia of currentPeriodoData()!.materias; track materia.nrc) {
                 <tr class="hover:bg-[#f3f4f5]/40 transition-colors">
                   <td class="py-4 px-6 font-mono font-bold text-[#003b5c]">{{ materia.nrc }}</td>
-                  <td class="py-4 px-6 font-bold text-[#42474e]">{{ materia.nombre }}</td>
+                  <td class="py-4 px-6 font-bold text-[#42474e]">{{ materia.materia_nombre }}</td>
+                  <td class="py-4 px-6 text-center font-bold text-[#003b5c]">{{ materia.promedio_grupal | number:'1.1-2' }}</td>
+                  <td class="py-4 px-6 text-center text-green-700 font-bold">{{ materia.aprobados }}</td>
+                  <td class="py-4 px-6 text-center text-red-600 font-bold">{{ materia.reprobados }}</td>
                   <td class="py-4 px-6 text-center">
-                    <span class="text-sm font-bold" [ngClass]="materia.aprobacion >= 80 ? 'text-[#2E7D32]' : 'text-amber-600'">
-                      {{ materia.aprobacion }}%
+                    <span class="text-sm font-bold" [ngClass]="getPorcentajeAprobacion(materia.aprobados, materia.reprobados) >= 80 ? 'text-[#2E7D32]' : 'text-amber-600'">
+                      {{ getPorcentajeAprobacion(materia.aprobados, materia.reprobados) }}%
                     </span>
                   </td>
+                  <td class="py-4 px-6 text-center font-bold text-[#003b5c]">{{ materia.porcentaje_asistencia | number:'1.1-2' }}%</td>
                 </tr>
               }
               @if (currentPeriodoData()!.materias.length === 0) {
                 <tr>
-                  <td colspan="3" class="py-8 text-center text-[#72787e] text-sm font-medium">
-                    No hay materias registradas para este periodo.
+                  <td colspan="7" class="py-8 text-center text-[#72787e] text-sm font-medium">
+                    No hay materias registradas en este periodo
                   </td>
                 </tr>
               }
@@ -354,31 +371,4 @@
       }
     </div>
   </div>
-
-  <!-- Modal Mi Horario -->
-  @if (mostrarHorarioModal) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in-up">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col relative animate-scale-up">
-          <!-- Modal Header -->
-          <div class="sticky top-0 z-10 flex justify-between items-center bg-white px-8 py-5 border-b border-slate-100 shadow-sm">
-              <div>
-                  <h2 class="text-xl font-black text-[#003B5C] flex items-center gap-3">
-                      <span class="material-symbols-outlined text-2xl text-secondary">calendar_today</span>
-                      Horario de la Materia
-                  </h2>
-                  <p class="text-xs text-slate-500 font-medium mt-1">{{ materia?.nombre }} - NRC: {{ materia?.nrc }}</p>
-              </div>
-              <button (click)="cerrarHorario()" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center">
-                  <span class="material-symbols-outlined">close</span>
-              </button>
-          </div>
-          
-          <!-- Modal Content (App Horario) -->
-          <div class="p-8 overflow-y-auto bg-slate-50/30">
-              <app-horario [scheduleData]="scheduleData" [totalMaterias]="1" [isDocente]="true"></app-horario>
-          </div>
-      </div>
-  </div>
-  }
-
 </div>

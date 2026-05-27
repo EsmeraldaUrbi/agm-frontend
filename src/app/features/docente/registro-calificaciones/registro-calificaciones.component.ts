@@ -267,7 +267,7 @@ export class RegistroCalificacionesComponent {
     const isActualizacion = !!current.id;
 
     const payload: Partial<Calificacion> = {
-      calificacion: form.calificacion,
+      calificacion: Number(form.calificacion),
       observaciones: form.observaciones
     };
 
