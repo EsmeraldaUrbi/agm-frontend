@@ -119,7 +119,7 @@ export class PaseListaComponent implements OnInit, OnDestroy {
   iniciarSesion() {
     if (!this.materiaSeleccionada) return;
 
-    const idMateria = Number(this.materiaSeleccionada);
+    const idMateria = String(this.materiaSeleccionada);
 
     this.asistenciasService.iniciarSesion(idMateria).subscribe({
       next: (sesion) => {

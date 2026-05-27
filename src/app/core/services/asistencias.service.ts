@@ -43,9 +43,9 @@ export class AsistenciasService {
 
   // POST /sesiones/iniciar
   iniciarSesionAsistencia(idMateria: string | number): Observable<SesionAsistencia> {
-    const numericId = typeof idMateria === 'string' ? parseInt(idMateria, 10) || idMateria : idMateria;
+    const stringId = String(idMateria);
     return this.apiClient.post<any>(`${this.baseUrl}/sesiones/iniciar`, {
-      id_materia: numericId
+      id_materia: stringId
     }).pipe(
       map(res => unwrapApiResponse<SesionAsistencia>(res))
     );
@@ -89,7 +89,7 @@ export class AsistenciasService {
   }
 
   // === MÉTODOS DE COMPATIBILIDAD CON VISTAS EXISTENTES ===
-  iniciarSesion(idMateria: number): Observable<SesionAsistencia> {
+  iniciarSesion(idMateria: string | number): Observable<SesionAsistencia> {
     return this.iniciarSesionAsistencia(idMateria);
   }
 
