@@ -47,6 +47,7 @@ export class MateriasService {
 
   private materiaCache = new Map<string, Observable<Materia>>();
   private horariosCache = new Map<string, Observable<any>>();
+  private docenteMateriasCache = new Map<string, Observable<any>>();
 
   // === PLANES DE ESTUDIO ===
   getPlanesEstudio(): Observable<PlanEstudio[]> {
@@ -135,19 +136,25 @@ export class MateriasService {
   }
 
   getMateriasByDocente(docenteId: string, params?: { page?: number; limit?: number }): Observable<any> {
-    const safeParams = { ...params, limit: Math.min(params?.limit || 100, 100) };
-    return this.apiClient.get<any>(`${this.baseUrl}/materias/docente/${docenteId}`, safeParams).pipe(
-      map(res => {
-        const unwrapped = unwrapApiResponse<any>(res);
-        const items = unwrapArrayResponse<any>(unwrapped).map(normalizeMateria);
-        return {
-          items,
-          total: unwrapped.total || items.length,
-          page: unwrapped.page || params?.page || 1,
-          limit: unwrapped.limit || safeParams.limit
-        };
-      })
-    );
+    const cacheKey = `${docenteId}-${JSON.stringify(params || {})}`;
+    if (!this.docenteMateriasCache.has(cacheKey)) {
+      const safeParams = { ...params, limit: Math.min(params?.limit || 100, 100) };
+      const req = this.apiClient.get<any>(`${this.baseUrl}/materias/docente/${docenteId}`, safeParams).pipe(
+        map(res => {
+          const unwrapped = unwrapApiResponse<any>(res);
+          const items = unwrapArrayResponse<any>(unwrapped).map(normalizeMateria);
+          return {
+            items,
+            total: unwrapped.total || items.length,
+            page: unwrapped.page || params?.page || 1,
+            limit: unwrapped.limit || safeParams.limit
+          };
+        }),
+        shareReplay(1)
+      );
+      this.docenteMateriasCache.set(cacheKey, req);
+    }
+    return this.docenteMateriasCache.get(cacheKey)!;
   }
 
   getMateriasPorCerrar(docenteId: string): Observable<any[]> {

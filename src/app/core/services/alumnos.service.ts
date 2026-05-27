@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { API_CONFIG } from '../config/api.config';
 import { ApiClient } from './apiClient';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 import { normalizeAlumno, unwrapApiResponse, unwrapArrayResponse } from '../helpers/apiResponse.helpers';
 
 export interface Alumno {
@@ -21,6 +21,8 @@ export class AlumnosService {
   private apiClient = inject(ApiClient);
   private apiUrl = `${API_CONFIG.usuarios}/api/v1/alumnos`;
 
+  private materiaAlumnosCache = new Map<string, Observable<Alumno[]>>();
+
   // GET /api/v1/alumnos/?skip=&limit=
   getAlumnos(params?: { skip?: number; limit?: number }): Observable<Alumno[]> {
     return this.apiClient.get<any>(`${this.apiUrl}/`, params).pipe(
@@ -30,9 +32,14 @@ export class AlumnosService {
 
   // GET /api/v1/alumnos/materia/:materia_id
   getAlumnosByMateria(materiaId: string): Observable<Alumno[]> {
-    return this.apiClient.get<any>(`${this.apiUrl}/materia/${materiaId}`).pipe(
-      map(res => unwrapArrayResponse<any>(res).map(normalizeAlumno))
-    );
+    if (!this.materiaAlumnosCache.has(materiaId)) {
+      const req = this.apiClient.get<any>(`${this.apiUrl}/materia/${materiaId}`).pipe(
+        map(res => unwrapArrayResponse<any>(res).map(normalizeAlumno)),
+        shareReplay(1)
+      );
+      this.materiaAlumnosCache.set(materiaId, req);
+    }
+    return this.materiaAlumnosCache.get(materiaId)!;
   }
 
   // GET /api/v1/alumnos/:alumno_id
