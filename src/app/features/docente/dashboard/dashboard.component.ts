@@ -40,7 +40,36 @@ export class DashboardComponent implements OnInit {
   materiasPorCerrarValue: number = 0;
 
   selectedMateriaIdForAsistencia = '';
-  asistenciaSemanalDatos: number[] = [];
+  hasAttendanceData = false;
+  attendanceMessage = '';
+  
+  public attendanceChartType: ChartType = 'doughnut';
+  public attendanceChartData: ChartConfiguration['data'] = {
+    labels: ['Presentes', 'Retardos', 'Faltas'],
+    datasets: [{
+      data: [0, 0, 0],
+      backgroundColor: ['#2E7D32', '#0070A8', '#C62828']
+    }]
+  };
+  public attendanceChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'bottom',
+        labels: {
+          boxWidth: 12,
+          font: { size: 11 }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => ` ${context.label}: ${context.raw} alumnos`
+        }
+      }
+    }
+  };
 
   selectedMateriaIdForChart = '';
 
@@ -161,47 +190,54 @@ export class DashboardComponent implements OnInit {
   get asistenciaPromedio(): number { return this.asistenciaPromedioValue; }
   get materiasPorCerrar(): number { return this.materiasPorCerrarValue; }
 
-  // 6. Asistencia Semanal
+  // 6. Distribución de Asistencia de la sesión más reciente/hoy
   onAsistenciaMateriaChange() {
     if (!this.selectedMateriaIdForAsistencia) return;
-    this.asistenciasService.getHistorialAsistencias(this.selectedMateriaIdForAsistencia).subscribe({
-      next: (res: any) => {
-         console.log(`==== DEBUG 6. MS5 ASISTENCIAS MATERIA ${this.selectedMateriaIdForAsistencia} ====`, res);
-         
-         if (Array.isArray(res) && res.length > 0) {
-             this.asistenciaSemanalDatos = res.map((s: any) => s.asistencia_porcentaje || s.porcentaje || 100).slice(0, 5);
-             while(this.asistenciaSemanalDatos.length < 5) this.asistenciaSemanalDatos.push(0); 
-         } else {
-             this.asistenciaSemanalDatos = []; // Para no pintar la gráfica si no hay datos
-         }
+    
+    this.hasAttendanceData = false;
+    this.attendanceMessage = 'Cargando datos...';
+
+    forkJoin({
+      alumnos: this.alumnosService.getAlumnosByMateria(this.selectedMateriaIdForAsistencia).pipe(
+        catchError(() => of([]))
+      ),
+      asistencias: this.asistenciasService.getAsistenciasHoy(this.selectedMateriaIdForAsistencia).pipe(
+        catchError(() => of([]))
+      )
+    }).subscribe({
+      next: ({ alumnos, asistencias }) => {
+        const totalAlumnos = alumnos.length;
+        
+        console.log(`==== DEBUG 6. MS5 ASISTENCIAS MATERIA ${this.selectedMateriaIdForAsistencia} ====`, {
+          totalAlumnos,
+          asistencias
+        });
+
+        if (asistencias.length > 0) {
+          const presentes = asistencias.filter(a => a.estado?.toUpperCase() === 'PRESENTE').length;
+          const retardos = asistencias.filter(a => a.estado?.toUpperCase() === 'RETARDO').length;
+          const ausentes = Math.max(0, totalAlumnos - (presentes + retardos));
+          
+          this.attendanceChartData = {
+            labels: ['Presentes', 'Retardos', 'Faltas'],
+            datasets: [{
+              data: [presentes, retardos, ausentes],
+              backgroundColor: ['#2E7D32', '#0070A8', '#C62828']
+            }]
+          };
+          this.hasAttendanceData = true;
+          this.attendanceMessage = '';
+        } else {
+          this.hasAttendanceData = false;
+          this.attendanceMessage = 'No hay pases de lista registrados el día de hoy para esta materia.';
+        }
       },
       error: (err) => {
-         console.error('Error MS5 Asistencias:', err);
-         this.asistenciaSemanalDatos = [];
+        console.error('Error cargando datos de asistencia:', err);
+        this.hasAttendanceData = false;
+        this.attendanceMessage = 'Error al cargar los datos de asistencia.';
       }
     });
-  }
-
-  get asisLinePath(): string {
-    const data = this.asistenciaSemanalDatos;
-    if (!data || data.length === 0) return '';
-    const points = data.map((val: number, i: number) => {
-      const x = (i / (data.length - 1)) * 100;
-      const y = 100 - val;
-      return `${x},${y}`;
-    });
-    return `M${points.join(' L')}`;
-  }
-
-  get asisAreaPath(): string {
-    const data = this.asistenciaSemanalDatos;
-    if (!data || data.length === 0) return '';
-    const points = data.map((val: number, i: number) => {
-      const x = (i / (data.length - 1)) * 100;
-      const y = 100 - val;
-      return `${x},${y}`;
-    });
-    return `M0,100 L${points.join(' L')} L100,100 Z`;
   }
 
   public chartType: ChartType = 'bar';

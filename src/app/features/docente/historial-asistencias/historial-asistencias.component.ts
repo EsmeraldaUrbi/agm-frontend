@@ -233,7 +233,7 @@ export class HistorialAsistenciasComponent implements OnInit {
         }
 
         // Si hay asistencias, sacamos el id_sesion del primer registro para consultar estadísticas reales
-        const idSesion = asistencias[0].id_sesion;
+        const idSesion = asistencias[0].id_sesion || asistencias[0].sesion_id;
         if (idSesion) {
           this.asistenciasService.obtenerEstadisticasSesion(idSesion).subscribe({
             next: (stats) => {
@@ -262,14 +262,21 @@ export class HistorialAsistenciasComponent implements OnInit {
 
     inscritos.forEach(inscrito => {
       // Buscar si el alumno pasó lista
-      const registro = asistencias.find(a => a.matricula === inscrito.matricula || String(a.id_alumno) === String(inscrito.alumno_id));
+      const registro = asistencias.find(a => 
+        (a.matricula && a.matricula === inscrito.matricula) || 
+        (a.id_alumno && String(a.id_alumno) === String(inscrito.alumno_id)) ||
+        (a.alumno_id && String(a.alumno_id) === String(inscrito.alumno_id))
+      );
       
       if (registro) {
+        const estadoRaw = registro.estado || registro.estado_asistencia || 'FALTA';
         result.push({
-          matricula: inscrito.matricula || registro.matricula,
+          matricula: inscrito.matricula || registro.matricula || 'N/A',
           nombre: inscrito.nombre_completo,
-          hora: new Date(registro.fecha_hora_registro).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
-          estado: registro.estado_asistencia.toUpperCase()
+          hora: registro.fecha_hora_registro 
+            ? new Date(registro.fecha_hora_registro).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
+            : '--:-- --',
+          estado: estadoRaw.toUpperCase()
         });
       } else {
         // No tiene registro, es FALTA
@@ -284,13 +291,17 @@ export class HistorialAsistenciasComponent implements OnInit {
     
     // Agregamos también los que pasaron lista pero no están en la tabla de alumnos (casos raros)
     asistencias.forEach(a => {
-      const exists = result.find(r => r.matricula === a.matricula);
+      const matricula = a.matricula || 'N/A';
+      const exists = result.find(r => r.matricula === matricula);
       if (!exists) {
+        const estadoRaw = a.estado || a.estado_asistencia || 'FALTA';
         result.push({
-          matricula: a.matricula,
-          nombre: `Alumno ${a.matricula}`,
-          hora: new Date(a.fecha_hora_registro).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
-          estado: a.estado_asistencia.toUpperCase()
+          matricula: matricula,
+          nombre: `Alumno ${matricula}`,
+          hora: a.fecha_hora_registro 
+            ? new Date(a.fecha_hora_registro).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
+            : '--:-- --',
+          estado: estadoRaw.toUpperCase()
         });
       }
     });

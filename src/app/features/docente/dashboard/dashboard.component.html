@@ -69,15 +69,15 @@
   <!-- Sección de Gráficos -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     
-    <!-- Gráfico: Asistencia Semanal -->
-    <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+    <!-- Gráfico: Distribución de Asistencia -->
+    <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col">
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-lg font-bold text-[#003B5C] flex items-center gap-2">
-          Asistencia Semanal
+          Distribución de asistencia de la materia seleccionada
           <div class="relative group cursor-help">
             <span class="material-symbols-outlined text-xl text-[#003B5C] bg-blue-50 rounded-full p-1 shadow-sm hover:bg-[#003B5C] hover:text-white transition-all transform hover:scale-110" data-icon="info">info</span>
             <div class="absolute left-1/2 bottom-full -translate-x-1/2 mb-2 hidden group-hover:block w-72 bg-slate-800 text-white text-sm p-4 rounded-xl shadow-xl z-50 font-normal leading-relaxed text-center normal-case">
-              Muestra el porcentaje promedio de asistencia de los estudiantes durante la semana actual.
+               Muestra la distribución de alumnos Presentes, Retardos y Faltas de la sesión de hoy para la materia seleccionada.
             </div>
           </div>
         </h3>
@@ -85,44 +85,15 @@
           <option *ngFor="let materia of materias" [value]="materia.materia_id || materia.id">{{ materia.nombre }} ({{ materia.nrc }})</option>
         </select>
       </div>
-      <!-- Gráfico Lineal -->
-      <div class="relative h-[220px] w-full flex flex-col justify-between">
-        <!-- Grid lines horizontales -->
-        <div class="absolute inset-0 flex flex-col justify-between z-0 pointer-events-none">
-          <div class="border-t border-slate-100 w-full flex-1"></div>
-          <div class="border-t border-slate-100 w-full flex-1"></div>
-          <div class="border-t border-slate-100 w-full flex-1"></div>
-          <div class="border-t border-slate-100 w-full flex-1"></div>
-          <div class="border-t border-slate-100 w-full"></div>
+      
+      <!-- Gráfico o Mensaje de Estado Vacío -->
+      <div class="flex-1 w-full flex items-center justify-center min-h-[220px] relative">
+        <div *ngIf="!hasAttendanceData" class="text-center p-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 w-full">
+          <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">event_busy</span>
+          <p class="text-sm font-semibold text-slate-500">{{ attendanceMessage }}</p>
         </div>
-        <!-- Eje Y labels -->
-        <div class="absolute inset-y-0 left-0 flex flex-col justify-between py-1 z-10 text-[10px] text-slate-400 font-semibold bg-white pr-2">
-          <span>100%</span>
-          <span>75%</span>
-          <span>50%</span>
-          <span>25%</span>
-        </div>
-        <!-- Eje X labels -->
-        <div class="absolute bottom-0 inset-x-0 ml-10 flex justify-between z-10 text-[10px] text-slate-400 font-semibold transform translate-y-6">
-          <span>LUN</span>
-          <span>MAR</span>
-          <span>MIÉÉ</span>
-          <span>JUE</span>
-          <span>VIE</span>
-        </div>
-        <!-- SVG Line -->
-        <div class="absolute inset-0 ml-10 mb-6 z-10">
-          <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <!-- Simulación de área sombreada -->
-            <path [attr.d]="asisAreaPath" fill="rgba(0,112,168,0.05)" />
-            <!-- Simulación de línea -->
-            <path [attr.d]="asisLinePath" fill="none" stroke="#0070A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            <!-- Puntos -->
-            <circle *ngFor="let val of asistenciaSemanalDatos; let i = index" 
-                    [attr.cx]="(i / (asistenciaSemanalDatos.length - 1)) * 100" 
-                    [attr.cy]="100 - val" 
-                    r="3" fill="#0070A8" class="stroke-white stroke-2" />
-          </svg>
+        <div *ngIf="hasAttendanceData" class="w-full h-full relative" style="max-height: 220px;">
+          <canvas baseChart [data]="attendanceChartData" [options]="attendanceChartOptions" [type]="attendanceChartType"></canvas>
         </div>
       </div>
     </div>

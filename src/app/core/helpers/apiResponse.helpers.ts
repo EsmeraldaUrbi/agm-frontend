@@ -150,9 +150,10 @@ export function normalizeCalificacion(calificacion: any): any {
 
 export function normalizeAsistencia(asistencia: any): any {
   if (!asistencia) return null;
-  const asistencia_id = asistencia.asistencia_id || asistencia.id;
+  const asistencia_id = asistencia.asistencia_id || asistencia.id || asistencia.id_asistencia;
   const estado = asistencia.estado || asistencia.estado_asistencia || asistencia.asistencia_estado;
   return {
+    ...asistencia,
     asistencia_id,
     sesion_id: asistencia.sesion_id || asistencia.id_sesion,
     materia_id: asistencia.materia_id || asistencia.id_materia,
