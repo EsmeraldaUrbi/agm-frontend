@@ -40,17 +40,23 @@
         </div>
     }
 
-    @for (slot of timeSlots; track slot.label) {
-        <div class="schedule-grid border-b border-outline-variant/30">
+    @for (slot of timeSlots; track slot.label; let i = $index) {
+        <div class="schedule-grid border-b border-outline-variant/30 relative" [style.zIndex]="50 - i">
             <div class="p-3 text-xs font-bold text-on-surface-variant border-r border-outline-variant flex items-start justify-center">{{ slot.label }}</div>
             
             @for (dia of diasSemana; track dia.clave) {
                 <div class="p-1 relative h-20">
                     @if (getMateriaParaSlot(slot.start!, dia.clave); as mat) {
                         @let col = getColorClass(mat.materia_ofertada_id || mat.materia_id);
-                        <div [ngClass]="['h-full w-full border-l-4 rounded-lg p-2 transition-all cursor-pointer group', col.bg, col.border, col.hover]">
+                        @let sHoras = getSpan(mat);
+                        <div [style.height]="getHeight(sHoras)"
+                             class="absolute top-1 left-1 right-1 z-20 border-l-4 rounded-lg p-2 transition-all cursor-pointer group shadow-sm"
+                             [ngClass]="[col.bg, col.border, col.hover]">
                             <p [ngClass]="['text-[10px] font-bold truncate leading-tight', col.textTitle]">{{ mat.materia_nombre || 'Materia' }}</p>
                             <p [ngClass]="['text-[9px] mt-0.5', col.textSub]">{{ mat.salon || 'Sin aula' }}</p>
+                            @if (sHoras > 1) {
+                                <p [ngClass]="['text-[8px] mt-1 opacity-70 font-medium', col.textSub]">{{ mat.hora_inicio?.substring(0,5) }} - {{ mat.hora_fin?.substring(0,5) }}</p>
+                            }
                         </div>
                     }
                 </div>

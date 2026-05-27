@@ -46,8 +46,8 @@ export class HorarioComponent {
     const mapDias: { [key: string]: string } = {
       '0': 'LU',
       '1': 'LU', 'LUN': 'LU', 'LUNES': 'LU', 'L': 'LU',
-      '2': 'MA', 'MAR': 'MA', 'MARTES': 'MA', 'M': 'MA',
-      '3': 'MI', 'MIE': 'MI', 'MIERCOLES': 'MI', 'MIÉRCOLES': 'MI', 'I': 'MI', 'X': 'MI', 'W': 'MI',
+      '2': 'MA', 'MAR': 'MA', 'MARTES': 'MA', 'A': 'MA',
+      '3': 'MI', 'MIE': 'MI', 'MIERCOLES': 'MI', 'MIÉRCOLES': 'MI', 'M': 'MI', 'I': 'MI', 'X': 'MI', 'W': 'MI',
       '4': 'JU', 'JUE': 'JU', 'JUEVES': 'JU', 'J': 'JU',
       '5': 'VI', 'VIE': 'VI', 'VIERNES': 'VI', 'V': 'VI',
       '6': 'SA', 'SAB': 'SA', 'SABADO': 'SA', 'SÁBADO': 'SA', 'S': 'SA',
@@ -61,12 +61,34 @@ export class HorarioComponent {
         d = mapDias[d];
       }
 
-      // Extraer solo la hora (ej. "08") para que si la materia empieza a las "08:15" o "08:30" 
-      // aún así encaje en la fila de las "08:00"
-      const hourBackend = s.hora_inicio ? s.hora_inicio.substring(0, 2) : '';
-      const hourSlot = slotStart ? slotStart.substring(0, 2) : '';
+      if (d !== dia) return false;
 
-      return hourBackend === hourSlot && d === dia;
+      const startHour = s.hora_inicio ? parseInt(s.hora_inicio.substring(0, 2), 10) : 0;
+      const slotHour = slotStart ? parseInt(slotStart.substring(0, 2), 10) : 0;
+
+      return slotHour === startHour;
     });
+  }
+
+  getSpan(s: any): number {
+    if (!s) return 1;
+    const startHour = s.hora_inicio ? parseInt(s.hora_inicio.substring(0, 2), 10) : 0;
+    const endHour = s.hora_fin ? parseInt(s.hora_fin.substring(0, 2), 10) : startHour;
+    const endMinute = s.hora_fin ? parseInt(s.hora_fin.substring(3, 5), 10) : 0;
+    
+    let durationHours = endHour - startHour;
+    if (endMinute > 0) durationHours += 1;
+    
+    if (durationHours < 1) durationHours = 1;
+    return durationHours;
+  }
+
+  getHeight(spanHoras: number): string {
+    const s = spanHoras || 1;
+    // Si s=1: calc(100% - 8px)
+    // Si s=2: calc(200% - 7px)
+    // Si s=3: calc(300% - 6px)
+    const pxOffset = 8 - (s - 1);
+    return `calc(${s * 100}% - ${pxOffset}px)`;
   }
 }
