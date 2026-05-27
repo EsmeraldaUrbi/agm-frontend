@@ -55,7 +55,9 @@ export class ApiClient {
 
   // Manejo centralizado de errores HTTP
   private handleError(error: any) {
-    console.error('Error HTTP en ApiClient:', error);
+    if (error && error.status !== 404) {
+      console.error('Error HTTP en ApiClient:', error);
+    }
     return throwError(() => error);
   }
 }

@@ -79,9 +79,9 @@ export class AuthService {
     );
   }
 
-  // POST /auth/refresh
+  // POST /auth/refresh-token
   refreshToken(refreshToken: string): Observable<any> {
-    const url = `${API_CONFIG.auth}/auth/refresh`;
+    const url = `${API_CONFIG.auth}/auth/refresh-token`;
     return this.apiClient.post<any>(url, { refresh_token: refreshToken }).pipe(
       tap(res => {
         const data = unwrapApiResponse<any>(res);

@@ -58,11 +58,9 @@ export class ReportesService {
     );
   }
 
-  // GET /api/v1/estadisticas/docente/:docente_id/resumen
+  // GET /api/v1/estadisticas/docente/:docente_id
   getResumenMateriasDocente(docenteId: string): Observable<any> {
-    return this.apiClient.get<any>(`${this.baseUrl}/api/v1/estadisticas/docente/${docenteId}/resumen`).pipe(
-      map(res => res.data || res)
-    );
+    return this.getEstadisticasDocente(docenteId);
   }
 
   // GET /api/v1/reportes/calificaciones/:materia_id?formato=pdf|xlsx

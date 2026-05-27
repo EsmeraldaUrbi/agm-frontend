@@ -38,10 +38,12 @@ export class InscripcionesService {
     );
   }
 
-  // GET /api/v1/inscripciones/docente/:docente_id/total
+  // GET /api/v1/inscripciones/?docente_id=
   getTotalAlumnosDocente(docenteId: string): Observable<{ total_alumnos: number }> {
-    return this.apiClient.get<any>(`${this.apiUrl}/docente/${docenteId}/total`).pipe(
-      map(res => res.data || res) // Handle standard and unwrapped responses
+    return this.apiClient.get<any>(`${this.apiUrl}/`, { docente_id: docenteId }).pipe(
+      map(res => ({
+        total_alumnos: unwrapArrayResponse<Inscripcion>(res).length
+      }))
     );
   }
 }

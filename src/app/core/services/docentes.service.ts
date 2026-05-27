@@ -37,9 +37,9 @@ export class DocentesService {
     );
   }
 
-  // PATCH /api/v1/docentes/:docente_id
+  // PUT /api/v1/docentes/:docente_id
   updateDocente(docenteId: string, payload: Partial<Docente>): Observable<Docente> {
-    return this.apiClient.patch<any>(`${this.apiUrl}/${docenteId}`, payload).pipe(
+    return this.apiClient.put<any>(`${this.apiUrl}/${docenteId}`, payload).pipe(
       map(res => normalizeDocente(unwrapApiResponse(res)))
     );
   }

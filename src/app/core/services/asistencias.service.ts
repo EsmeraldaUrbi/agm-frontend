@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { API_CONFIG } from '../config/api.config';
 import { ApiClient } from './apiClient';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { normalizeAsistencia, unwrapApiResponse, unwrapArrayResponse } from '../helpers/apiResponse.helpers';
 
@@ -141,9 +141,10 @@ export class AsistenciasService {
 
   // GET /api/v1/asistencias/docente/:docente_id/promedio
   getAsistenciaPromedioDocente(docenteId: string): Observable<{ porcentaje_asistencia: number }> {
-    return this.apiClient.get<any>(`${this.baseUrl}/asistencias/docente/${docenteId}/promedio`).pipe(
-      map(res => res.data || res)
+    console.warn(
+      'getAsistenciaPromedioDocente ya no se consulta en MS5 porque el endpoint no existe. Usar MS7 getEstadisticasDocente().'
     );
+    return of({ porcentaje_asistencia: 0 });
   }
 
   // GET /api/v1/asistencias/materia/:materia_id/historico-semanal

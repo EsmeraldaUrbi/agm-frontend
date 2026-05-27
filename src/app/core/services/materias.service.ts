@@ -164,11 +164,10 @@ export class MateriasService {
   }
 
   getMateriasPorCerrar(docenteId: string): Observable<any[]> {
-    return this.apiClient.get<any>(`${this.baseUrl}/materias/docente/${docenteId}/por-cerrar`).pipe(
-      map(res => {
-        const unwrapped = unwrapApiResponse<any>(res);
-        return unwrapArrayResponse<any>(unwrapped).map(normalizeMateria);
-      })
+    return this.getMateriasByDocente(docenteId).pipe(
+      map(res => res.items.filter((m: any) =>
+        m.estado === 'ACTIVA' || m.estado_materia === 'ACTIVA'
+      ))
     );
   }
 

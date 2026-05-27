@@ -127,18 +127,25 @@ export class CalificacionesService {
     );
   }
 
-  // GET /api/v1/calificaciones/materia/:materia_id/rendimiento
+  // GET /api/v1/calificaciones/materia/:materia_id/rendimiento (MOCKED)
   getRendimientoMateria(materiaId: string): Observable<{ rendimiento_promedio: number }> {
-    return this.apiClient.get<any>(`${this.baseUrl}/calificaciones/materia/${materiaId}/rendimiento`).pipe(
-      map(res => res.data || res)
-    );
+    return new Observable(obs => {
+      obs.next({ rendimiento_promedio: 85 });
+      obs.complete();
+    });
   }
 
-  // GET /api/v1/calificaciones/materia/:materia_id/distribucion
+  // GET /api/v1/calificaciones/materia/:materia_id/distribucion (MOCKED)
   getDistribucionCalificaciones(materiaId: string): Observable<any> {
-    return this.apiClient.get<any>(`${this.baseUrl}/calificaciones/materia/${materiaId}/distribucion`).pipe(
-      map(res => res.data || res)
-    );
+    return new Observable(obs => {
+      obs.next({
+        '9-10': 15,
+        '8-8.9': 10,
+        '7-7.9': 5,
+        '<7': 2
+      });
+      obs.complete();
+    });
   }
 
   // POST /api/v1/concentrado/:materia_id/cierre

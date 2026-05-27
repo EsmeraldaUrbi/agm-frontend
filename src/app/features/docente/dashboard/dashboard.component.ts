@@ -93,12 +93,6 @@ export class DashboardComponent implements OnInit {
         if (docente && (docente.docente_id || docente.id)) {
           const docenteId = docente.docente_id || docente.id;
           
-          // Asistencia promedio global
-          this.asistenciasService.getAsistenciaPromedioDocente(docenteId as string).subscribe({
-            next: (res: any) => this.asistenciaPromedioValue = res.porcentaje_asistencia || 0,
-            error: (err) => console.error('Error cargando asistencia promedio MS5', err)
-          });
-
           this.cargarMateriasDelDocente(docenteId as string);
         } else {
           console.warn('Docente no encontrado en el padrón.');
@@ -153,22 +147,43 @@ export class DashboardComponent implements OnInit {
           this.reportesService.getEstadisticasDocente(docenteId).subscribe({
             next: (estadisticas: any) => {
               console.log('==== DEBUG 4. MS7 ESTADISTICAS DOCENTE ====', estadisticas);
-              let periodos = estadisticas?.periodos || [];
+              const periodos = estadisticas?.periodos || [];
+
               let materiasMS7: any[] = [];
-              periodos.forEach((p: any) => {
-                if (p.materias) {
-                  materiasMS7 = [...materiasMS7, ...p.materias];
+
+              periodos.forEach((periodo: any) => {
+                if (Array.isArray(periodo.materias)) {
+                  materiasMS7 = [...materiasMS7, ...periodo.materias];
                 }
               });
 
+              // Calcular asistencia promedio del docente usando MS7
+              const porcentajesAsistencia = materiasMS7
+                .map((materia: any) => Number(materia.porcentaje_asistencia ?? 0))
+                .filter((valor: number) => !Number.isNaN(valor));
+
+              if (porcentajesAsistencia.length > 0) {
+                const suma = porcentajesAsistencia.reduce((acc, valor) => acc + valor, 0);
+                this.asistenciaPromedioValue = Math.round(suma / porcentajesAsistencia.length);
+              } else {
+                this.asistenciaPromedioValue = 0;
+              }
+
+              // Mantener cálculo de rendimiento por materia
               this.materias.forEach(m => {
                 const materiaId = m.materia_ofertada_id || m.materia_id || m.id;
-                const mMS7 = materiasMS7.find((x: any) => (x.materia_id === materiaId || x.materia_ofertada_id === materiaId));
-                m.rendimiento = mMS7 ? (mMS7.promedio_grupal || 0) : 0;
+
+                const materiaMS7 = materiasMS7.find((x: any) =>
+                  x.materia_id === materiaId ||
+                  x.materia_ofertada_id === materiaId
+                );
+
+                m.rendimiento = materiaMS7 ? Number(materiaMS7.promedio_grupal || 0) : 0;
               });
             },
             error: (err) => {
               console.error('Error MS7:', err);
+              this.asistenciaPromedioValue = 0;
               this.materias.forEach(m => m.rendimiento = 0);
             }
           });
@@ -315,7 +330,21 @@ export class DashboardComponent implements OnInit {
           }]
         };
       },
-      error: (err) => console.error('Error MS4 Concentrado:', err)
+      error: (err) => {
+        if (err && err.status !== 404) {
+          console.error('Error MS4 Concentrado:', err);
+        }
+        // Reset chart data
+        this.chartData = {
+          labels: ['Excelencia (9.0 - 10)', 'Regular (6.0 - 8.9)', 'Reprobados (< 6.0)'],
+          datasets: [{
+            data: [0, 0, 0],
+            backgroundColor: ['#2E7D32', '#0070A8', '#C62828'],
+            borderRadius: 4,
+            barPercentage: 0.6,
+          }]
+        };
+      }
     });
   }
 }
