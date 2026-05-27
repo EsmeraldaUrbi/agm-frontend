@@ -69,7 +69,7 @@ export class MisCursosComponent implements OnInit {
 
     this.isLoading.set(true);
     // Para resolver disparidades de IDs, listamos los docentes de MS-3 y filtramos por email
-    this.docentesService.getDocentes().subscribe({
+    this.docentesService.getDocentes({ limit: 1000 }).subscribe({
       next: (docentes) => {
         const matchingDocente = docentes.find(d => {
           const docenteEmail = (d as any).email || d.correo || '';

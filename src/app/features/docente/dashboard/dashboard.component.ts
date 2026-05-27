@@ -81,7 +81,7 @@ export class DashboardComponent implements OnInit {
     const user = this.authService.currentUser();
     if (!user || !user.email) return;
 
-    this.docentesService.getDocentes({ limit: 100 }).subscribe({
+    this.docentesService.getDocentes({ limit: 1000 }).subscribe({
       next: (docentes) => {
         const docente = docentes.find(d => {
           const docenteEmail = (d as any).email || d.correo || '';
