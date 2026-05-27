@@ -61,7 +61,7 @@
       <div class="col-span-12 lg:col-span-5 space-y-5">
 
         <!-- Sesión info -->
-        <div class="bg-[#003b5c] text-white rounded-2xl p-6 relative overflow-hidden">
+        <div class="bg-[#003b5c] text-white rounded-2xl p-6 relative overflow-hidden flex justify-between items-center">
           <div class="absolute -right-6 -top-6 opacity-10 pointer-events-none">
             <span class="material-symbols-outlined text-[120px]">qr_code_2</span>
           </div>
@@ -69,6 +69,10 @@
             <p class="text-[#7aa5cc] text-xs font-bold uppercase tracking-widest mb-1">Sesión Activa</p>
             <h3 class="text-xl font-black font-['Public_Sans']">{{ materiaActual?.nombre }}</h3>
             <p class="text-[#a0cbf3] text-sm mt-1">NRC: {{ materiaActual?.nrc }} • Sec. {{ materiaActual?.seccion }}</p>
+          </div>
+          <div class="relative z-10 text-right bg-black/20 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/10">
+            <p class="text-[10px] font-bold text-[#a0cbf3] uppercase tracking-widest mb-0.5">ID para Alumnos</p>
+            <p class="text-3xl font-black font-mono tracking-wider">{{ sessionId() }}</p>
           </div>
         </div>
 
