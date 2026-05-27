@@ -6,6 +6,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { DocentesService } from '../../../core/services/docentes.service';
 import { MateriasService } from '../../../core/services/materias.service';
 import { AlumnosService } from '../../../core/services/alumnos.service';
+import { CalificacionesService } from '../../../core/services/calificaciones.service';
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
@@ -31,6 +32,7 @@ export class MisCursosComponent implements OnInit {
   private docentesService = inject(DocentesService);
   private materiasService = inject(MateriasService);
   private alumnosService = inject(AlumnosService);
+  private calificacionesService = inject(CalificacionesService);
 
   cursos = signal<Curso[]>([]);
   docenteId: string | null = null;
@@ -159,20 +161,48 @@ export class MisCursosComponent implements OnInit {
   confirmarCierre() {
     if (this.cursoToClose && this.cursoToClose.materia_id) {
       const materiaId = this.cursoToClose.materia_id;
-      this.materiasService.cancelarMateriaOfertada(materiaId).subscribe({
+      // Primero cerramos la materia en el MS de Periodos/Materias
+      this.materiasService.cerrarMateriaOfertada(materiaId).subscribe({
         next: () => {
-          if (this.cursoToClose) {
-            this.cursoToClose.estado = 'CANCELADA';
-            this.cursoToClose.progresoColor = 'bg-red-500';
-          }
-          this.cerrarModalCierre();
-          if (this.docenteId) {
-            this.cargarCursos(this.docenteId);
-          }
+          // Luego notificamos a todos los alumnos
+          this.calificacionesService.notificarCierreMateria(materiaId).subscribe({
+            next: () => {
+              if (this.cursoToClose) {
+                this.cursoToClose.estado = 'CERRADA';
+                this.cursoToClose.progresoColor = 'bg-slate-400';
+              }
+              this.cerrarModalCierre();
+              if (this.docenteId) {
+                this.isLoading.set(true);
+                this.materiasService.clearDocenteMateriasCache(this.docenteId);
+                // Le damos un pequeño delay (500ms) para que el ms-notificaciones / RabbitMQ 
+                // terminen de procesar, y la experiencia visual se vea mejor.
+                setTimeout(() => {
+                  if (this.docenteId) this.cargarCursos(this.docenteId);
+                }, 500);
+              }
+            },
+            error: (err) => {
+              console.error('Materia cerrada, pero error al notificar alumnos:', err);
+              // Igual actualizamos la vista
+              if (this.cursoToClose) {
+                this.cursoToClose.estado = 'CERRADA';
+                this.cursoToClose.progresoColor = 'bg-slate-400';
+              }
+              this.cerrarModalCierre();
+              if (this.docenteId) {
+                this.isLoading.set(true);
+                this.materiasService.clearDocenteMateriasCache(this.docenteId);
+                setTimeout(() => {
+                  if (this.docenteId) this.cargarCursos(this.docenteId);
+                }, 500);
+              }
+            }
+          });
         },
         error: (err) => {
           console.error('Error al cerrar materia:', err);
-          alert('Hubo un error al intentar cancelar/cerrar la materia.');
+          alert('Hubo un error al intentar cerrar la materia.');
           this.cerrarModalCierre();
         }
       });

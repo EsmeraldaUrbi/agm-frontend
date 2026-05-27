@@ -157,6 +157,12 @@ export class MateriasService {
     return this.docenteMateriasCache.get(cacheKey)!;
   }
 
+  clearDocenteMateriasCache(docenteId: string): void {
+    // Clear all cache keys that start with the docenteId
+    const keysToDelete = Array.from(this.docenteMateriasCache.keys()).filter(key => key.startsWith(docenteId));
+    keysToDelete.forEach(key => this.docenteMateriasCache.delete(key));
+  }
+
   getMateriasPorCerrar(docenteId: string): Observable<any[]> {
     return this.apiClient.get<any>(`${this.baseUrl}/materias/docente/${docenteId}/por-cerrar`).pipe(
       map(res => {
@@ -179,6 +185,10 @@ export class MateriasService {
 
   cancelarMateriaOfertada(materiaOfertadaId: string): Observable<any> {
     return this.apiClient.patch<any>(`${this.baseUrl}/materias-ofertadas/${materiaOfertadaId}/cancelar`, {});
+  }
+
+  cerrarMateriaOfertada(materiaOfertadaId: string): Observable<any> {
+    return this.apiClient.patch<any>(`${this.baseUrl}/materias-ofertadas/${materiaOfertadaId}/cerrar`, {});
   }
 
   // === HORARIOS ===

@@ -140,4 +140,11 @@ export class CalificacionesService {
       map(res => res.data || res)
     );
   }
+
+  // POST /api/v1/concentrado/:materia_id/cierre
+  notificarCierreMateria(materiaId: string): Observable<any> {
+    return this.apiClient.post<any>(`${this.baseUrl}/concentrado/${materiaId}/cierre`, {}).pipe(
+      map(res => res.data || res)
+    );
+  }
 }
