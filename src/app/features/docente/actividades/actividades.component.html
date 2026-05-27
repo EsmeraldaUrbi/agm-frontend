@@ -76,7 +76,9 @@
         </div>
 
         <button (click)="abrirCrearModal()"
-          class="flex items-center gap-2 px-5 py-2.5 bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all text-sm font-bold flex-shrink-0">
+          [disabled]="ponderaciones.length === 0"
+          [title]="ponderaciones.length === 0 ? 'Primero debes configurar las ponderaciones' : 'Crear nueva actividad'"
+          class="flex items-center gap-2 px-5 py-2.5 bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all text-sm font-bold flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
           <span class="material-symbols-outlined text-sm">add</span>
           Crear Actividad
         </button>

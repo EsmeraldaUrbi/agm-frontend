@@ -25,6 +25,7 @@ export interface Actividad {
   descripcion?: string;
   valor_maximo: number;
   fecha_aplicacion: string;
+  estado?: string;
 }
 
 export interface Calificacion {

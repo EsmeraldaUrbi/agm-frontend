@@ -50,9 +50,10 @@ export class AlumnosService {
   }
 
   // POST /api/v1/importar/alumnos
-  importarAlumnos(file: File): Observable<any> {
+  importarAlumnos(file: File, materiaId: string): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('materia_id', materiaId);
     return this.apiClient.post<any>(`${API_CONFIG.usuarios}/api/v1/importar/alumnos`, formData);
   }
 

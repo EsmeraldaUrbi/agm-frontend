@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MateriasService } from '../../../core/services/materias.service';
+import { CalificacionesService } from '../../../core/services/calificaciones.service';
 
 interface Actividad {
   id: string;
@@ -37,7 +38,8 @@ export class ActividadesComponent {
 
   constructor(
     private route: ActivatedRoute,
-    private materiasService: MateriasService
+    private materiasService: MateriasService,
+    private calificacionesService: CalificacionesService
   ) {
     this.route.paramMap.subscribe(params => {
       const nrc = params.get('id');
@@ -78,8 +80,7 @@ export class ActividadesComponent {
           periodo: data.periodo?.nombre || 'Otoño 2024'
         });
         
-        // Aquí podríamos cargar las actividades reales usando el materia_id
-        // this.cargarActividades(materia_id);
+        this.cargarPonderaciones(materia_id);
       },
       error: (err) => {
         console.error('Error al cargar la materia', err);
@@ -111,9 +112,54 @@ export class ActividadesComponent {
     fecha_aplicacion: new Date().toISOString().split('T')[0]
   };
 
+  cargarPonderaciones(materiaId: string) {
+    this.calificacionesService.getPonderaciones(materiaId).subscribe({
+      next: (res) => {
+        if (res && res.criterios) {
+          this.ponderaciones = res.criterios;
+        } else {
+          this.ponderaciones = [];
+        }
+        this.cargarActividades(materiaId);
+      },
+      error: (err) => {
+        console.error('Error cargando ponderaciones', err);
+        this.ponderaciones = [];
+        this.cargarActividades(materiaId);
+      }
+    });
+  }
+
+  cargarActividades(materiaId: string) {
+    this.calificacionesService.getActividadesByMateria(materiaId).subscribe({
+      next: (data) => {
+        const mapped = data.map(act => {
+          const pond = this.ponderaciones.find(p => p.id === act.ponderacion_id);
+          return {
+            ...act,
+            id: act.actividad_id || '',
+            ponderacion_nombre: pond ? pond.nombre : 'General',
+            estado: act.estado || 'activa',
+            evaluados: 0,
+            total: 0,
+            promedio: 0.0
+          } as Actividad;
+        });
+        this.actividades.set(mapped);
+      },
+      error: (err) => {
+        console.error('Error cargando actividades', err);
+      }
+    });
+  }
+
   abrirCrearModal() {
+    if (this.ponderaciones.length === 0) {
+      alert('Primero debes configurar las ponderaciones de esta materia.');
+      return;
+    }
     this.nuevaActividad = {
-      ponderacion_id: 'p1',
+      ponderacion_id: this.ponderaciones[0].id,
       nombre: '',
       descripcion: '',
       valor_maximo: 10.0,
@@ -123,25 +169,27 @@ export class ActividadesComponent {
   }
 
   guardarActividad() {
-    if (!this.nuevaActividad.nombre) return;
-    const pond = this.ponderaciones.find(p => p.id === this.nuevaActividad.ponderacion_id);
-
-    const act: Actividad = {
-      id: 'act-' + (this.actividades().length + 1),
+    if (!this.nuevaActividad.nombre || !this.nuevaActividad.ponderacion_id) return;
+    
+    const payload = {
+      materia_id: this.materia().materia_id,
       ponderacion_id: this.nuevaActividad.ponderacion_id,
-      ponderacion_nombre: pond ? pond.nombre : 'General',
       nombre: this.nuevaActividad.nombre,
       descripcion: this.nuevaActividad.descripcion,
       valor_maximo: this.nuevaActividad.valor_maximo,
-      fecha_aplicacion: this.nuevaActividad.fecha_aplicacion,
-      estado: 'activa',
-      evaluados: 0,
-      total: 36,
-      promedio: 0.0
+      fecha_aplicacion: this.nuevaActividad.fecha_aplicacion
     };
 
-    this.actividades.update(list => [act, ...list]);
-    this.showCrearModal.set(false);
+    this.calificacionesService.createActividad(payload).subscribe({
+      next: (res) => {
+        this.showCrearModal.set(false);
+        this.cargarActividades(this.materia().materia_id);
+      },
+      error: (err) => {
+        console.error('Error creando actividad', err);
+        alert('Hubo un error al guardar la actividad.');
+      }
+    });
   }
 
   // Modal Importar Excel

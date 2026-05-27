@@ -10,6 +10,7 @@ interface Alumno {
   nombre: string;
   correo: string;
   estatus: string;
+  origen: string;
 }
 
 @Component({
@@ -66,8 +67,9 @@ export class ImportarAlumnosComponent {
         const mapped = data.map((a: any) => ({
           matricula: a.matricula || 'N/A',
           nombre: a.nombre_completo || 'Sin Nombre',
-          correo: a.correo || 'Sin Correo',
-          estatus: 'Inscrito'
+          correo: a.correo || 'Sin correo',
+          estatus: a.estatus_academico !== undefined ? (a.estatus_academico ? 'Activo' : 'Inactivo') : 'Sin estatus',
+          origen: a.tipo_formacion || 'N/A'
         }));
         this.alumnos.set(mapped);
       },
@@ -113,31 +115,6 @@ export class ImportarAlumnosComponent {
     });
   }
 
-  // Modal Agregar Manual
-  showManualModal = signal(false);
-  nuevoAlumno = { matricula: '', nombre: '', correo: '' };
-
-  abrirManualModal() {
-    this.nuevoAlumno = { matricula: '', nombre: '', correo: '' };
-    this.showManualModal.set(true);
-  }
-
-  guardarManual() {
-    if (!this.nuevoAlumno.matricula || !this.nuevoAlumno.nombre) return;
-    this.alumnos.update(list => [...list, {
-      matricula: this.nuevoAlumno.matricula,
-      nombre: this.nuevoAlumno.nombre,
-      correo: this.nuevoAlumno.correo || `${this.nuevoAlumno.matricula}@alumno.buap.mx`,
-      estatus: 'Inscrito Manual'
-    }]);
-    this.showManualModal.set(false);
-  }
-
-  // Dar de Baja
-  darDeBaja(matricula: string) {
-    this.alumnos.update(list => list.filter(a => a.matricula !== matricula));
-  }
-
   // Stepper Importar PDF BUAP (Modal)
   showPdfModal = signal(false);
   step = signal<number>(1); // 1: Subir PDF, 2: Procesando, 3: Previsualización, 4: Confirmado
@@ -168,7 +145,7 @@ export class ImportarAlumnosComponent {
     
     this.step.set(2); // Procesando...
     
-    this.alumnosService.importarAlumnos(this.archivoParaSubir).subscribe({
+    this.alumnosService.importarAlumnos(this.archivoParaSubir, this.materia().materia_id).subscribe({
       next: (res) => {
         this.importResult.set(res);
         this.step.set(4); // Exito

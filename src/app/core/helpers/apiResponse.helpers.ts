@@ -103,7 +103,8 @@ export function normalizeAlumno(alumno: any): any {
     correo,
     nombre_completo,
     matricula: alumno.matricula || '',
-    tipo_formacion: alumno.tipo_formacion || ''
+    tipo_formacion: alumno.tipo_formacion || '',
+    estatus_academico: alumno.estatus_academico
   };
 }
 
@@ -129,7 +130,8 @@ export function normalizeActividad(actividad: any): any {
     nombre: actividad.nombre,
     descripcion: actividad.descripcion || '',
     valor_maximo: actividad.valor_maximo,
-    fecha_aplicacion: actividad.fecha_aplicacion
+    fecha_aplicacion: actividad.fecha_aplicacion,
+    estado: actividad.estado || 'activa'
   };
 }
 
