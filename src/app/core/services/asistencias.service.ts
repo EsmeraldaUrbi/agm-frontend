@@ -138,4 +138,18 @@ export class AsistenciasService {
   obtenerHistorial(idMateria: number): Observable<any[]> {
     return this.getHistorialAsistencias(idMateria);
   }
+
+  // GET /api/v1/asistencias/docente/:docente_id/promedio
+  getAsistenciaPromedioDocente(docenteId: string): Observable<{ porcentaje_asistencia: number }> {
+    return this.apiClient.get<any>(`${this.baseUrl}/asistencias/docente/${docenteId}/promedio`).pipe(
+      map(res => res.data || res)
+    );
+  }
+
+  // GET /api/v1/asistencias/materia/:materia_id/historico-semanal
+  getHistoricoSemanalMateria(materiaId: string): Observable<any> {
+    return this.apiClient.get<any>(`${this.baseUrl}/asistencias/materia/${materiaId}/historico-semanal`).pipe(
+      map(res => res.data || res)
+    );
+  }
 }

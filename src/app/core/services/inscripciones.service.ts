@@ -37,4 +37,11 @@ export class InscripcionesService {
       map(res => unwrapArrayResponse<Inscripcion>(res))
     );
   }
+
+  // GET /api/v1/inscripciones/docente/:docente_id/total
+  getTotalAlumnosDocente(docenteId: string): Observable<{ total_alumnos: number }> {
+    return this.apiClient.get<any>(`${this.apiUrl}/docente/${docenteId}/total`).pipe(
+      map(res => res.data || res) // Handle standard and unwrapped responses
+    );
+  }
 }

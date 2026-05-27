@@ -147,6 +147,15 @@ export class MateriasService {
     );
   }
 
+  getMateriasPorCerrar(docenteId: string): Observable<any[]> {
+    return this.apiClient.get<any>(`${this.baseUrl}/materias/docente/${docenteId}/por-cerrar`).pipe(
+      map(res => {
+        const unwrapped = unwrapApiResponse<any>(res);
+        return unwrapArrayResponse<any>(unwrapped).map(normalizeMateria);
+      })
+    );
+  }
+
   getMateriaById(materiaId: string): Observable<Materia> {
     return this.apiClient.get<any>(`${this.baseUrl}/materias/${materiaId}`).pipe(
       map(res => normalizeMateria(unwrapApiResponse(res)))

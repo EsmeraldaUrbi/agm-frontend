@@ -160,22 +160,6 @@
             <h3 class="font-black text-[#00253b] font-['Public_Sans']">Listado de Alumnos (Pase de lista QR)</h3>
             <p class="text-xs text-[#72787e] mt-1">Sincronizado en tiempo real con MS-Asistencias.</p>
           </div>
-          <div class="flex gap-2">
-            <div class="relative">
-              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#72787e] text-sm">search</span>
-              <input [(ngModel)]="busqueda" type="text"
-                class="pl-9 pr-4 py-1.5 text-sm bg-[#f8f9fa] border border-[#c2c7ce] rounded-full w-56 focus:border-[#00253b] outline-none"
-                placeholder="Buscar por nombre..."/>
-            </div>
-            <button (click)="descargarReporte()" [disabled]="descargandoReporte()"
-              class="p-2 rounded-lg border border-[#c2c7ce] hover:bg-[#edeeef] transition-colors disabled:opacity-50" title="Descargar lista">
-              @if (descargandoReporte()) {
-                <span class="material-symbols-outlined text-sm text-[#42474e] animate-spin">sync</span>
-              } @else {
-                <span class="material-symbols-outlined text-sm text-[#42474e]">download</span>
-              }
-            </button>
-          </div>
         </div>
 
         <!-- Tabla -->

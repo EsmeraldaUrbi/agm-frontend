@@ -126,4 +126,18 @@ export class CalificacionesService {
       map(res => unwrapApiResponse<any>(res))
     );
   }
+
+  // GET /api/v1/calificaciones/materia/:materia_id/rendimiento
+  getRendimientoMateria(materiaId: string): Observable<{ rendimiento_promedio: number }> {
+    return this.apiClient.get<any>(`${this.baseUrl}/calificaciones/materia/${materiaId}/rendimiento`).pipe(
+      map(res => res.data || res)
+    );
+  }
+
+  // GET /api/v1/calificaciones/materia/:materia_id/distribucion
+  getDistribucionCalificaciones(materiaId: string): Observable<any> {
+    return this.apiClient.get<any>(`${this.baseUrl}/calificaciones/materia/${materiaId}/distribucion`).pipe(
+      map(res => res.data || res)
+    );
+  }
 }

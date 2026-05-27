@@ -58,6 +58,13 @@ export class ReportesService {
     );
   }
 
+  // GET /api/v1/estadisticas/docente/:docente_id/resumen
+  getResumenMateriasDocente(docenteId: string): Observable<any> {
+    return this.apiClient.get<any>(`${this.baseUrl}/api/v1/estadisticas/docente/${docenteId}/resumen`).pipe(
+      map(res => res.data || res)
+    );
+  }
+
   // GET /api/v1/reportes/calificaciones/:materia_id?formato=pdf|xlsx
   descargarReporteCalificaciones(materiaId: string, formato: 'pdf' | 'xlsx'): Observable<Blob> {
     const url = `${this.baseUrl}/api/v1/reportes/calificaciones/${materiaId}`;
