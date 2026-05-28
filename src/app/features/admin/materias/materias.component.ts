@@ -45,32 +45,26 @@ export class MateriasComponent implements OnInit {
   periodosList = signal<Periodo[]>([]);
 
   ngOnInit() {
-    this.cargarFiltros();
-    this.cargarDocentesYMaterias();
-  }
-
-  cargarFiltros() {
-    this.materiasService.getPlanesEstudio().subscribe({
-      next: (planes) => this.planesList.set(planes),
-      error: (err) => console.error('Error cargando planes de estudio', err)
-    });
-    this.periodosService.getPeriodos(1, 100).subscribe({
-      next: (res) => this.periodosList.set(res.items),
-      error: (err) => console.error('Error cargando periodos', err)
-    });
-  }
-
-  cargarDocentesYMaterias() {
     this.isLoading.set(true);
-    this.docentesService.getDocentes({ limit: 1000 }).subscribe({
-      next: (docentes) => {
-        this.docentesList.set(docentes || []);
-        this.cargarMaterias();
-      },
-      error: (err) => {
-        console.error('Error cargando docentes', err);
-        this.cargarMaterias(); // Cargamos materias igual aunque falle docentes
-      }
+    import('rxjs').then(({ forkJoin, of }) => {
+      import('rxjs/operators').then(({ catchError }) => {
+        forkJoin({
+          planes: this.materiasService.getPlanesEstudio().pipe(catchError(() => of([]))),
+          periodos: this.periodosService.getPeriodos(1, 100).pipe(catchError(() => of({ items: [] }))),
+          docentes: this.docentesService.getDocentes({ limit: 1000 }).pipe(catchError(() => of([])))
+        }).subscribe({
+          next: (res: any) => {
+            this.planesList.set(res.planes || []);
+            this.periodosList.set(res.periodos.items || []);
+            this.docentesList.set(res.docentes || []);
+            this.cargarMaterias();
+          },
+          error: (err) => {
+            console.error('Error en carga inicial', err);
+            this.cargarMaterias();
+          }
+        });
+      });
     });
   }
 
