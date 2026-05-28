@@ -10,15 +10,17 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   
   const token = authService.getToken();
+  const normalizedUrl = normalizeUrl(req.url);
+  const normalizedReq = normalizedUrl === req.url ? req : req.clone({ url: normalizedUrl });
   
   // Verificar si la petición va dirigida a alguna URL de nuestros microservicios
   const isMicroserviceReq = Object.values(environment).some(url => 
-    typeof url === 'string' && req.url.startsWith(url)
+    typeof url === 'string' && normalizedReq.url.startsWith(url)
   );
 
-  let authReq = req;
+  let authReq = normalizedReq;
   if (token && isMicroserviceReq) {
-    authReq = req.clone({
+    authReq = normalizedReq.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`
       }
@@ -46,3 +48,16 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
     })
   );
 };
+
+function normalizeUrl(url: string): string {
+  return url
+    .replace(/^http:\/\/api-gateway-production-0647\.up\.railway\.app/, 'https://api-gateway-production-0647.up.railway.app')
+    .replace('/api/periodos/periodos', '/api/v1/periodos')
+    .replace('/api/periodos/planes-estudio', '/api/v1/planes-estudio')
+    .replace('/api/periodos/materias-catalogo', '/api/v1/materias-catalogo')
+    .replace('/api/periodos/materias-planes-estudio', '/api/v1/materias-planes-estudio')
+    .replace('/api/periodos/materias-ofertadas', '/api/v1/materias-ofertadas')
+    .replace('/api/periodos/materia-horarios', '/api/v1/materia-horarios')
+    .replace('/api/periodos/importaciones', '/api/v1/importaciones')
+    .replace('/api/periodos/materias', '/api/v1/materias');
+}
