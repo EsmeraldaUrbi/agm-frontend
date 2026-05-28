@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -44,6 +44,20 @@ export class ImportarMateriasComponent implements OnInit, OnDestroy {
   planSeleccionadoId = signal<string>('');
 
   previsualizacionDatos = signal<MateriaExtraida[]>([]);
+  
+  // Paginación
+  currentPage = signal<number>(1);
+  itemsPerPage = 50;
+
+  totalRegistros = computed(() => this.previsualizacionDatos().length);
+  totalErrores = computed(() => this.previsualizacionDatos().filter(m => m.tieneError).length);
+  totalValidos = computed(() => this.totalRegistros() - this.totalErrores());
+  totalPages = computed(() => Math.ceil(this.totalRegistros() / this.itemsPerPage) || 1);
+
+  paginatedDatos = computed(() => {
+    const start = (this.currentPage() - 1) * this.itemsPerPage;
+    return this.previsualizacionDatos().slice(start, start + this.itemsPerPage);
+  });
   
   // Para bloquear si falta algo
   hasConfigError = signal<boolean>(false);
@@ -210,6 +224,7 @@ export class ImportarMateriasComponent implements OnInit, OnDestroy {
       }
 
       this.previsualizacionDatos.set(materiasExtraidas);
+      this.currentPage.set(1);
       this.currentStep.set(3);
     } catch (e) {
       console.error(e);
@@ -305,6 +320,25 @@ export class ImportarMateriasComponent implements OnInit, OnDestroy {
       this.router.navigate(['/alumno/dashboard']);
     } else {
       this.router.navigate(['/']);
+    }
+  }
+
+  // Métodos de Paginación
+  nextPage() {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.update(p => p + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage() > 1) {
+      this.currentPage.update(p => p - 1);
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
     }
   }
 }

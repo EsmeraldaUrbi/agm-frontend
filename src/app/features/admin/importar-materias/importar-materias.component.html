@@ -114,16 +114,16 @@
       <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
         <div>
           <h2 class="text-lg font-bold text-[#003B5C] font-['Public_Sans']">Verificación Requerida</h2>
-          <p class="text-sm text-slate-500">Encontramos 12 registros válidos y 2 con errores. Revisa la información extraída.</p>
+          <p class="text-sm text-slate-500">Encontramos {{ totalValidos() }} registros válidos y {{ totalErrores() }} con errores de {{ totalRegistros() }} en total.</p>
         </div>
         <div class="flex gap-2">
           <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full flex items-center gap-1">
             <span class="material-symbols-outlined text-sm">check_circle</span>
-            12 Válidos
+            {{ totalValidos() }} Válidos
           </span>
-          <span class="px-3 py-1 bg-[#ffdad6] text-[#93000a] text-xs font-bold rounded-full flex items-center gap-1">
+          <span *ngIf="totalErrores() > 0" class="px-3 py-1 bg-[#ffdad6] text-[#93000a] text-xs font-bold rounded-full flex items-center gap-1">
             <span class="material-symbols-outlined text-sm">error</span>
-            2 Errores
+            {{ totalErrores() }} Errores
           </span>
         </div>
       </div>
@@ -140,7 +140,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
-            <tr *ngFor="let m of previsualizacionDatos()" [ngClass]="m.tieneError ? 'bg-red-50/30 hover:bg-red-50/50' : 'hover:bg-slate-50'" class="transition-colors">
+            <tr *ngFor="let m of paginatedDatos()" [ngClass]="m.tieneError ? 'bg-red-50/30 hover:bg-red-50/50' : 'hover:bg-slate-50'" class="transition-colors">
               <td class="px-6 py-4">
                 <input type="text" [(ngModel)]="m.nrc" [ngClass]="!m.nrc ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-primary'" class="w-20 px-2 py-1 text-sm font-mono text-[#003b5c] rounded-md border outline-none">
               </td>
@@ -167,6 +167,32 @@
           </tbody>
         </table>
       </div>
+      <!-- Paginación -->
+      <div *ngIf="totalPages() > 1" class="p-4 bg-white border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+        <p class="text-sm text-slate-500 font-medium">
+          Mostrando página <span class="font-bold text-[#003B5C]">{{ currentPage() }}</span> de <span class="font-bold text-[#003B5C]">{{ totalPages() }}</span>
+        </p>
+        <div class="flex items-center gap-2">
+          <button 
+            (click)="prevPage()" 
+            [disabled]="currentPage() === 1"
+            class="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-300 text-slate-600 hover:bg-slate-50 hover:text-[#003B5C] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            <span class="material-symbols-outlined text-lg">chevron_left</span>
+          </button>
+          
+          <div class="flex gap-1 overflow-x-auto max-w-[200px] no-scrollbar">
+            <!-- Botones limitados visualmente o simplemente usar un input para saltar, pero mejor mostramos información -->
+          </div>
+          
+          <button 
+            (click)="nextPage()" 
+            [disabled]="currentPage() === totalPages()"
+            class="w-8 h-8 rounded-lg flex items-center justify-center border border-slate-300 text-slate-600 hover:bg-slate-50 hover:text-[#003B5C] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            <span class="material-symbols-outlined text-lg">chevron_right</span>
+          </button>
+        </div>
+      </div>
+
       <div class="p-6 bg-slate-50 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
         <button (click)="cancelImport()" class="flex items-center gap-2 text-slate-600 font-bold text-sm hover:text-[#003b5c] transition-colors">
           <span class="material-symbols-outlined">arrow_back</span>
