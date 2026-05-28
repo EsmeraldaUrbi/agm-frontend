@@ -70,4 +70,40 @@ export class PlanesEstudioService {
       map(res => unwrapApiResponse<PlanEstudio>(res))
     );
   }
+
+  // === GESTIÓN DE MATERIAS POR PLAN ===
+
+  getMateriasPorPlan(planEstudioId: string, page: number = 1, limit: number = 100): Observable<any> {
+    const url = `${API_CONFIG.catalogos}/materias-planes-estudio?plan_estudio_id=${planEstudioId}&page=${page}&limit=${limit}`;
+    return this.apiClient.get<any>(url).pipe(
+      map(res => {
+        const unwrapped = unwrapApiResponse<any>(res);
+        const items = unwrapArrayResponse<any>(unwrapped);
+        return {
+          items,
+          total: unwrapped.total || items.length,
+          page: unwrapped.page || page,
+          limit: unwrapped.limit || limit
+        };
+      })
+    );
+  }
+
+  asignarMateriaAPlan(planEstudioId: string, materiaCatalogoId: string): Observable<any> {
+    const url = `${API_CONFIG.catalogos}/materias-planes-estudio`;
+    return this.apiClient.post<any>(url, {
+      plan_estudio_id: planEstudioId,
+      materia_catalogo_id: materiaCatalogoId,
+      activa: true
+    }).pipe(
+      map(res => unwrapApiResponse<any>(res))
+    );
+  }
+
+  removerMateriaDePlan(materiaPlanEstudioId: string): Observable<any> {
+    const url = `${API_CONFIG.catalogos}/materias-planes-estudio/${materiaPlanEstudioId}`;
+    return this.apiClient.delete<any>(url).pipe(
+      map(res => unwrapApiResponse<any>(res))
+    );
+  }
 }

@@ -15,7 +15,7 @@ export const ADMIN_ROUTES: Routes = [
   },
   {
     path: 'importar-materias',
-    loadComponent: () => import('../docente/importar-materias/importar-materias.component').then(m => m.ImportarMateriasComponent)
+    loadComponent: () => import('./importar-materias/importar-materias.component').then(m => m.ImportarMateriasComponent)
   },
   {
     path: 'importar-docentes',
