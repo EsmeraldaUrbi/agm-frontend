@@ -129,7 +129,7 @@
             <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider mt-1">Mapa de habilidades (Radar)</p>
         </div>
         <div class="relative w-full max-w-[280px] aspect-square flex items-center justify-center mt-4">
-            <svg viewBox="0 0 200 200" class="w-full h-full overflow-visible">
+            <svg viewBox="-40 -30 280 260" class="w-full h-full overflow-visible">
                 <!-- Polígonos de fondo -->
                 @for (bgPoly of getRadarBackgroundPolygons(); track $index) {
                     <polygon [attr.points]="bgPoly" fill="none" stroke="#e2e8f0" stroke-width="1" [attr.fill]="'rgba(226, 232, 240, ' + (0.1 + $index*0.05) + ')'"></polygon>
@@ -241,12 +241,29 @@
         <h2 class="text-xl font-extrabold text-[#00253B] mb-2">Detalle de Asistencia</h2>
         <p class="text-xs text-slate-500 font-medium mb-6">Selecciona una materia para visualizar su historial en el periodo {{ alumnoInfo.periodo_activo }}.</p>
         
-        <select class="w-full p-3 border border-slate-200 rounded-lg bg-slate-50 text-slate-700 font-bold focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-colors cursor-pointer"
-                (change)="seleccionarMateria($any($event.target).value)">
-            @for (mat of estadisticasMaterias; track mat.nrc) {
-                <option [value]="mat.nrc">{{ mat.nombre_materia }}</option>
+        <div class="relative w-full">
+            <button type="button" (click)="dropdownOpen = !dropdownOpen" 
+                    class="w-full p-3 border border-slate-200 rounded-lg bg-slate-50 text-slate-700 font-bold focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-colors cursor-pointer flex justify-between items-center text-left">
+                <span class="truncate pr-4">{{ materiaSeleccionada?.nombre_materia || 'Selecciona una materia' }}</span>
+                <span class="material-symbols-outlined text-slate-400 transition-transform" [class.rotate-180]="dropdownOpen">expand_more</span>
+            </button>
+            
+            @if (dropdownOpen) {
+                <div class="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-lg shadow-xl overflow-hidden transform origin-top transition-all">
+                    <ul class="max-h-60 overflow-y-auto">
+                        @for (mat of estadisticasMaterias; track mat.nrc) {
+                            <li>
+                                <button type="button" (click)="seleccionarMateria(mat.nrc); dropdownOpen = false"
+                                        class="w-full text-left px-4 py-3 hover:bg-slate-50 font-bold text-sm transition-colors border-b border-slate-100 last:border-0"
+                                        [ngClass]="materiaSeleccionada?.nrc === mat.nrc ? 'text-[#003B5C] bg-blue-50/50' : 'text-slate-600'">
+                                    {{ mat.nombre_materia }}
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                </div>
             }
-        </select>
+        </div>
     </div>
 
     <div class="w-full sm:w-1/2 flex justify-center border-t sm:border-t-0 sm:border-l border-slate-100 pt-8 sm:pt-0 sm:pl-8">

@@ -7,11 +7,11 @@
   <p class="text-xs text-[#72787e] leading-relaxed">
     Para generar tu código de asistencia dinámico, introduce el ID de sesión proporcionado por tu docente.
   </p>
-  <div class="flex gap-2">
+  <div class="flex flex-col sm:flex-row gap-3">
     <input type="number" [(ngModel)]="idSesionInput" placeholder="Ej. 1" 
-           class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#003b5c]/20 outline-none transition-all" />
+           class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#003b5c]/20 outline-none transition-all w-full sm:w-auto" />
     <button (click)="establecerSesion()" 
-            class="bg-[#003b5c] text-white px-5 py-3 rounded-xl text-xs font-black active:scale-95 transition-transform shadow-md font-['Public_Sans'] uppercase tracking-wider">
+            class="bg-[#003b5c] w-full sm:w-auto text-white px-5 py-3 rounded-xl text-xs font-black active:scale-95 transition-transform shadow-md font-['Public_Sans'] uppercase tracking-wider">
       Generar QR
     </button>
   </div>

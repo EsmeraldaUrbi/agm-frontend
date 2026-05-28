@@ -2,17 +2,17 @@
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col relative animate-scale-up">
         
         <!-- Header Alert Banner -->
-        <div class="bg-error-container p-5 flex justify-between items-start">
-            <div class="flex gap-4">
+        <div class="bg-error-container p-4 md:p-5 flex justify-between items-start gap-2">
+            <div class="flex gap-3 md:gap-4 flex-1 min-w-0">
                 <div class="w-10 h-10 rounded-full bg-error text-white flex items-center justify-center shrink-0 shadow-sm">
                     <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
                 </div>
-                <div>
-                    <h2 class="font-bold text-on-error-container text-lg leading-tight">Confirmación Crítica de Baja</h2>
-                    <p class="text-sm text-on-error-container opacity-90 mt-1">¿Estás seguro de que deseas darte de baja de <strong>{{ nombreMateria }}</strong>?</p>
+                <div class="flex-1 min-w-0">
+                    <h2 class="font-bold text-on-error-container text-base md:text-lg leading-tight break-words">Confirmación Crítica de Baja</h2>
+                    <p class="text-xs md:text-sm text-on-error-container opacity-90 mt-1 break-words">¿Estás seguro de que deseas darte de baja de <strong>{{ nombreMateria }}</strong>?</p>
                 </div>
             </div>
-            <button (click)="cancelar()" class="p-1 text-on-error-container/60 hover:text-on-error-container hover:bg-error/10 rounded-lg transition-colors">
+            <button (click)="cancelar()" class="p-1 text-on-error-container/60 hover:text-on-error-container hover:bg-error/10 rounded-lg transition-colors shrink-0">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>

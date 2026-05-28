@@ -100,6 +100,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   totalMaterias: number = 0;
   materiaMenorRendimiento: MateriaStats | null = null;
   materiaSeleccionada: MateriaStats | null = null;
+  dropdownOpen: boolean = false;
   alertaStyles: any = {};
 
   ngOnInit() {

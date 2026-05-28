@@ -1,25 +1,25 @@
 <!-- Secondary Context Bar -->
-<div class="flex justify-between items-center h-16 px-8 w-full bg-white border-b border-slate-200 shadow-sm font-['Public_Sans'] text-sm font-medium">
-<div class="flex items-center gap-4">
-<span class="text-slate-400">Académico</span>
-<span class="material-symbols-outlined text-xs">chevron_right</span>
-<a routerLink="/alumno/materias" class="text-slate-400 hover:text-[#003B5C] transition-colors">Mis Materias</a>
-<span class="material-symbols-outlined text-xs">chevron_right</span>
-<span class="text-[#003B5C] font-bold border-b-2 border-[#003B5C] py-5">Detalles del Curso</span>
-</div>
-<div class="flex items-center gap-6">
-<div class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full text-xs font-bold text-primary-container uppercase tracking-tight">
-<span class="material-symbols-outlined text-sm">calendar_today</span>
-                    Periodo Actual
-                </div>
-</div>
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center min-h-16 h-auto py-4 md:py-0 px-4 md:px-8 w-full bg-white border-b border-slate-200 shadow-sm font-['Public_Sans'] text-sm font-medium gap-3 md:gap-0">
+  <div class="flex items-center flex-wrap gap-2 md:gap-4">
+    <span class="text-slate-400">Académico</span>
+    <span class="material-symbols-outlined text-xs">chevron_right</span>
+    <a routerLink="/alumno/materias" class="text-slate-400 hover:text-[#003B5C] transition-colors whitespace-nowrap">Mis Materias</a>
+    <span class="material-symbols-outlined text-xs">chevron_right</span>
+    <span class="text-[#003B5C] font-bold border-b-2 border-[#003B5C] py-1 md:py-5 whitespace-nowrap">Detalles del Curso</span>
+  </div>
+  <div class="flex items-center gap-6">
+    <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full text-xs font-bold text-primary-container uppercase tracking-tight whitespace-nowrap">
+      <span class="material-symbols-outlined text-sm">calendar_today</span>
+      Periodo Actual
+    </div>
+  </div>
 </div>
 <!-- Content Canvas -->
 <div class="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in-up">
 
 @if (materiaInfo()) {
 <!-- Subject Hero Header -->
-<div class="relative overflow-hidden rounded-xl bg-primary-container text-white p-8 shadow-lg">
+<div class="relative overflow-hidden rounded-xl bg-primary-container text-white p-6 md:p-8 shadow-lg">
 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
 <div class="space-y-2">
 <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-medium">
