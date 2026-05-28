@@ -41,6 +41,12 @@ export class ImportarMateriasComponent implements OnInit, OnDestroy {
   todosLosPeriodos = signal<any[]>([]);
   periodoSeleccionadoId = signal<string>('');
   planSeleccionadoId = signal<string>('');
+
+  previsualizacionDatos = signal<any[]>([
+    { nrc: '28491', materia: 'Arquitectura de Servicios Web', seccion: '101', docente: 'Dr. Roberto Sanchez', horario: 'Lu/Mi 09:00 - 11:00', tieneError: false },
+    { nrc: '31022', materia: 'Bases de Datos Avanzadas', seccion: '202', docente: 'Mtra. Elena Gomez', horario: 'Ma/Ju 13:00 - 15:00', tieneError: false },
+    { nrc: '', materia: 'Cómputo Paralelo', seccion: '301', docente: 'Ing. Julian Herrera', horario: 'Vi 08:00 - 12:00', tieneError: true }
+  ]);
   
   // Para bloquear si falta algo
   hasConfigError = signal<boolean>(false);

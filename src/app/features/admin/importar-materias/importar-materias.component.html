@@ -140,48 +140,28 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
-            <tr class="hover:bg-slate-50 transition-colors">
-              <td class="px-6 py-4 text-sm font-mono text-[#003b5c]">28491</td>
-              <td class="px-6 py-4 text-sm font-semibold text-slate-800">Arquitectura de Servicios Web</td>
-              <td class="px-6 py-4 text-sm text-slate-600">101</td>
-              <td class="px-6 py-4 text-sm text-slate-600">Dr. Roberto Sanchez</td>
+            <tr *ngFor="let m of previsualizacionDatos()" [ngClass]="m.tieneError ? 'bg-red-50/30 hover:bg-red-50/50' : 'hover:bg-slate-50'" class="transition-colors">
               <td class="px-6 py-4">
-                <button (click)="openScheduleModal('Lu/Mi 09:00 - 11:00')" class="px-3 py-1.5 bg-slate-100 hover:bg-[#003b5c] text-slate-600 hover:text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5">
-                  <span class="material-symbols-outlined text-[14px]">visibility</span>
-                  Ver
-                </button>
-              </td>
-              <td class="px-6 py-4"><span class="text-emerald-600 material-symbols-outlined">verified</span></td>
-            </tr>
-            <tr class="hover:bg-slate-50 transition-colors">
-              <td class="px-6 py-4 text-sm font-mono text-[#003b5c]">31022</td>
-              <td class="px-6 py-4 text-sm font-semibold text-slate-800">Bases de Datos Avanzadas</td>
-              <td class="px-6 py-4 text-sm text-slate-600">202</td>
-              <td class="px-6 py-4 text-sm text-slate-600">Mtra. Elena Gomez</td>
-              <td class="px-6 py-4">
-                <button (click)="openScheduleModal('Ma/Ju 13:00 - 15:00')" class="px-3 py-1.5 bg-slate-100 hover:bg-[#003b5c] text-slate-600 hover:text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5">
-                  <span class="material-symbols-outlined text-[14px]">visibility</span>
-                  Ver
-                </button>
-              </td>
-              <td class="px-6 py-4"><span class="text-emerald-600 material-symbols-outlined">verified</span></td>
-            </tr>
-            <tr class="bg-red-50/30 hover:bg-red-50/50 transition-colors">
-              <td class="px-6 py-4 text-sm font-mono text-[#ba1a1a] font-bold">FALTA</td>
-              <td class="px-6 py-4 text-sm font-semibold text-slate-800">Cómputo Paralelo</td>
-              <td class="px-6 py-4 text-sm text-slate-600">301</td>
-              <td class="px-6 py-4 text-sm text-slate-600">Ing. Julian Herrera</td>
-              <td class="px-6 py-4">
-                <button (click)="openScheduleModal('Vi 08:00 - 12:00')" class="px-3 py-1.5 bg-slate-100 hover:bg-[#003b5c] text-slate-600 hover:text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5">
-                  <span class="material-symbols-outlined text-[14px]">visibility</span>
-                  Ver
-                </button>
+                <input type="text" [(ngModel)]="m.nrc" [ngClass]="!m.nrc ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-primary'" class="w-20 px-2 py-1 text-sm font-mono text-[#003b5c] rounded-md border outline-none">
               </td>
               <td class="px-6 py-4">
-                <div class="flex items-center gap-2 text-[#ba1a1a]">
+                <input type="text" [(ngModel)]="m.materia" [ngClass]="!m.materia ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-primary'" class="w-full px-2 py-1 text-sm font-semibold text-slate-800 rounded-md border outline-none">
+              </td>
+              <td class="px-6 py-4">
+                <input type="text" [(ngModel)]="m.seccion" [ngClass]="!m.seccion ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-primary'" class="w-16 px-2 py-1 text-sm text-slate-600 rounded-md border outline-none">
+              </td>
+              <td class="px-6 py-4">
+                <input type="text" [(ngModel)]="m.docente" [ngClass]="!m.docente ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-primary'" class="w-full px-2 py-1 text-sm text-slate-600 rounded-md border outline-none">
+              </td>
+              <td class="px-6 py-4">
+                <input type="text" [(ngModel)]="m.horario" [ngClass]="!m.horario ? 'border-red-500 focus:ring-red-500' : 'border-slate-200 focus:ring-primary'" class="w-32 px-2 py-1 text-xs text-slate-600 rounded-md border outline-none">
+              </td>
+              <td class="px-6 py-4">
+                <div *ngIf="m.tieneError" class="flex items-center gap-2 text-[#ba1a1a]">
                   <span class="material-symbols-outlined text-[20px]">warning</span>
-                  <span class="text-[11px] font-bold uppercase">Error</span>
+                  <span class="text-[11px] font-bold uppercase">Validar</span>
                 </div>
+                <span *ngIf="!m.tieneError" class="text-emerald-600 material-symbols-outlined">verified</span>
               </td>
             </tr>
           </tbody>
@@ -232,22 +212,7 @@
       </div>
     </div>
     
-    <!-- PDF Preview Section -->
-    <div class="mt-8 font-sans w-full" *ngIf="pdfPreviewUrl()">
-      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h3 class="text-sm font-bold text-[#003B5C] mb-4 flex items-center gap-2">
-          <span class="material-symbols-outlined text-lg">visibility</span>
-          Vista Previa del Documento: {{ selectedFile()?.name }}
-        </h3>
-        <div class="w-full h-[500px] bg-slate-100 rounded-lg overflow-hidden border border-slate-200 relative">
-          <object [data]="pdfPreviewUrl()" type="application/pdf" width="100%" height="100%">
-            <div class="absolute inset-0 flex items-center justify-center">
-              <p class="text-slate-500 text-sm">Tu navegador no soporta previsualización de PDFs en línea.</p>
-            </div>
-          </object>
-        </div>
-      </div>
-    </div>
+
   </div>
 
   <!-- PASO 4: CONFIRMAR (Success) -->
