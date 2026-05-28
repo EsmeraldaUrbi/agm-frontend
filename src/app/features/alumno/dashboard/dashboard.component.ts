@@ -122,7 +122,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.alumnoInfo.nombre_completo = user.nombre_completo || 'Alumno AGM';
 
     // 1. Resolver el alumno_id a partir del correo
-    this.alumnosService.getAlumnos({ skip: 0, limit: 100 }).subscribe({
+    this.alumnosService.getAlumnos({ skip: 0, limit: 500 }).subscribe({
       next: (alumnos) => {
         const matchingAlumno = alumnos.find(a => a.correo.toLowerCase() === user.email.toLowerCase());
         if (matchingAlumno && matchingAlumno.alumno_id) {

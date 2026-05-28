@@ -97,7 +97,7 @@ export class HistorialAsistenciasComponent implements OnInit {
     if (!user) return;
 
     this.isLoading.set(true);
-    this.docentesService.getDocentes().subscribe({
+    this.docentesService.getDocentes({ limit: 500 }).subscribe({
       next: (docentes) => {
         const matchingDocente = docentes.find(d => {
           const docenteEmail = (d as any).email || d.correo || '';

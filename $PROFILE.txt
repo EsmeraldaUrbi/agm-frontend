@@ -1,0 +1,3 @@
+function prompt {
+    "Xanaks ($((Get-Item .).Name))> "
+}
