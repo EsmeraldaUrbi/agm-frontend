@@ -80,7 +80,18 @@ export class LoginComponent {
         error: (err) => {
           console.error('Error en login:', err);
           this.showError.set(true);
-          this.errorMessage.set('Credenciales incorrectas o usuario no encontrado.');
+          
+          if (err.status === 0) {
+            this.errorMessage.set('No se pudo conectar con el servidor. Verifica que el backend esté en ejecución.');
+          } else if (err.status === 401 || err.status === 403 || err.status === 404) {
+            this.errorMessage.set('Correo o contraseña incorrectos.');
+          } else if (err.status === 504 || err.status === 408 || err.name === 'TimeoutError') {
+            this.errorMessage.set('El servidor tardó demasiado en responder.');
+          } else if (err.status >= 500) {
+            this.errorMessage.set('Ocurrió un error interno del servidor.');
+          } else {
+            this.errorMessage.set('Credenciales incorrectas o usuario no encontrado.');
+          }
         }
       });
     } else {
