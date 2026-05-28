@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlanesEstudioService, PlanEstudio } from '../../../core/services/planes-estudio.service';
 import { MateriasService, MateriaCatalogo } from '../../../core/services/materias.service';
+import { PeriodosService, Periodo } from '../../../core/services/periodos.service';
 import { AgmButtonComponent, AgmCardComponent, AgmInputComponent } from '../../../shared/components/ui';
 
 @Component({
@@ -14,6 +15,7 @@ import { AgmButtonComponent, AgmCardComponent, AgmInputComponent } from '../../.
 export class PlanesEstudioComponent implements OnInit {
   private planesService = inject(PlanesEstudioService);
   private materiasService = inject(MateriasService);
+  private periodosService = inject(PeriodosService);
 
   planes = signal<PlanEstudio[]>([]);
   isLoading = signal<boolean>(false);
@@ -40,9 +42,22 @@ export class PlanesEstudioComponent implements OnInit {
   toastMessage = signal<string>('');
   toastType = signal<'success' | 'error'>('success');
 
+  periodosMap = signal<Map<string, string>>(new Map()); // materia_catalogo_id -> Periodo Nombre
+  todosLosPeriodos = signal<Periodo[]>([]);
+
   ngOnInit() {
+    this.cargarPeriodos();
     this.cargarPlanes();
     this.cargarCatalogoMaterias();
+    this.cargarMateriasOfertadas();
+  }
+
+  cargarPeriodos() {
+    this.periodosService.getPeriodos(1, 100).subscribe({
+      next: (res) => {
+        this.todosLosPeriodos.set(res.items || []);
+      }
+    });
   }
 
   cargarPlanes() {
@@ -61,12 +76,29 @@ export class PlanesEstudioComponent implements OnInit {
   }
 
   cargarCatalogoMaterias() {
-    this.materiasService.getMateriasCatalogo().subscribe({
+    this.materiasService.getAllMateriasCatalogo().subscribe({
       next: (materias) => {
         this.catalogoMaterias.set(materias || []);
       },
       error: (err) => {
         console.error('Error al cargar catálogo de materias', err);
+      }
+    });
+  }
+
+  cargarMateriasOfertadas() {
+    this.materiasService.getAllMaterias().subscribe({
+      next: (materias) => {
+        const pMap = new Map<string, string>();
+        // Guardamos el periodo_id para cada materia del catálogo que haya sido ofertada
+        materias.forEach(m => {
+          if (m.materia_catalogo_id && m.periodo_id) {
+            const periodoReal = this.todosLosPeriodos().find(p => p.periodo_id === m.periodo_id);
+            const nombrePeriodo = periodoReal ? periodoReal.nombre : 'Ofertada';
+            pMap.set(m.materia_catalogo_id, nombrePeriodo);
+          }
+        });
+        this.periodosMap.set(pMap);
       }
     });
   }
@@ -165,11 +197,13 @@ export class PlanesEstudioComponent implements OnInit {
         // Combinamos la información de la relación con los datos del catálogo
         const asignadas = (res.items || []).filter((r: any) => r.activa !== false).map((relacion: any) => {
           const materiaCat = this.catalogoMaterias().find(m => m.materia_catalogo_id === relacion.materia_catalogo_id);
+          const nombrePeriodo = this.periodosMap().get(relacion.materia_catalogo_id);
           return {
             materia_plan_estudio_id: relacion.materia_plan_estudio_id,
             materia_catalogo_id: relacion.materia_catalogo_id,
             nombre: materiaCat ? materiaCat.nombre : 'Materia Desconocida',
-            codigo: materiaCat ? materiaCat.codigo : 'N/A'
+            clave: materiaCat ? materiaCat.clave : 'N/A',
+            periodo: nombrePeriodo ? nombrePeriodo : 'Sin Ofertar'
           };
         });
         this.materiasAsignadas.set(asignadas);

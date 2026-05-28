@@ -183,7 +183,7 @@
               >
                 <option value="" disabled selected>-- Elige una materia --</option>
                 <option *ngFor="let cat of catalogoMaterias()" [value]="cat.materia_catalogo_id">
-                  {{ cat.codigo }} - {{ cat.nombre }}
+                  {{ cat.clave }} - {{ cat.nombre }}
                 </option>
               </select>
             </div>
@@ -205,21 +205,23 @@
             <table class="w-full text-left border-collapse">
               <thead class="bg-surface-variant/30 text-[10px] uppercase text-outline font-bold sticky top-0 backdrop-blur-md">
                 <tr>
-                  <th class="px-4 py-3 border-b border-outline-variant/10">Código</th>
+                  <th class="px-4 py-3 border-b border-outline-variant/10">Clave</th>
                   <th class="px-4 py-3 border-b border-outline-variant/10">Materia</th>
+                  <th class="px-4 py-3 border-b border-outline-variant/10">Periodo</th>
                   <th class="px-4 py-3 border-b border-outline-variant/10 text-right w-20">Acción</th>
                 </tr>
               </thead>
               <tbody class="text-xs">
                 <tr *ngIf="materiasAsignadas().length === 0 && !isLoadingAsignadas()">
-                  <td colspan="3" class="px-4 py-8 text-center text-outline font-medium">
+                  <td colspan="4" class="px-4 py-8 text-center text-outline font-medium">
                     <span class="material-symbols-outlined text-3xl mb-2 opacity-50 block">link_off</span>
                     Este plan no tiene materias asignadas aún.
                   </td>
                 </tr>
                 <tr *ngFor="let mat of materiasAsignadas()" class="border-b border-outline-variant/5 hover:bg-surface-variant/10 transition-colors">
-                  <td class="px-4 py-3 font-mono font-bold text-primary/80">{{ mat.codigo }}</td>
+                  <td class="px-4 py-3 font-mono font-bold text-primary/80">{{ mat.clave }}</td>
                   <td class="px-4 py-3 font-semibold text-on-surface">{{ mat.nombre }}</td>
+                  <td class="px-4 py-3 font-medium text-outline">{{ mat.periodo }}</td>
                   <td class="px-4 py-3 text-right">
                     <button 
                       (click)="removerMateria(mat.materia_plan_estudio_id)"

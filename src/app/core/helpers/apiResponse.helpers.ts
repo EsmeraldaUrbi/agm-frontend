@@ -71,7 +71,8 @@ export function normalizeMateria(materia: any): any {
     nrc,
     seccion,
     estado,
-    docente_id
+    docente_id,
+    planes_estudio: materia.planes_estudio || []
   };
 }
 

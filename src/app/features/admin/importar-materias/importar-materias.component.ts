@@ -1,5 +1,6 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
@@ -7,15 +8,16 @@ import { PeriodosService } from '../../../core/services/periodos.service';
 import { MateriasService } from '../../../core/services/materias.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { OnDestroy } from '@angular/core';
+import { OnDestroy, OnInit } from '@angular/core';
+import { PlanesEstudioService, PlanEstudio } from '../../../core/services/planes-estudio.service';
 
 @Component({
   selector: 'app-importar-materias',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './importar-materias.component.html'
 })
-export class ImportarMateriasComponent implements OnDestroy {
+export class ImportarMateriasComponent implements OnInit, OnDestroy {
   currentStep = signal<1 | 2 | 3 | 4>(1);
   
   selectedFile = signal<File | null>(null);
@@ -35,14 +37,70 @@ export class ImportarMateriasComponent implements OnDestroy {
 
   private processedHashes: string[] = [];
 
+  planes = signal<PlanEstudio[]>([]);
+  todosLosPeriodos = signal<any[]>([]);
+  periodoSeleccionadoId = signal<string>('');
+  planSeleccionadoId = signal<string>('');
+  
+  // Para bloquear si falta algo
+  hasConfigError = signal<boolean>(false);
+  configErrorMessage = signal<string>('');
+
   private router = inject(Router);
-  private http = inject(HttpClient);
   private periodosService = inject(PeriodosService);
+  private planesService = inject(PlanesEstudioService);
   private materiasService = inject(MateriasService);
   private authService = inject(AuthService);
   private sanitizer = inject(DomSanitizer);
 
   private currentFileSignature = '';
+
+  ngOnInit() {
+    this.verificarConfiguracionInicial();
+  }
+
+  private verificarConfiguracionInicial() {
+    // 1. Obtener planes de estudio
+    this.planesService.getPlanesEstudio(1, 100, true).subscribe({
+      next: (res) => {
+        const planesActivos = res.items || [];
+        this.planes.set(planesActivos);
+        
+        if (planesActivos.length === 0) {
+          this.hasConfigError.set(true);
+          this.configErrorMessage.set('No existe un plan de estudio registrado. Por favor, crea primero un plan de estudio antes de continuar.');
+          return;
+        }
+
+        // 2. Obtener todos los periodos (para que el usuario seleccione)
+        this.periodosService.getPeriodos(1, 100).subscribe({
+          next: (res) => {
+            const periodosList = res.items || [];
+            this.todosLosPeriodos.set(periodosList);
+            if (periodosList.length === 0) {
+              this.hasConfigError.set(true);
+              this.configErrorMessage.set('No existen periodos escolares. Por favor, crea un periodo antes de continuar.');
+              return;
+            }
+            // Seleccionar por defecto el activo si hay
+            const activo = periodosList.find((p: any) => p.activo);
+            if (activo && activo.periodo_id) {
+              this.periodoSeleccionadoId.set(activo.periodo_id);
+            }
+            this.hasConfigError.set(false);
+          },
+          error: () => {
+            this.hasConfigError.set(true);
+            this.configErrorMessage.set('Error al conectar con el servidor para verificar periodos.');
+          }
+        });
+      },
+      error: () => {
+        this.hasConfigError.set(true);
+        this.configErrorMessage.set('Error al conectar con el servidor para verificar planes de estudio.');
+      }
+    });
+  }
 
   ngOnDestroy() {
     this.revokePdfUrl();
@@ -138,65 +196,32 @@ export class ImportarMateriasComponent implements OnDestroy {
   cancelImport() {
     this.currentStep.set(1);
     this.selectedFile.set(null);
+    this.planSeleccionadoId.set('');
     this.showDuplicateError.set(false);
     this.revokePdfUrl();
   }
 
   confirmImport() {
     const file = this.selectedFile();
+    const periodoId = this.periodoSeleccionadoId();
+    const planId = this.planSeleccionadoId();
+
     if (!file) return;
+
+    if (!planId) {
+      this.triggerToast('Por favor, selecciona a qué Plan de Estudio deseas importar las materias.', 'error');
+      return;
+    }
+
+    if (!periodoId) {
+      this.triggerToast('Por favor, selecciona el Periodo Escolar.', 'error');
+      return;
+    }
 
     this.currentStep.set(4);
     this.isSaving.set(true);
-
-    // 1. Obtener Periodo Activo
-    this.periodosService.getPeriodoActivo().subscribe({
-      next: (periodo) => {
-        if (!periodo) {
-          // Si no hay periodo activo, buscar el primero de la lista
-          this.periodosService.getPeriodos(1, 1).subscribe({
-            next: (resPeriodos) => {
-              const p = resPeriodos.items[0];
-              if (!p) {
-                this.isSaving.set(false);
-                this.currentStep.set(1);
-                this.triggerToast('Error: No existe ningún periodo escolar registrado. Crea uno en la sección de Periodos antes de continuar.', 'error');
-                return;
-              }
-              this.procederConPlan(p.periodo_id!, file);
-            },
-            error: (err) => this.handleErrorMsg(err)
-          });
-        } else {
-          this.procederConPlan(periodo.periodo_id!, file);
-        }
-      },
-      error: (err) => this.handleErrorMsg(err)
-    });
-  }
-
-  private procederConPlan(periodoId: string, file: File) {
-    // 2. Obtener Plan de Estudios
-    this.materiasService.getPlanesEstudio().subscribe({
-      next: (planes) => {
-        const planValido = planes.find(p => p.activo) || planes[0];
-        if (!planValido) {
-          // Si no hay plan, creamos uno dinámicamente "Plan de Estudios General"
-          this.materiasService.createPlanEstudio({
-            nombre: 'Plan de Estudios General',
-            activo: true
-          }).subscribe({
-            next: (nuevoPlan) => {
-              this.subirArchivoReal(periodoId, nuevoPlan.plan_estudio_id!, file);
-            },
-            error: (err) => this.handleErrorMsg(err)
-          });
-        } else {
-          this.subirArchivoReal(periodoId, planValido.plan_estudio_id!, file);
-        }
-      },
-      error: (err) => this.handleErrorMsg(err)
-    });
+    
+    this.subirArchivoReal(periodoId, planId, file);
   }
 
   private subirArchivoReal(periodoId: string, planEstudioId: string, file: File) {
@@ -205,8 +230,7 @@ export class ImportarMateriasComponent implements OnDestroy {
     formData.append('periodo_id', periodoId);
     formData.append('plan_estudio_id', planEstudioId);
 
-    this.http.post(`${environment.msCatalogosUrl}/api/v1/importaciones/programacion-academica`, formData)
-      .subscribe({
+    this.materiasService.importarProgramacionAcademica(formData).subscribe({
         next: () => {
           this.isSaving.set(false);
           const uploaded = JSON.parse(localStorage.getItem('agm_uploaded_files') || '[]');
@@ -222,7 +246,7 @@ export class ImportarMateriasComponent implements OnDestroy {
             this.showDuplicateError.set(true);
           } else {
             const errorMsg = err.error?.detail || err.error?.message || err.message || 'Error desconocido';
-            this.triggerToast(`Error al importar la carga académica: ${errorMsg}. Revisa los IDs del periodo o el archivo.`, 'error');
+            this.triggerToast(`Error al importar la carga académica: ${errorMsg}`, 'error');
           }
         }
       });

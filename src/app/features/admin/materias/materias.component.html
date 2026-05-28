@@ -52,6 +52,7 @@
             <tr class="bg-surface-variant/10 text-outline text-[10px] uppercase font-bold tracking-wider border-b border-outline-variant/15">
               <th class="py-3 px-6">NRC / Materia</th>
               <th class="py-3 px-6">Sección</th>
+              <th class="py-3 px-6">Plan de Estudio</th>
               <th class="py-3 px-6">Docente Asignado</th>
               <th class="py-3 px-6">Estado</th>
             </tr>
@@ -63,6 +64,16 @@
                 <p class="font-bold text-on-surface">{{ m.nombre }}</p>
               </td>
               <td class="py-4 px-6 text-on-surface-variant font-semibold">{{ m.seccion }}</td>
+              <td class="py-4 px-6">
+                <div class="flex flex-col gap-1">
+                  <span *ngFor="let p of m.planes_estudio" class="inline-flex w-fit items-center px-2 py-0.5 rounded-full text-[9px] font-bold tracking-widest bg-secondary-container/30 text-secondary-container-on">
+                    {{ p }}
+                  </span>
+                  <span *ngIf="!m.planes_estudio || m.planes_estudio.length === 0" class="text-xs text-outline italic">
+                    Sin asignar
+                  </span>
+                </div>
+              </td>
               <td class="py-4 px-6">
                 <div class="flex items-center gap-2">
                   <div class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[9px] uppercase">
@@ -78,7 +89,7 @@
               </td>
             </tr>
             <tr *ngIf="filteredMaterias().length === 0">
-              <td colspan="4" class="py-8 text-center text-outline w-full block">No se encontraron materias que coincidan con la búsqueda.</td>
+              <td colspan="5" class="py-8 text-center text-outline w-full block">No se encontraron materias que coincidan con la búsqueda.</td>
             </tr>
           </tbody>
         </table>

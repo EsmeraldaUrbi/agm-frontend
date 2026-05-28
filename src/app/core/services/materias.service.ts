@@ -15,8 +15,7 @@ export interface PlanEstudio {
 export interface MateriaCatalogo {
   materia_catalogo_id?: string;
   nombre: string;
-  codigo: string;
-  creditos: number;
+  clave: string;
 }
 
 export interface Materia {
@@ -27,6 +26,7 @@ export interface Materia {
   estado: string;
   docente_id?: string;
   periodo_id?: string;
+  planes_estudio?: string[];
 }
 
 export interface Horario {
@@ -79,9 +79,38 @@ export class MateriasService {
   }
 
   // === MATERIAS CATÁLOGO ===
-  getMateriasCatalogo(params?: any): Observable<MateriaCatalogo[]> {
-    return this.apiClient.get<any>(`${this.baseUrl}/materias-catalogo`, params).pipe(
-      map(res => unwrapArrayResponse<MateriaCatalogo>(res))
+  getMateriasCatalogo(params?: any): Observable<any> {
+    const safeParams = { ...params, limit: Math.min(params?.limit || 100, 100) };
+    return this.apiClient.get<any>(`${this.baseUrl}/materias-catalogo`, safeParams).pipe(
+      map(res => {
+        const unwrapped = unwrapApiResponse<any>(res);
+        const items = unwrapArrayResponse<MateriaCatalogo>(unwrapped);
+        return {
+          items,
+          total: unwrapped.total || items.length,
+          page: unwrapped.page || params?.page || 1,
+          limit: unwrapped.limit || safeParams.limit
+        };
+      })
+    );
+  }
+
+  // Obtiene TODAS las materias del catálogo paginando automáticamente
+  getAllMateriasCatalogo(): Observable<MateriaCatalogo[]> {
+    const limit = 100;
+    return this.getMateriasCatalogo({ page: 1, limit }).pipe(
+      switchMap(firstPage => {
+        const total: number = firstPage.total;
+        const totalPages = Math.ceil(total / limit);
+        if (totalPages <= 1) return of(firstPage.items);
+        const requests: Observable<MateriaCatalogo[]>[] = [];
+        for (let p = 2; p <= totalPages; p++) {
+          requests.push(this.getMateriasCatalogo({ page: p, limit }).pipe(map((r: any) => r.items)));
+        }
+        return forkJoin(requests).pipe(
+          map(pages => [...firstPage.items, ...pages.flat()])
+        );
+      })
     );
   }
 
