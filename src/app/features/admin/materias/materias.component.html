@@ -42,16 +42,12 @@
             <option value="all">Todos los Planes</option>
             <option *ngFor="let plan of planesList()" [value]="plan.nombre">{{ plan.nombre }}</option>
           </select>
-          <select [ngModel]="selectedPeriodo()" (ngModelChange)="selectedPeriodo.set($event); resetPagination()" class="h-9 px-3 text-xs font-semibold bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface cursor-pointer max-w-[180px] truncate">
-            <option value="all">Todos los Períodos</option>
-            <option *ngFor="let per of periodosList()" [value]="per.periodo_id">{{ per.nombre }}</option>
-          </select>
           <select [ngModel]="selectedStatusFilter()" (ngModelChange)="selectedStatusFilter.set($event); resetPagination()" class="h-9 px-3 text-xs font-semibold bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface cursor-pointer">
             <option value="all">Todos los Estados</option>
             <option value="ACTIVA">Activas</option>
             <option value="INACTIVA">Inactivas</option>
           </select>
-          <button *ngIf="searchQuery() || selectedPlan() !== 'all' || selectedPeriodo() !== 'all' || selectedStatusFilter() !== 'all'" 
+          <button *ngIf="searchQuery() || selectedPlan() !== 'all' || selectedStatusFilter() !== 'all'" 
                   (click)="limpiarFiltros()" 
                   class="h-9 px-3 flex items-center gap-1.5 text-xs font-bold text-error bg-error/10 hover:bg-error/20 rounded-xl transition-colors">
             <span class="material-symbols-outlined text-[16px]">close</span>

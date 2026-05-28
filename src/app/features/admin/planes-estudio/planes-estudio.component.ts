@@ -197,13 +197,11 @@ export class PlanesEstudioComponent implements OnInit {
         const procesar = () => {
           const asignadas = (res.items || []).filter((r: any) => r.activa !== false).map((relacion: any) => {
             const materiaCat = this.catalogoMaterias().find((m: any) => m.materia_catalogo_id === relacion.materia_catalogo_id || m.id === relacion.materia_catalogo_id);
-            const nombrePeriodo = this.periodosMap().get(relacion.materia_catalogo_id);
             return {
               materia_plan_estudio_id: relacion.materia_plan_estudio_id,
               materia_catalogo_id: relacion.materia_catalogo_id,
               nombre: materiaCat ? materiaCat.nombre : `Desconocida (${relacion.materia_catalogo_id?.split('-')[0]})`,
-              clave: materiaCat ? materiaCat.clave : 'N/A',
-              periodo: nombrePeriodo ? nombrePeriodo : 'Sin Ofertar'
+              clave: materiaCat ? materiaCat.clave : 'N/A'
             };
           });
           this.materiasAsignadas.set(asignadas);

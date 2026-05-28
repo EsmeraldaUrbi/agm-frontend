@@ -75,55 +75,70 @@ export class MateriasComponent implements OnInit {
   }
 
   cargarMaterias() {
-    this.planesEstudioService.getAllMateriasPlanesEstudio(1, 1000).subscribe({
-      next: (relaciones: any[]) => {
-        this.materiasService.getAllMaterias().subscribe({
-          next: (materias) => {
-            const mappedMaterias: MateriaView[] = materias.map((mat: any) => {
-              let docenteNombre = 'Sin asignar';
-              if (mat.docente_id) {
-                const docente = this.docentesList().find(d => d.docente_id === mat.docente_id);
-                if (docente) {
-                  docenteNombre = docente.nombre_completo;
-                }
-              }
+    import('rxjs').then(({ forkJoin, of }) => {
+      import('rxjs/operators').then(({ catchError }) => {
+        const planes = this.planesList();
+        const requests = planes.map(p => 
+          this.planesEstudioService.getMateriasPorPlan(p.plan_estudio_id || '', 1, 100).pipe(
+            catchError(() => of({ items: [] }))
+          )
+        );
 
-              // Map planes de estudio
-              const catalogoId = mat.materia?.materia_catalogo_id || mat.materia_catalogo_id;
-              let nombresPlanes: string[] = [];
-              if (catalogoId) {
-                const planesIds = relaciones.filter((r: any) => r.materia_catalogo_id === catalogoId && r.activa !== false).map((r: any) => r.plan_estudio_id);
-                nombresPlanes = planesIds.map((id: string) => {
-                  const p = this.planesList().find(plan => plan.plan_estudio_id === id);
-                  return p ? p.nombre : null;
-                }).filter((n: string | null) => n !== null) as string[];
-              }
-              
-              // Keep the ones we got from the API if they exist
-              const finalPlanes = Array.from(new Set([...(mat.planes_estudio || []), ...nombresPlanes]));
+        const finalRequest = requests.length > 0 ? forkJoin(requests) : of([]);
 
-              return {
-                ...mat,
-                planes_estudio: finalPlanes,
-                docenteNombre
-              };
+        finalRequest.subscribe({
+          next: (resultados: any[]) => {
+            let todasLasRelaciones: any[] = [];
+            resultados.forEach(res => {
+              if (res && res.items) todasLasRelaciones.push(...res.items);
             });
-            this.materiasList.set(mappedMaterias);
-            setTimeout(() => {
-              this.isLoading.set(false);
-            }, 500);
+
+            this.materiasService.getAllMaterias().subscribe({
+              next: (materias) => {
+                const mappedMaterias: MateriaView[] = materias.map((mat: any) => {
+                  let docenteNombre = 'Sin asignar';
+                  if (mat.docente_id) {
+                    const docente = this.docentesList().find(d => d.docente_id === mat.docente_id);
+                    if (docente) {
+                      docenteNombre = docente.nombre_completo;
+                    }
+                  }
+
+                  const catalogoId = mat.materia?.materia_catalogo_id || mat.materia_catalogo_id;
+                  let nombresPlanes: string[] = [];
+                  if (catalogoId) {
+                    const planesIds = todasLasRelaciones.filter((r: any) => r.materia_catalogo_id === catalogoId && r.activa !== false).map((r: any) => r.plan_estudio_id);
+                    nombresPlanes = planesIds.map((id: string) => {
+                      const p = this.planesList().find(plan => plan.plan_estudio_id === id);
+                      return p ? p.nombre : null;
+                    }).filter((n: string | null) => n !== null) as string[];
+                  }
+                  
+                  const finalPlanes = Array.from(new Set([...(mat.planes_estudio || []), ...nombresPlanes]));
+
+                  return {
+                    ...mat,
+                    planes_estudio: finalPlanes,
+                    docenteNombre
+                  };
+                });
+                this.materiasList.set(mappedMaterias);
+                setTimeout(() => {
+                  this.isLoading.set(false);
+                }, 500);
+              },
+              error: (err) => {
+                console.error('Error cargando materias', err);
+                this.triggerToast('Error de conexión al obtener el directorio de materias.', 'error');
+                this.isLoading.set(false);
+              }
+            });
           },
-          error: (err) => {
-            console.error('Error cargando materias', err);
-            this.triggerToast('Error de conexión al obtener el directorio de materias.', 'error');
-            this.isLoading.set(false);
+          error: () => {
+            this.cargarMateriasFallback();
           }
         });
-      },
-      error: () => {
-        // Si fallan las relaciones, cargamos igual las materias
-        this.cargarMateriasFallback();
-      }
+      });
     });
   }
 
@@ -156,7 +171,6 @@ export class MateriasComponent implements OnInit {
   searchQuery = signal<string>('');
   selectedStatusFilter = signal<'all' | 'ACTIVA' | 'INACTIVA' | 'CANCELADA'>('all');
   selectedPlan = signal<string>('all');
-  selectedPeriodo = signal<string>('all');
 
   currentPage = signal<number>(1);
   pageSize = signal<number>(10);
@@ -170,7 +184,6 @@ export class MateriasComponent implements OnInit {
     const query = (rawQuery || '').toLowerCase().trim();
     const status = this.selectedStatusFilter() || 'all';
     const plan = this.selectedPlan() || 'all';
-    const periodo = this.selectedPeriodo() || 'all';
 
     return (this.materiasList() || []).filter(m => {
       const nombre = (m.nombre || '').toLowerCase();
@@ -180,9 +193,8 @@ export class MateriasComponent implements OnInit {
       const matchesQuery = !query || nombre.includes(query) || nrc.includes(query) || docente.includes(query);
       const matchesStatus = status === 'all' || m.estado === status;
       const matchesPlan = plan === 'all' || (m.planes_estudio && m.planes_estudio.includes(plan));
-      const matchesPeriodo = periodo === 'all' || m.periodo_id === periodo;
 
-      return matchesQuery && matchesStatus && matchesPlan && matchesPeriodo;
+      return matchesQuery && matchesStatus && matchesPlan;
     });
   });
 
@@ -190,7 +202,6 @@ export class MateriasComponent implements OnInit {
     this.searchQuery.set('');
     this.selectedStatusFilter.set('all');
     this.selectedPlan.set('all');
-    this.selectedPeriodo.set('all');
     this.resetPagination();
   }
 
