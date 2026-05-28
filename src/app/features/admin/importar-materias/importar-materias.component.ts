@@ -10,6 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { OnDestroy, OnInit } from '@angular/core';
 import { PlanesEstudioService, PlanEstudio } from '../../../core/services/planes-estudio.service';
+import { PdfExtractionService, MateriaExtraida } from '../../../core/services/pdf-extraction.service';
 
 @Component({
   selector: 'app-importar-materias',
@@ -42,11 +43,7 @@ export class ImportarMateriasComponent implements OnInit, OnDestroy {
   periodoSeleccionadoId = signal<string>('');
   planSeleccionadoId = signal<string>('');
 
-  previsualizacionDatos = signal<any[]>([
-    { nrc: '28491', materia: 'Arquitectura de Servicios Web', seccion: '101', docente: 'Dr. Roberto Sanchez', horario: 'Lu/Mi 09:00 - 11:00', tieneError: false },
-    { nrc: '31022', materia: 'Bases de Datos Avanzadas', seccion: '202', docente: 'Mtra. Elena Gomez', horario: 'Ma/Ju 13:00 - 15:00', tieneError: false },
-    { nrc: '', materia: 'Cómputo Paralelo', seccion: '301', docente: 'Ing. Julian Herrera', horario: 'Vi 08:00 - 12:00', tieneError: true }
-  ]);
+  previsualizacionDatos = signal<MateriaExtraida[]>([]);
   
   // Para bloquear si falta algo
   hasConfigError = signal<boolean>(false);
@@ -58,6 +55,7 @@ export class ImportarMateriasComponent implements OnInit, OnDestroy {
   private materiasService = inject(MateriasService);
   private authService = inject(AuthService);
   private sanitizer = inject(DomSanitizer);
+  private pdfExtractor = inject(PdfExtractionService);
 
   private currentFileSignature = '';
 
@@ -168,7 +166,7 @@ export class ImportarMateriasComponent implements OnInit, OnDestroy {
     }, 4000);
   }
 
-  private handleFile(file: File) {
+  private async handleFile(file: File) {
     // Validamos extensión (solo PDF para materias)
     if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
       this.triggerToast('Por favor, selecciona únicamente un archivo PDF.', 'error');
@@ -192,11 +190,33 @@ export class ImportarMateriasComponent implements OnInit, OnDestroy {
     this.rawPdfUrl = URL.createObjectURL(file);
     this.pdfPreviewUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.rawPdfUrl));
     
-    // Simular tiempo de carga de vista previa
     this.currentStep.set(2);
-    setTimeout(() => {
+
+    try {
+      // Extraer datos reales del PDF
+      const materiasExtraidas = await this.pdfExtractor.extractMateriasFromPdf(file);
+      
+      // Si el parser no encontró absolutamente nada (fallback a error)
+      if (materiasExtraidas.length === 0) {
+        materiasExtraidas.push({
+          nrc: '',
+          materia: 'No se pudo leer el contenido',
+          seccion: '',
+          docente: '',
+          horario: '',
+          tieneError: true
+        });
+        this.triggerToast('No se detectaron materias con el formato esperado. Por favor valida manualmente.', 'error');
+      }
+
+      this.previsualizacionDatos.set(materiasExtraidas);
       this.currentStep.set(3);
-    }, 1500);
+    } catch (e) {
+      console.error(e);
+      this.triggerToast('Hubo un error al extraer el PDF.', 'error');
+      this.currentStep.set(1);
+      this.selectedFile.set(null);
+    }
   }
 
   cancelImport() {
