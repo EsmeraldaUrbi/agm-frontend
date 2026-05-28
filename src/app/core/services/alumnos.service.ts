@@ -19,7 +19,7 @@ export interface Alumno {
 })
 export class AlumnosService {
   private apiClient = inject(ApiClient);
-  private apiUrl = `${API_CONFIG.usuarios}/api/v1/alumnos`;
+  private apiUrl = `${API_CONFIG.usuarios}/alumnos`;
 
   private materiaAlumnosCache = new Map<string, Observable<Alumno[]>>();
 
@@ -65,7 +65,7 @@ export class AlumnosService {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('materia_id', materiaId);
-    return this.apiClient.post<any>(`${API_CONFIG.usuarios}/api/v1/importar/alumnos`, formData);
+    return this.apiClient.post<any>(`${API_CONFIG.usuarios}/importar/alumnos`, formData);
   }
 
   // DELETE /api/v1/alumnos/:alumno_id/baja?materia_id=:materia_id

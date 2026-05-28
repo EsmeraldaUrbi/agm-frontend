@@ -46,14 +46,14 @@ export class ReportesService {
 
   // GET /api/v1/estadisticas/alumno/:alumno_id
   getEstadisticasAlumno(alumnoId: string): Observable<EstadisticasAlumno> {
-    return this.apiClient.get<any>(`${this.baseUrl}/api/v1/estadisticas/alumno/${alumnoId}`).pipe(
+    return this.apiClient.get<any>(`${this.baseUrl}/estadisticas/alumno/${alumnoId}`).pipe(
       map(res => unwrapApiResponse<EstadisticasAlumno>(res))
     );
   }
 
   // GET /api/v1/estadisticas/docente/:docente_id
   getEstadisticasDocente(docenteId: string): Observable<EstadisticasDocenteResponse> {
-    return this.apiClient.get<any>(`${this.baseUrl}/api/v1/estadisticas/docente/${docenteId}`).pipe(
+    return this.apiClient.get<any>(`${this.baseUrl}/estadisticas/docente/${docenteId}`).pipe(
       map(res => unwrapApiResponse<EstadisticasDocenteResponse>(res))
     );
   }
@@ -65,13 +65,13 @@ export class ReportesService {
 
   // GET /api/v1/reportes/calificaciones/:materia_id?formato=pdf|xlsx
   descargarReporteCalificaciones(materiaId: string, formato: 'pdf' | 'xlsx'): Observable<Blob> {
-    const url = `${this.baseUrl}/api/v1/reportes/calificaciones/${materiaId}`;
+    const url = `${this.baseUrl}/reportes/calificaciones/${materiaId}`;
     return this.apiClient.download(url, { formato });
   }
 
   // GET /api/v1/reportes/asistencias/:materia_id?formato=pdf|xlsx
   descargarReporteAsistencias(materiaId: string, formato: 'pdf' | 'xlsx'): Observable<Blob> {
-    const url = `${this.baseUrl}/api/v1/reportes/asistencias/${materiaId}`;
+    const url = `${this.baseUrl}/reportes/asistencias/${materiaId}`;
     return this.apiClient.download(url, { formato });
   }
 }

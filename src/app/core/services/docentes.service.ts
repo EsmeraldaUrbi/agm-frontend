@@ -21,7 +21,7 @@ export interface Docente {
 })
 export class DocentesService {
   private apiClient = inject(ApiClient);
-  private apiUrl = `${API_CONFIG.usuarios}/api/v1/docentes`;
+  private apiUrl = `${API_CONFIG.usuarios}/docentes`;
 
   // GET /api/v1/docentes
   getDocentes(params?: { limit?: number; skip?: number }): Observable<Docente[]> {
@@ -48,6 +48,6 @@ export class DocentesService {
   importarDocentes(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.apiClient.post<any>(`${API_CONFIG.usuarios}/api/v1/importar/docentes`, formData);
+    return this.apiClient.post<any>(`${API_CONFIG.usuarios}/importar/docentes`, formData);
   }
 }

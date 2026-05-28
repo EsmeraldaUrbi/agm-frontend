@@ -29,7 +29,7 @@ export interface Inscripcion {
 })
 export class InscripcionesService {
   private apiClient = inject(ApiClient);
-  private apiUrl = `${API_CONFIG.usuarios}/api/v1/inscripciones`;
+  private apiUrl = `${API_CONFIG.usuarios}/inscripciones`;
 
   // GET /api/v1/inscripciones/?alumno_id=
   getInscripcionesByAlumno(alumnoId: string): Observable<Inscripcion[]> {
