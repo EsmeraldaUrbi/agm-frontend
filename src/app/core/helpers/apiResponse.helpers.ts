@@ -60,19 +60,36 @@ export function normalizeMateria(materia: any): any {
   if (!materia) return null;
   const materia_id = materia.materia_id || materia.materia_ofertada_id || materia.id_materia || materia.id;
   const nrc = materia.nrc;
+  const clave = materia.clave || materia.materia_catalogo?.clave || materia.materia?.clave;
   const seccion = materia.seccion;
   const estado = materia.estado || materia.estado_materia || 'ACTIVA';
   const docente_id = materia.docente_id || materia.id_docente;
-  const nombre = materia.nombre || materia.materia?.nombre || materia.materia_catalogo?.nombre;
+  
+  // Soporte para múltiples formatos del backend (MateriaDirectorio, MateriaOfertada, MateriaCatalogo)
+  const nombre = materia.nombre || materia.materia?.nombre || materia.materia_catalogo?.nombre || 'Materia desconocida';
+  
+  // Soporte para plan_estudio anidado o arrays
+  let planes_estudio = materia.planes_estudio || [];
+  if (materia.planEstudios && materia.planEstudios.nombre) {
+    planes_estudio = [materia.planEstudios.nombre];
+  } else if (materia.plan_estudio && materia.plan_estudio.nombre) {
+    planes_estudio = [materia.plan_estudio.nombre];
+  }
+
+  // Soporte para periodo anidado
+  const periodo_id = materia.periodo_id || materia.periodo?.id || materia.periodo?.periodo_id;
+
   return {
     ...materia,
     materia_id,
+    clave,
     nombre,
     nrc,
     seccion,
     estado,
     docente_id,
-    planes_estudio: materia.planes_estudio || []
+    periodo_id,
+    planes_estudio
   };
 }
 

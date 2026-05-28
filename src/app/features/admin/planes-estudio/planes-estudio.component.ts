@@ -194,20 +194,33 @@ export class PlanesEstudioComponent implements OnInit {
     this.isLoadingAsignadas.set(true);
     this.planesService.getMateriasPorPlan(planId).subscribe({
       next: (res) => {
-        // Combinamos la información de la relación con los datos del catálogo
-        const asignadas = (res.items || []).filter((r: any) => r.activa !== false).map((relacion: any) => {
-          const materiaCat = this.catalogoMaterias().find(m => m.materia_catalogo_id === relacion.materia_catalogo_id);
-          const nombrePeriodo = this.periodosMap().get(relacion.materia_catalogo_id);
-          return {
-            materia_plan_estudio_id: relacion.materia_plan_estudio_id,
-            materia_catalogo_id: relacion.materia_catalogo_id,
-            nombre: materiaCat ? materiaCat.nombre : 'Materia Desconocida',
-            clave: materiaCat ? materiaCat.clave : 'N/A',
-            periodo: nombrePeriodo ? nombrePeriodo : 'Sin Ofertar'
-          };
-        });
-        this.materiasAsignadas.set(asignadas);
-        this.isLoadingAsignadas.set(false);
+        const procesar = () => {
+          const asignadas = (res.items || []).filter((r: any) => r.activa !== false).map((relacion: any) => {
+            const materiaCat = this.catalogoMaterias().find((m: any) => m.materia_catalogo_id === relacion.materia_catalogo_id || m.id === relacion.materia_catalogo_id);
+            const nombrePeriodo = this.periodosMap().get(relacion.materia_catalogo_id);
+            return {
+              materia_plan_estudio_id: relacion.materia_plan_estudio_id,
+              materia_catalogo_id: relacion.materia_catalogo_id,
+              nombre: materiaCat ? materiaCat.nombre : `Desconocida (${relacion.materia_catalogo_id?.split('-')[0]})`,
+              clave: materiaCat ? materiaCat.clave : 'N/A',
+              periodo: nombrePeriodo ? nombrePeriodo : 'Sin Ofertar'
+            };
+          });
+          this.materiasAsignadas.set(asignadas);
+          this.isLoadingAsignadas.set(false);
+        };
+
+        if (this.catalogoMaterias().length === 0) {
+          this.materiasService.getAllMateriasCatalogo().subscribe({
+            next: (materias) => {
+              this.catalogoMaterias.set(materias || []);
+              procesar();
+            },
+            error: () => procesar()
+          });
+        } else {
+          procesar();
+        }
       },
       error: (err) => {
         console.error(err);

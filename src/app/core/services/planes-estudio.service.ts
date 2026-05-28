@@ -89,6 +89,17 @@ export class PlanesEstudioService {
     );
   }
 
+  // Obtiene todas las relaciones materia-plan sin filtrar por un plan específico
+  getAllMateriasPlanesEstudio(page: number = 1, limit: number = 500): Observable<any[]> {
+    const url = `${API_CONFIG.catalogos}/materias-planes-estudio?page=${page}&limit=${limit}`;
+    return this.apiClient.get<any>(url).pipe(
+      map(res => {
+        const unwrapped = unwrapApiResponse<any>(res);
+        return unwrapArrayResponse<any>(unwrapped);
+      })
+    );
+  }
+
   asignarMateriaAPlan(planEstudioId: string, materiaCatalogoId: string): Observable<any> {
     const url = `${API_CONFIG.catalogos}/materias-planes-estudio`;
     return this.apiClient.post<any>(url, {

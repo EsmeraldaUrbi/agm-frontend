@@ -1,8 +1,10 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MateriasService, Materia } from '../../../core/services/materias.service';
+import { MateriasService, Materia, PlanEstudio } from '../../../core/services/materias.service';
 import { DocentesService, Docente } from '../../../core/services/docentes.service';
+import { PeriodosService, Periodo } from '../../../core/services/periodos.service';
+import { PlanesEstudioService } from '../../../core/services/planes-estudio.service';
 import { AgmButtonComponent, AgmCardComponent } from '../../../shared/components/ui';
 import { Router } from '@angular/router';
 
@@ -29,6 +31,8 @@ interface MateriaView extends Materia {
 export class MateriasComponent implements OnInit {
   private materiasService = inject(MateriasService);
   private docentesService = inject(DocentesService);
+  private periodosService = inject(PeriodosService);
+  private planesEstudioService = inject(PlanesEstudioService);
   public router = inject(Router);
 
   Math = Math;
@@ -37,9 +41,23 @@ export class MateriasComponent implements OnInit {
 
   materiasList = signal<MateriaView[]>([]);
   docentesList = signal<Docente[]>([]);
+  planesList = signal<PlanEstudio[]>([]);
+  periodosList = signal<Periodo[]>([]);
 
   ngOnInit() {
+    this.cargarFiltros();
     this.cargarDocentesYMaterias();
+  }
+
+  cargarFiltros() {
+    this.materiasService.getPlanesEstudio().subscribe({
+      next: (planes) => this.planesList.set(planes),
+      error: (err) => console.error('Error cargando planes de estudio', err)
+    });
+    this.periodosService.getPeriodos(1, 100).subscribe({
+      next: (res) => this.periodosList.set(res.items),
+      error: (err) => console.error('Error cargando periodos', err)
+    });
   }
 
   cargarDocentesYMaterias() {
@@ -57,38 +75,88 @@ export class MateriasComponent implements OnInit {
   }
 
   cargarMaterias() {
+    this.planesEstudioService.getAllMateriasPlanesEstudio(1, 1000).subscribe({
+      next: (relaciones: any[]) => {
+        this.materiasService.getAllMaterias().subscribe({
+          next: (materias) => {
+            const mappedMaterias: MateriaView[] = materias.map((mat: any) => {
+              let docenteNombre = 'Sin asignar';
+              if (mat.docente_id) {
+                const docente = this.docentesList().find(d => d.docente_id === mat.docente_id);
+                if (docente) {
+                  docenteNombre = docente.nombre_completo;
+                }
+              }
+
+              // Map planes de estudio
+              const catalogoId = mat.materia?.materia_catalogo_id || mat.materia_catalogo_id;
+              let nombresPlanes: string[] = [];
+              if (catalogoId) {
+                const planesIds = relaciones.filter((r: any) => r.materia_catalogo_id === catalogoId && r.activa !== false).map((r: any) => r.plan_estudio_id);
+                nombresPlanes = planesIds.map((id: string) => {
+                  const p = this.planesList().find(plan => plan.plan_estudio_id === id);
+                  return p ? p.nombre : null;
+                }).filter((n: string | null) => n !== null) as string[];
+              }
+              
+              // Keep the ones we got from the API if they exist
+              const finalPlanes = Array.from(new Set([...(mat.planes_estudio || []), ...nombresPlanes]));
+
+              return {
+                ...mat,
+                planes_estudio: finalPlanes,
+                docenteNombre
+              };
+            });
+            this.materiasList.set(mappedMaterias);
+            setTimeout(() => {
+              this.isLoading.set(false);
+            }, 500);
+          },
+          error: (err) => {
+            console.error('Error cargando materias', err);
+            this.triggerToast('Error de conexión al obtener el directorio de materias.', 'error');
+            this.isLoading.set(false);
+          }
+        });
+      },
+      error: () => {
+        // Si fallan las relaciones, cargamos igual las materias
+        this.cargarMateriasFallback();
+      }
+    });
+  }
+
+  cargarMateriasFallback() {
     this.materiasService.getAllMaterias().subscribe({
       next: (materias) => {
-        const mappedMaterias: MateriaView[] = materias.map((m: Materia) => {
+        const mappedMaterias: MateriaView[] = materias.map((mat: Materia) => {
           let docenteNombre = 'Sin asignar';
-          if (m.docente_id) {
-            const docente = this.docentesList().find(d => d.docente_id === m.docente_id);
+          if (mat.docente_id) {
+            const docente = this.docentesList().find(d => d.docente_id === mat.docente_id);
             if (docente) {
               docenteNombre = docente.nombre_completo;
             }
           }
           return {
-            ...m,
+            ...mat,
             docenteNombre
           };
         });
         this.materiasList.set(mappedMaterias);
-        setTimeout(() => {
-          this.isLoading.set(false);
-        }, 2000);
+        this.isLoading.set(false);
       },
       error: (err) => {
         console.error('Error cargando materias', err);
-        this.triggerToast('Error de conexión al obtener el directorio de materias.', 'error');
-        setTimeout(() => {
-          this.isLoading.set(false);
-        }, 2000);
+        this.isLoading.set(false);
       }
     });
   }
 
   searchQuery = signal<string>('');
   selectedStatusFilter = signal<'all' | 'ACTIVA' | 'INACTIVA' | 'CANCELADA'>('all');
+  selectedPlan = signal<string>('all');
+  selectedPeriodo = signal<string>('all');
 
   currentPage = signal<number>(1);
   pageSize = signal<number>(10);
@@ -101,18 +169,30 @@ export class MateriasComponent implements OnInit {
     const rawQuery = this.searchQuery();
     const query = (rawQuery || '').toLowerCase().trim();
     const status = this.selectedStatusFilter() || 'all';
+    const plan = this.selectedPlan() || 'all';
+    const periodo = this.selectedPeriodo() || 'all';
 
     return (this.materiasList() || []).filter(m => {
       const nombre = (m.nombre || '').toLowerCase();
       const nrc = (m.nrc || '').toLowerCase();
       const docente = (m.docenteNombre || '').toLowerCase();
 
-      const matchesQuery = nombre.includes(query) || nrc.includes(query) || docente.includes(query);
+      const matchesQuery = !query || nombre.includes(query) || nrc.includes(query) || docente.includes(query);
       const matchesStatus = status === 'all' || m.estado === status;
+      const matchesPlan = plan === 'all' || (m.planes_estudio && m.planes_estudio.includes(plan));
+      const matchesPeriodo = periodo === 'all' || m.periodo_id === periodo;
 
-      return matchesQuery && matchesStatus;
+      return matchesQuery && matchesStatus && matchesPlan && matchesPeriodo;
     });
   });
+
+  limpiarFiltros() {
+    this.searchQuery.set('');
+    this.selectedStatusFilter.set('all');
+    this.selectedPlan.set('all');
+    this.selectedPeriodo.set('all');
+    this.resetPagination();
+  }
 
   paginatedMaterias = computed(() => {
     const filtered = this.filteredMaterias();
