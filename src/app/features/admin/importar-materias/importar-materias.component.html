@@ -239,13 +239,13 @@
     </div>
     
     <!-- Summary Section -->
-    <div class="mt-12 font-sans max-w-sm">
-      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+    <div class="mt-12 font-sans w-full sm:w-fit sm:min-w-[384px] max-w-full">
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
         <div class="w-10 h-10 rounded-lg bg-blue-50 text-[#003B5C] flex items-center justify-center mb-4">
           <span class="material-symbols-outlined">description</span>
         </div>
         <h3 class="text-sm font-bold text-[#003B5C] mb-1">Archivo Fuente</h3>
-        <p class="text-xl font-black text-slate-800">{{ selectedFile()?.name }}</p>
+        <p class="text-xl font-black text-slate-800 whitespace-nowrap">{{ selectedFile()?.name }}</p>
         <p class="text-xs text-slate-500 mt-2">Leído correctamente</p>
       </div>
     </div>
