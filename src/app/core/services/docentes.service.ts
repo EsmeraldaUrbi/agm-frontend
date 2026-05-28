@@ -25,7 +25,7 @@ export class DocentesService {
 
   // GET /api/v1/docentes
   getDocentes(params?: { limit?: number; skip?: number }): Observable<Docente[]> {
-    return this.apiClient.get<any>(this.apiUrl, params).pipe(
+    return this.apiClient.get<any>(`${this.apiUrl}/`, params).pipe(
       map(res => unwrapArrayResponse<any>(res).map(normalizeDocente))
     );
   }

@@ -33,7 +33,7 @@ export class PeriodosService {
     if (activo !== undefined) {
       params.activo = activo;
     }
-    return this.apiClient.get<any>(this.apiUrl, params).pipe(
+    return this.apiClient.get<any>(`${this.apiUrl}/`, params).pipe(
       map(res => {
         // Manejar estructura { success, data: { items, total, page, limit } }
         const unwrapped = unwrapApiResponse<any>(res);
@@ -67,7 +67,7 @@ export class PeriodosService {
 
   // POST /periodos
   createPeriodo(periodo: Partial<Periodo>): Observable<Periodo> {
-    return this.apiClient.post<any>(this.apiUrl, periodo).pipe(
+    return this.apiClient.post<any>(`${this.apiUrl}/`, periodo).pipe(
       map(res => normalizePeriodo(unwrapApiResponse(res)))
     );
   }
