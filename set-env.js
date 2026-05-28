@@ -2,17 +2,27 @@ const fs = require('fs');
 
 const targetPath = './src/environments/environment.ts';
 
-// Estas son las variables de entorno que vas a configurar en Render.
-// Si no existen (por ejemplo cuando corres en local), usará localhost por defecto.
+// Una sola variable apunta al API Gateway (Railway u otro).
+// En local, si no hay gateway, cada MS usa su puerto por separado.
+const gateway = process.env.API_GATEWAY_URL || '';
+
+const msAuthUrl        = gateway ? `${gateway}/api/auth`          : 'http://localhost:8001';
+const msCatalogosUrl   = gateway ? `${gateway}/api/periodos`      : 'http://localhost:8002';
+const msUsuariosUrl    = gateway ? `${gateway}/api/alumnos`       : 'http://localhost:8003';
+const msCalificacionesUrl = gateway ? `${gateway}/api/calificaciones` : 'http://localhost:8004/api/v1';
+const msAsistenciasUrl = gateway ? `${gateway}/api/asistencias`   : 'http://localhost:8005';
+const msNotificacionesUrl = gateway ? `${gateway}/api/notificaciones` : 'http://localhost:8006';
+const msReportesUrl    = gateway ? `${gateway}/api/reportes`      : 'http://localhost:8007';
+
 const envConfigFile = `export const environment = {
-  production: true,
-  msAuthUrl: '${process.env.MS_AUTH_URL || 'http://localhost:8001'}',
-  msCatalogosUrl: '${process.env.MS_CATALOGOS_URL || 'http://localhost:8002'}',
-  msUsuariosUrl: '${process.env.MS_USUARIOS_URL || 'http://localhost:8003'}',
-  msCalificacionesUrl: '${process.env.MS_CALIFICACIONES_URL || 'http://localhost:8004/api/v1'}',
-  msAsistenciasUrl: '${process.env.MS_ASISTENCIAS_URL || 'http://localhost:8005'}',
-  msNotificacionesUrl: '${process.env.MS_NOTIFICACIONES_URL || 'http://localhost:8006'}',
-  msReportesUrl: '${process.env.MS_REPORTES_URL || 'http://localhost:8007'}'
+  production: ${gateway ? 'true' : 'false'},
+  msAuthUrl: '${msAuthUrl}',
+  msCatalogosUrl: '${msCatalogosUrl}',
+  msUsuariosUrl: '${msUsuariosUrl}',
+  msCalificacionesUrl: '${msCalificacionesUrl}',
+  msAsistenciasUrl: '${msAsistenciasUrl}',
+  msNotificacionesUrl: '${msNotificacionesUrl}',
+  msReportesUrl: '${msReportesUrl}'
 };
 `;
 
@@ -22,4 +32,5 @@ fs.writeFile(targetPath, envConfigFile, function (err) {
     process.exit(1);
   }
   console.log(`Variables de entorno generadas en ${targetPath}`);
+  console.log('Gateway URL:', gateway || '(local - usando localhost)');
 });
