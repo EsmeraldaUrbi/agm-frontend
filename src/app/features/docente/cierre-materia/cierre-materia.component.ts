@@ -2,6 +2,9 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { MateriasService } from '../../../core/services/materias.service';
+import { CalificacionesService } from '../../../core/services/calificaciones.service';
+import { forkJoin } from 'rxjs';
+import { catchError, of } from 'rxjs';
 
 type EstadoMateria = 'activa' | 'cerrada' | 'finalizada';
 
@@ -28,12 +31,17 @@ export class CierreMateriaComponent {
     periodo: 'Cargando periodo...',
     alumnos: 0,
     promedioGrupal: 0,
-    asistencias: 100
+    asistencias: 0
   });
+
+  // Estado de la operación de cierre
+  cerrando = signal<boolean>(false);
+  errorCierre = signal<string | null>(null);
 
   constructor(
     private route: ActivatedRoute,
-    private materiasService: MateriasService
+    private materiasService: MateriasService,
+    private calificacionesService: CalificacionesService
   ) {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
@@ -44,12 +52,18 @@ export class CierreMateriaComponent {
   }
 
   cargarDatosMateria(id: string) {
-    this.materiasService.getMateriaById(id).subscribe({
-      next: (data: any) => {
+    // Cargamos en paralelo: datos de la materia + rendimiento de calificaciones
+    forkJoin({
+      materia: this.materiasService.getMateriaById(id),
+      rendimiento: this.calificacionesService.getRendimientoMateria(id).pipe(
+        catchError(() => of({ rendimiento_promedio: 0 }))
+      )
+    }).subscribe({
+      next: ({ materia: data, rendimiento }) => {
         let horarioFormat = 'Horario no definido';
-        if (data.horarios && data.horarios.length > 0) {
+        if ((data as any).horarios && (data as any).horarios.length > 0) {
           const gruposHorarios: { [key: string]: string[] } = {};
-          data.horarios.forEach((h: any) => {
+          (data as any).horarios.forEach((h: any) => {
             const ini = h.hora_inicio?.substring(0, 5) || '';
             const fin = h.hora_fin?.substring(0, 5) || '';
             const rango = `${ini} - ${fin}`;
@@ -62,17 +76,19 @@ export class CierreMateriaComponent {
           horarioFormat = partes.join(' | ');
         }
 
+        const promedioReal = rendimiento?.rendimiento_promedio ?? 0;
+
         this.materia.set({
           materia_id: id,
-          nrc: data.nrc || 'N/A',
-          nombre: data.nombre || 'Materia sin nombre',
-          seccion: data.seccion || '001',
-          alumnos: data.alumnos_inscritos || 0,
-          promedioGrupal: 0, // Por ahora mock
-          asistencias: 100, // Por ahora mock
+          nrc: (data as any).nrc || 'N/A',
+          nombre: (data as any).nombre || 'Materia sin nombre',
+          seccion: (data as any).seccion || '001',
+          alumnos: (data as any).alumnos_inscritos || 0,
+          promedioGrupal: Number(promedioReal.toFixed(1)),
+          asistencias: 0, // Se puede conectar a MS-5 en el futuro
           horario: horarioFormat,
-          programa: data.programa || 'Licenciatura en Ciencias de la Computación',
-          periodo: data.periodo?.nombre || 'Otoño 2024'
+          programa: (data as any).programa || 'Licenciatura en Ciencias de la Computación',
+          periodo: (data as any).periodo?.nombre || 'Otoño 2024'
         });
       },
       error: (err) => {
@@ -93,15 +109,57 @@ export class CierreMateriaComponent {
   mostrarModalActa = false;
 
   abrirModalCierre() {
+    this.errorCierre.set(null);
     this.mostrarModalCierre = true;
   }
 
   confirmarCierre() {
-    // Aquí se llamará a DELETE /sesiones/:id/cerrar (MS-5) y
-    // el backend notifica por correo a los alumnos vía MS-6
-    this.estadoMateria.set('cerrada');
-    // Marcar checklist de acta como pendiente
-    this.mostrarModalCierre = false;
+    const materiaId = this.materia().materia_id;
+    if (!materiaId) return;
+
+    this.cerrando.set(true);
+    this.errorCierre.set(null);
+
+    this.calificacionesService.cerrarConcentrado(materiaId).subscribe({
+      next: () => {
+        this.cerrando.set(false);
+        this.estadoMateria.set('cerrada');
+        this.mostrarModalCierre = false;
+      },
+      error: (err) => {
+        this.cerrando.set(false);
+        this.mostrarModalCierre = false;
+
+        // Interpretar el error correctamente sin redirigir
+        const status = err?.status;
+        const mensaje = err?.error?.message || err?.error?.detail || err?.message;
+
+        if (status === 400) {
+          this.errorCierre.set(
+            mensaje || 'No se puede cerrar la materia: verifica que todas las calificaciones estén registradas.'
+          );
+        } else if (status === 403) {
+          // 403 de negocio ≠ 403 de permisos de rol
+          // El interceptor ya redirige a /acceso-denegado si el backend devuelve 403 genérico.
+          // Por eso, el backend del concentrado debería devolver 400 o 422 para errores de validación.
+          this.errorCierre.set(
+            mensaje || 'Error al cerrar la materia: verifica que la materia tenga ponderaciones configuradas.'
+          );
+        } else if (status === 404) {
+          this.errorCierre.set('No se encontró el concentrado de calificaciones para esta materia.');
+        } else if (status === 422) {
+          this.errorCierre.set(
+            mensaje || 'Validación fallida: verifica que todas las ponderaciones y calificaciones estén completas.'
+          );
+        } else {
+          this.errorCierre.set(
+            mensaje || `Error inesperado (${status}). Intente de nuevo o contacte a soporte.`
+          );
+        }
+
+        console.error('Error al cerrar concentrado:', err);
+      }
+    });
   }
 
   abrirModalActa() {

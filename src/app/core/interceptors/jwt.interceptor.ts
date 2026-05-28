@@ -32,9 +32,15 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
         authService.logout();
         router.navigate(['/sesion-expirada']);
       }
-      // 403: Acceso Denegado (rol incorrecto)
+      // 403: Solo redirigir a /acceso-denegado si es un error de permisos de rol real.
+      // Si el backend devuelve un body con mensaje (error de negocio), NO redirigir
+      // para que el componente pueda mostrar el error al usuario en la misma pantalla.
       else if (error.status === 403) {
-        router.navigate(['/acceso-denegado']);
+        const hasBusinessErrorBody = error.error &&
+          (error.error.message || error.error.detail || error.error.error);
+        if (!hasBusinessErrorBody) {
+          router.navigate(['/acceso-denegado']);
+        }
       }
       return throwError(() => error);
     })

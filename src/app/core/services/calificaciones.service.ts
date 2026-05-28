@@ -154,4 +154,12 @@ export class CalificacionesService {
       map(res => res.data || res)
     );
   }
+
+  // POST /api/v1/concentrado/:materia_id/cierre
+  // Cierra el concentrado de calificaciones Y dispara el correo de cierre vía MS-6
+  cerrarConcentrado(materiaId: string): Observable<any> {
+    return this.apiClient.post<any>(`${this.baseUrl}/concentrado/${materiaId}/cierre`, {}).pipe(
+      map(res => res.data || res)
+    );
+  }
 }

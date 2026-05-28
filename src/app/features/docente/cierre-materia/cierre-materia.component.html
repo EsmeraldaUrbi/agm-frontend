@@ -94,14 +94,34 @@
             </div>
           }
 
+          <!-- Banner de Error al Cerrar -->
+          @if (errorCierre()) {
+            <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-4 flex items-start gap-3">
+              <span class="material-symbols-outlined text-red-500 text-xl flex-shrink-0">error</span>
+              <div>
+                <p class="text-red-800 font-bold text-sm mb-1">Error al cerrar la materia</p>
+                <p class="text-red-700 text-xs leading-relaxed">{{ errorCierre() }}</p>
+              </div>
+              <button (click)="errorCierre.set(null)" class="ml-auto text-red-400 hover:text-red-600">
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+          }
+
           <!-- Botones de acción -->
           <div class="flex flex-col sm:flex-row items-center gap-4">
             @if (esActiva) {
               <button
                 (click)="abrirModalCierre()"
-                class="w-full sm:w-auto px-8 h-12 bg-[#003b5c] text-white rounded-lg font-bold hover:bg-[#00253b] hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-                Cerrar Materia Definitivamente
-                <span class="material-symbols-outlined">lock_reset</span>
+                [disabled]="cerrando()"
+                class="w-full sm:w-auto px-8 h-12 bg-[#003b5c] text-white rounded-lg font-bold hover:bg-[#00253b] hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                @if (cerrando()) {
+                  <span class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                  Cerrando...
+                } @else {
+                  Cerrar Materia Definitivamente
+                  <span class="material-symbols-outlined">lock_reset</span>
+                }
               </button>
             }
 
@@ -222,9 +242,14 @@
         <button (click)="cancelarModal()" class="flex-1 py-3 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-colors text-sm">
           Cancelar
         </button>
-        <button (click)="confirmarCierre()" class="flex-1 py-3 bg-[#003b5c] text-white rounded-xl font-bold hover:bg-[#00253b] transition-colors text-sm flex items-center justify-center gap-2">
-          <span class="material-symbols-outlined text-sm">check</span>
-          Sí, cerrar y notificar
+        <button (click)="confirmarCierre()" [disabled]="cerrando()" class="flex-1 py-3 bg-[#003b5c] text-white rounded-xl font-bold hover:bg-[#00253b] transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+          @if (cerrando()) {
+            <span class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+            Cerrando...
+          } @else {
+            <span class="material-symbols-outlined text-sm">check</span>
+            Sí, cerrar y notificar
+          }
         </button>
       </div>
     </div>
