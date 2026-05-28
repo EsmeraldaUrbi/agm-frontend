@@ -1,15 +1,17 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { DocentesService } from '../../../core/services/docentes.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { OnDestroy } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { DocentePdfExtractionService, DocenteExtraido } from '../../../core/services/docente-pdf-extraction.service';
 
 @Component({
   selector: 'app-importar-docentes',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './importar-docentes.html'
 })
 export class ImportarDocentesComponent implements OnDestroy {
@@ -17,10 +19,27 @@ export class ImportarDocentesComponent implements OnDestroy {
   selectedFile = signal<File | null>(null);
   showDuplicateError = signal(false);
   isSaving = signal(false);
+
+  previsualizacionDatos = signal<DocenteExtraido[]>([]);
+  
+  // Paginación
+  currentPage = signal<number>(1);
+  itemsPerPage = 50;
+
+  totalRegistros = computed(() => this.previsualizacionDatos().length);
+  totalErrores = computed(() => this.previsualizacionDatos().filter(m => m.tieneError).length);
+  totalValidos = computed(() => this.totalRegistros() - this.totalErrores());
+  totalPages = computed(() => Math.ceil(this.totalRegistros() / this.itemsPerPage) || 1);
+
+  paginatedDatos = computed(() => {
+    const start = (this.currentPage() - 1) * this.itemsPerPage;
+    return this.previsualizacionDatos().slice(start, start + this.itemsPerPage);
+  });
   
   private router = inject(Router);
   private docentesService = inject(DocentesService);
   private sanitizer = inject(DomSanitizer);
+  private pdfExtractor = inject(DocentePdfExtractionService);
   
   toastMessage = signal<string>('');
   toastType = signal<'success' | 'error'>('success');
@@ -67,17 +86,14 @@ export class ImportarDocentesComponent implements OnDestroy {
     }, 4000);
   }
 
-  private handleFile(file: File) {
-    // Aceptamos Excel (.xlsx, .xls) o PDF para coincidir con la compatibilidad del backend
-    const nameLower = file.name.toLowerCase();
-    if (!nameLower.endsWith('.pdf') && !nameLower.endsWith('.xlsx') && !nameLower.endsWith('.xls')) {
-      this.triggerToast('Por favor, selecciona únicamente un archivo Excel (.xlsx) o PDF de plantilla.', 'error');
+  private async handleFile(file: File) {
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      this.triggerToast('Por favor, selecciona únicamente un archivo PDF.', 'error');
       return;
     }
 
     const signature = `${file.name}_${file.size}`;
     const uploaded = JSON.parse(localStorage.getItem('agm_uploaded_docentes') || '[]');
-    // DESCOMENTAR EN PRODUCCIÓN: Evita subir el mismo archivo
     // if (uploaded.includes(signature)) {
     //   this.showDuplicateError.set(true);
     //   this.triggerToast('Este archivo de docentes ya fue cargado y procesado anteriormente.', 'error');
@@ -88,16 +104,36 @@ export class ImportarDocentesComponent implements OnDestroy {
     this.showDuplicateError.set(false);
     this.currentFileSignature = signature;
     
-    // Generar vista previa
     this.revokePdfUrl();
     this.rawPdfUrl = URL.createObjectURL(file);
     this.pdfPreviewUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.rawPdfUrl));
 
-    // Simular tiempo de carga de vista previa
     this.currentStep.set(2);
-    setTimeout(() => {
+
+    try {
+      const extraidos = await this.pdfExtractor.extractDocentesFromPdf(file);
+      
+      if (extraidos.length === 0) {
+        extraidos.push({
+          nombre: 'No se pudo extraer información',
+          correo: '',
+          ubicacion: '',
+          departamento: '',
+          academia: '',
+          tieneError: true
+        });
+        this.triggerToast('No se detectaron docentes con el formato esperado. Por favor valida manualmente.', 'error');
+      }
+
+      this.previsualizacionDatos.set(extraidos);
+      this.currentPage.set(1);
       this.currentStep.set(3);
-    }, 1500);
+    } catch (e) {
+      console.error(e);
+      this.triggerToast('Hubo un error al extraer el PDF.', 'error');
+      this.currentStep.set(1);
+      this.selectedFile.set(null);
+    }
   }
 
   cancelImport() {
@@ -147,5 +183,24 @@ export class ImportarDocentesComponent implements OnDestroy {
 
   goToDashboard() {
     this.router.navigate(['/admin/dashboard']);
+  }
+
+  // Métodos de Paginación
+  nextPage() {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.update(p => p + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage() > 1) {
+      this.currentPage.update(p => p - 1);
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
   }
 }
