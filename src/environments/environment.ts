@@ -1,12 +1,13 @@
-const gatewayUrl = 'https://api-gateway-production-0647.up.railway.app/api';
+const gatewayUrl = 'https://api-gateway-production-0647.up.railway.app';
+const apiBase = `${gatewayUrl}/api`;
 
 export const environment = {
   production: true,
-  msAuthUrl: `${gatewayUrl}/auth`,
-  msCatalogosUrl: `${gatewayUrl}/periodos`,
-  msUsuariosUrl: `${gatewayUrl}/alumnos`,
-  msCalificacionesUrl: `${gatewayUrl}/calificaciones`,
-  msAsistenciasUrl: `${gatewayUrl}/asistencias`,
-  msNotificacionesUrl: `${gatewayUrl}/notificaciones`,
-  msReportesUrl: `${gatewayUrl}/reportes`
+  msAuthUrl: apiBase,
+  msCatalogosUrl: `${apiBase}/v1`,
+  msUsuariosUrl: `${apiBase}/alumnos`,
+  msCalificacionesUrl: `${apiBase}/calificaciones`,
+  msAsistenciasUrl: `${apiBase}/asistencias`,
+  msNotificacionesUrl: `${apiBase}/notificaciones`,
+  msReportesUrl: `${apiBase}/reportes`
 };
