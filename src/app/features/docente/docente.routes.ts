@@ -42,6 +42,10 @@ export const DOCENTE_ROUTES: Routes = [
     loadComponent: () => import('./actividades/actividades.component').then(m => m.ActividadesComponent)
   },
   {
+    path: 'reportes',
+    loadComponent: () => import('./reportes/reportes.component').then(m => m.ReportesComponent)
+  },
+  {
     path: 'materias/:id/reportes',
     loadComponent: () => import('./reportes/reportes.component').then(m => m.ReportesComponent)
   },

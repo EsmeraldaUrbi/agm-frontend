@@ -49,7 +49,14 @@ export class SidebarComponent implements OnInit {
   ngOnInit() {
     // Escuchar el estado de autenticación reactivamente
     const user = this.authService.currentUser();
-    const role = user?.rol?.toLowerCase() || 'admin'; // Fallback a admin para testing si es necesario
+    const role = user?.rol?.toLowerCase();
+
+    if (!role) {
+      this.userRole.set('');
+      this.menuItems.set([]);
+      return;
+    }
+
     this.userRole.set(role);
     this.generateMenu(role);
   }
@@ -76,8 +83,10 @@ export class SidebarComponent implements OnInit {
       // ── Asistencias ────────────────────────────────────────
       { label: 'Pase de Lista (QR)', route: '/docente/pase-lista', icon: 'qr_code_scanner', section: 'Asistencias' },
       { label: 'Historial', route: '/docente/historial-asistencias', icon: 'calendar_month' },
+      
       // ── Reportes ───────────────────────────────────────────
-      { label: 'Reportes y estadísticas', route: '/docente/materias/15842/reportes', icon: 'analytics', section: 'Reportes' },
+      { label: 'Reportes y estadísticas', route: '/docente/reportes', icon: 'analytics', section: 'Reportes' },
+
       // ── Cuenta ─────────────────────────────────────────────
       { label: 'Mi Perfil', route: '/profile', icon: 'person', section: 'Cuenta' },
     ];
@@ -95,6 +104,8 @@ export class SidebarComponent implements OnInit {
       this.menuItems.set(docenteItems);
     } else if (role === 'alumno') {
       this.menuItems.set(alumnoItems);
+    } else {
+      this.menuItems.set([]);
     }
   }
 
