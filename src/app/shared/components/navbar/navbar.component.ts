@@ -9,7 +9,7 @@ import { BRANDING } from '../../../core/config/branding.config';
   selector: 'app-navbar',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './navbar.html',
+  templateUrl: './navbar.component.html',
   styles: [`
     :host {
       display: block;

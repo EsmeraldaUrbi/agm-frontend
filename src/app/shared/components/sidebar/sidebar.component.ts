@@ -17,7 +17,7 @@ interface NavItem {
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './sidebar.html',
+  templateUrl: './sidebar.component.html',
   styles: [`
     :host {
       display: block;
