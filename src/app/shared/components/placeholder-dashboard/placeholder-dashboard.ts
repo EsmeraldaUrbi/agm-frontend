@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { AgmCardComponent } from '../ui/card';
-import { AgmButtonComponent } from '../ui/button';
+import { AgmCardComponent } from '../ui/card.component';
+import { AgmButtonComponent } from '../ui/button.component';
 
 @Component({
   selector: 'app-placeholder-dashboard',

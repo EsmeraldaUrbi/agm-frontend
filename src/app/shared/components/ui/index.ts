@@ -1,3 +1,3 @@
-export * from './button';
-export * from './input';
-export * from './card';
+export * from './button.component';
+export * from './input.component';
+export * from './card.component';
