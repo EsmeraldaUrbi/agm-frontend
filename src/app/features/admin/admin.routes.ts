@@ -3,15 +3,15 @@ import { Routes } from '@angular/router';
 export const ADMIN_ROUTES: Routes = [
   {
     path: 'dashboard',
-    loadComponent: () => import('./dashboard/dashboard').then(m => m.DashboardComponent)
+    loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
   {
     path: 'usuarios',
-    loadComponent: () => import('./usuarios/usuarios').then(m => m.UsuariosComponent)
+    loadComponent: () => import('./usuarios/usuarios.component').then(m => m.UsuariosComponent)
   },
   {
     path: 'periodos',
-    loadComponent: () => import('./periodos/periodos').then(m => m.PeriodosComponent)
+    loadComponent: () => import('./periodos/periodos.component').then(m => m.PeriodosComponent)
   },
   {
     path: 'importar-materias',
@@ -19,7 +19,7 @@ export const ADMIN_ROUTES: Routes = [
   },
   {
     path: 'importar-docentes',
-    loadComponent: () => import('./importar-docentes/importar-docentes').then(m => m.ImportarDocentesComponent)
+    loadComponent: () => import('./importar-docentes/importar-docentes.component').then(m => m.ImportarDocentesComponent)
   },
   {
     path: 'materias',

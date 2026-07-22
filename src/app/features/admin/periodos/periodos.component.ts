@@ -14,7 +14,7 @@ import { PeriodosService, Periodo } from '../../../core/services/periodos.servic
     AgmInputComponent,
     AgmCardComponent
   ],
-  templateUrl: './periodos.html',
+  templateUrl: './periodos.component.html',
   styles: [`
     :host {
       display: block;

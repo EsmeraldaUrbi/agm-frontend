@@ -27,7 +27,7 @@ interface ActivityItem {
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, RouterModule, BaseChartDirective],
-  templateUrl: './dashboard.html',
+  templateUrl: './dashboard.component.html',
   styles: [`
     :host { display: block; }
 

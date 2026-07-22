@@ -12,7 +12,7 @@ import { DocentePdfExtractionService, DocenteExtraido } from '../../../core/serv
   selector: 'app-importar-docentes',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
-  templateUrl: './importar-docentes.html'
+  templateUrl: './importar-docentes.component.html'
 })
 export class ImportarDocentesComponent implements OnDestroy {
   currentStep = signal<1 | 2 | 3 | 4>(1);

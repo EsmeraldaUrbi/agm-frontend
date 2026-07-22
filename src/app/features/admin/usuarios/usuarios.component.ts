@@ -25,7 +25,7 @@ interface User {
     AgmInputComponent,
     AgmCardComponent
   ],
-  templateUrl: './usuarios.html',
+  templateUrl: './usuarios.component.html',
   styles: [`
     :host {
       display: block;
