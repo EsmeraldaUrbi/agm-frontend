@@ -6,10 +6,10 @@ import { BRANDING } from './core/config/branding.config';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
 })
-export class App implements OnInit {
+export class AppComponent implements OnInit {
   protected readonly title = signal(BRANDING.shortName);
   private titleService = inject(Title);
 
