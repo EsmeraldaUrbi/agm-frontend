@@ -7,7 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
   selector: 'app-acceso-denegado',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './acceso-denegado.html',
+  templateUrl: './acceso-denegado.component.html',
   styles: [`
     :host {
       display: block;

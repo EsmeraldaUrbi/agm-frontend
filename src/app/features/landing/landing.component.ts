@@ -8,7 +8,7 @@ import { BRANDING } from '../../core/config/branding.config';
   selector: 'app-landing',
   standalone: true,
   imports: [CommonModule, RouterModule, AgmButtonComponent, AgmCardComponent],
-  templateUrl: './landing.html',
+  templateUrl: './landing.component.html',
   styles: [`
     :host {
       display: block;

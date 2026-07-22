@@ -7,7 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
   selector: 'app-error-404',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './error-404.html',
+  templateUrl: './error-404.component.html',
   styles: [`
     :host {
       display: block;

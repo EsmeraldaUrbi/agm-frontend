@@ -16,7 +16,7 @@ import { AgmButtonComponent, AgmInputComponent, AgmCardComponent } from '../../.
     AgmInputComponent,
     AgmCardComponent
   ],
-  templateUrl: './recover-password.html',
+  templateUrl: './recover-password.component.html',
   styles: [`
     :host {
       display: block;

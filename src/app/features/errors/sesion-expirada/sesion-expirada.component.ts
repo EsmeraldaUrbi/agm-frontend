@@ -7,7 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
   selector: 'app-sesion-expirada',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './sesion-expirada.html',
+  templateUrl: './sesion-expirada.component.html',
   styles: [`
     :host {
       display: block;

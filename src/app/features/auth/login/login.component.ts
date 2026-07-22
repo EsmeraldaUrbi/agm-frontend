@@ -9,7 +9,7 @@ import { BRANDING } from '../../../core/config/branding.config';
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './login.html',
+  templateUrl: './login.component.html',
   styles: [`
     .login-gradient {
         background: linear-gradient(135deg, #003B5C 0%, #00253B 100%);

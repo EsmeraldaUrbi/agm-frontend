@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './shared/layouts/main-layout/main-layout.component';
-import { LoginComponent } from './features/auth/login/login';
-import { LandingComponent } from './features/landing/landing';
+import { LoginComponent } from './features/auth/login/login.component';
+import { LandingComponent } from './features/landing/landing.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -15,11 +15,11 @@ export const routes: Routes = [
   },
   {
     path: 'forgot-password',
-    loadComponent: () => import('./features/auth/recover-password/recover-password').then(m => m.RecoverPasswordComponent)
+    loadComponent: () => import('./features/auth/recover-password/recover-password.component').then(m => m.RecoverPasswordComponent)
   },
   {
     path: 'reset-password',
-    loadComponent: () => import('./features/auth/reset-password/reset-password').then(m => m.ResetPasswordComponent)
+    loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
   },
   {
     path: 'admin',
@@ -55,14 +55,14 @@ export const routes: Routes = [
   },
   {
     path: 'acceso-denegado',
-    loadComponent: () => import('./features/errors/acceso-denegado/acceso-denegado').then(m => m.AccesoDenegadoComponent)
+    loadComponent: () => import('./features/errors/acceso-denegado/acceso-denegado.component').then(m => m.AccesoDenegadoComponent)
   },
   {
     path: 'sesion-expirada',
-    loadComponent: () => import('./features/errors/sesion-expirada/sesion-expirada').then(m => m.SesionExpiradaComponent)
+    loadComponent: () => import('./features/errors/sesion-expirada/sesion-expirada.component').then(m => m.SesionExpiradaComponent)
   },
   {
     path: '**',
-    loadComponent: () => import('./features/errors/error-404/error-404').then(m => m.Error404Component)
+    loadComponent: () => import('./features/errors/error-404/error-404.component').then(m => m.Error404Component)
   }
 ];
