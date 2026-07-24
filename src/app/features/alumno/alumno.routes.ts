@@ -6,10 +6,6 @@ export const ALUMNO_ROUTES: Routes = [
     loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
   {
-    path: 'estados-vacios',
-    loadComponent: () => import('./gallery/gallery.component').then(m => m.GalleryComponent)
-  },
-  {
     path: 'materias',
     loadComponent: () => import('./mis-materias/mis-materias.component').then(m => m.MisMateriasComponent)
   },
