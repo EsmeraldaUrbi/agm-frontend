@@ -87,8 +87,6 @@ export class DashboardComponent implements OnInit {
           const docenteEmail = (d as any).email || d.correo || '';
           return docenteEmail.toLowerCase() === user.email.toLowerCase();
         });
-        
-        console.log('==== DEBUG 8. DOCENTE ACTUAL ====', { AuthUser: user, DocenteMatcheado: docente });
 
         if (docente && (docente.docente_id || docente.id)) {
           const docenteId = docente.docente_id || docente.id;
@@ -106,7 +104,6 @@ export class DashboardComponent implements OnInit {
     this.materiasService.getMateriasByDocente(docenteId, { limit: 100 }).subscribe({
       next: (response) => {
         this.materias = response.items || [];
-        console.log('==== DEBUG 1. MATERIAS ASIGNADAS ====', this.materias);
         
         this.totalMateriasValue = this.materias.length;
 
@@ -131,7 +128,6 @@ export class DashboardComponent implements OnInit {
                 return of([]);
               }),
               map((alumnos: any[]) => {
-                console.log(`==== DEBUG 3. ALUMNOS MATERIA ${materiaId} ====`, alumnos);
                 m.alumnos = alumnos?.length || 0;
                 alumnosTotales += m.alumnos;
                 return alumnos;
@@ -146,7 +142,6 @@ export class DashboardComponent implements OnInit {
           // 4. Rendimiento por Materia (MS-7)
           this.reportesService.getEstadisticasDocente(docenteId).subscribe({
             next: (estadisticas: any) => {
-              console.log('==== DEBUG 4. MS7 ESTADISTICAS DOCENTE ====', estadisticas);
               const periodos = estadisticas?.periodos || [];
 
               let materiasMS7: any[] = [];
@@ -222,11 +217,6 @@ export class DashboardComponent implements OnInit {
     }).subscribe({
       next: ({ alumnos, asistencias }) => {
         const totalAlumnos = alumnos.length;
-        
-        console.log(`==== DEBUG 6. MS5 ASISTENCIAS MATERIA ${this.selectedMateriaIdForAsistencia} ====`, {
-          totalAlumnos,
-          asistencias
-        });
 
         if (asistencias.length > 0) {
           const presentes = asistencias.filter(a => a.estado?.toUpperCase() === 'PRESENTE').length;
@@ -283,7 +273,6 @@ export class DashboardComponent implements OnInit {
     if (!this.selectedMateriaIdForChart) return;
     this.calificacionesService.getConcentrado(this.selectedMateriaIdForChart, 'actual').subscribe({
       next: (res: any) => {
-        console.log(`==== DEBUG 5. MS4 CONCENTRADO MATERIA ${this.selectedMateriaIdForChart} ====`, res);
 
         let excelencia = 0;
         let regular = 0;
@@ -291,15 +280,15 @@ export class DashboardComponent implements OnInit {
 
         let alumnosList = [];
         if (Array.isArray(res)) {
-           alumnosList = res;
+            alumnosList = res;
         } else if (res && Array.isArray(res.alumnos)) {
-           alumnosList = res.alumnos;
+            alumnosList = res.alumnos;
         } else if (res && Array.isArray(res.calificaciones)) {
-           alumnosList = res.calificaciones;
+            alumnosList = res.calificaciones;
         }
 
         if (alumnosList.length > 0) {
-           alumnosList.forEach((a: any) => {
+            alumnosList.forEach((a: any) => {
               // Si el alumno no tiene peso considerado, significa que no tiene calificaciones reales, se ignora
               if (a.peso_considerado === 0) return;
 
@@ -313,11 +302,11 @@ export class DashboardComponent implements OnInit {
               if (final >= 9) excelencia++;
               else if (final >= 6) regular++;
               else reprobados++;
-           });
+            });
         } else {
-           excelencia = res.excelencia || 0;
-           regular = res.regular || 0;
-           reprobados = res.reprobados || 0;
+            excelencia = res.excelencia || 0;
+            regular = res.regular || 0;
+            reprobados = res.reprobados || 0;
         }
         
         this.chartData = {
