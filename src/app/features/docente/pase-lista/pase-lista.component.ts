@@ -52,27 +52,40 @@ export class PaseListaComponent implements OnInit, OnDestroy {
 
   resolverDocenteYCargarCursos() {
     const user = this.authService.getCurrentUser();
-    if (!user) return;
+    if (!user?.email) {
+      this.isLoading.set(false);
+      this.materias = [];
+      return;
+    }
+
+    const normalizarCorreo = (correo?: string | null) =>
+      (correo || '').trim().toLowerCase();
 
     this.isLoading.set(true);
     this.docentesService.getDocentes({ limit: 500 }).subscribe({
       next: (docentes) => {
+        const userEmail = normalizarCorreo(user.email);
         const matchingDocente = docentes.find(d => {
-          const docenteEmail = (d as any).email || d.correo || '';
-          return docenteEmail.toLowerCase() === user.email.toLowerCase();
+          const docenteEmail = normalizarCorreo((d as any).email || d.correo);
+          return docenteEmail === userEmail;
         });
-        if (matchingDocente && matchingDocente.docente_id) {
+
+        if (matchingDocente?.docente_id) {
           this.docenteId = matchingDocente.docente_id;
           this.cargarCursos(matchingDocente.docente_id);
-        } else {
-          this.docenteId = user.user_id;
-          this.cargarCursos(user.user_id);
+          return;
         }
+
+        this.docenteId = null;
+        this.materias = [];
+        this.isLoading.set(false);
+        console.warn('No se encontró docente en MS-3 para el correo autenticado:', user.email);
       },
       error: (err) => {
         console.error('Error al resolver docente:', err);
-        this.docenteId = user.user_id;
-        this.cargarCursos(user.user_id);
+        this.docenteId = null;
+        this.materias = [];
+        this.isLoading.set(false);
       }
     });
   }

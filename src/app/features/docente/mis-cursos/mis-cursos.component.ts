@@ -67,30 +67,40 @@ export class MisCursosComponent implements OnInit {
 
   resolverDocenteYCargarCursos() {
     const user = this.authService.getCurrentUser();
-    if (!user) return;
+    if (!user?.email) {
+      this.isLoading.set(false);
+      this.cursos.set([]);
+      return;
+    }
+
+    const normalizarCorreo = (correo?: string | null) =>
+      (correo || '').trim().toLowerCase();
 
     this.isLoading.set(true);
-    // Para resolver disparidades de IDs, listamos los docentes de MS-3 y filtramos por email
     this.docentesService.getDocentes({ limit: 500 }).subscribe({
       next: (docentes) => {
+        const userEmail = normalizarCorreo(user.email);
         const matchingDocente = docentes.find(d => {
-          const docenteEmail = (d as any).email || d.correo || '';
-          return docenteEmail.toLowerCase() === user.email.toLowerCase();
+          const docenteEmail = normalizarCorreo((d as any).email || d.correo);
+          return docenteEmail === userEmail;
         });
-        if (matchingDocente && matchingDocente.docente_id) {
+
+        if (matchingDocente?.docente_id) {
           this.docenteId = matchingDocente.docente_id;
           this.cargarCursos(matchingDocente.docente_id);
-        } else {
-          // Fallback: usar el user_id de Auth
-          this.docenteId = user.user_id;
-          this.cargarCursos(user.user_id);
+          return;
         }
+
+        this.docenteId = null;
+        this.cursos.set([]);
+        this.isLoading.set(false);
+        console.warn('No se encontró docente en MS-3 para el correo autenticado:', user.email);
       },
       error: (err) => {
         console.error('Error al resolver docente:', err);
-        // Fallback: intentar cargar con el user_id
-        this.docenteId = user.user_id;
-        this.cargarCursos(user.user_id);
+        this.docenteId = null;
+        this.cursos.set([]);
+        this.isLoading.set(false);
       }
     });
   }
