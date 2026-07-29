@@ -187,17 +187,9 @@ export class ImportarMateriasComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const signature = `${file.name}_${file.size}`;
-    const uploaded = JSON.parse(localStorage.getItem('agm_uploaded_files') || '[]');
-    if (uploaded.includes(signature)) {
-      this.showDuplicateError.set(true);
-      this.triggerToast('Este archivo ya fue cargado y procesado anteriormente en este periodo.', 'error');
-      return;
-    }
-
     this.selectedFile.set(file);
     this.showDuplicateError.set(false);
-    this.currentFileSignature = signature;
+    this.currentFileSignature = `${file.name}_${file.size}`;
     
     // Generar vista previa
     this.revokePdfUrl();
