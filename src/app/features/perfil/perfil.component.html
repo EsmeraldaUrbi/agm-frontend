@@ -95,6 +95,13 @@
           <span class="material-symbols-outlined text-lg">close</span>
         </button>
       </div>
+    
+      <div
+        *ngIf="passwordError()"
+        class="mx-6 mt-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold"
+      >
+        {{ passwordError() }}
+      </div>
 
       <!-- Modal Body - Paso 1: Enviar Correo -->
       <div *ngIf="passwordModalStep() === 1" class="p-6 space-y-4">
@@ -118,9 +125,11 @@
           
           <button 
             (click)="requestPasswordChange()"
+              [disabled]="isPasswordSubmitting()"
+              [class.opacity-50]="isPasswordSubmitting()"
             class="px-5 py-2.5 bg-primary text-white hover:bg-primary/90 rounded-xl font-bold text-sm shadow-md transition-all flex items-center gap-2"
           >
-            Enviar Enlace <span class="material-symbols-outlined text-sm">send</span>
+            {{ isPasswordSubmitting() ? 'Enviando...' : 'Enviar Enlace' }} <span class="material-symbols-outlined text-sm">send</span>
           </button>
         </div>
       </div>
@@ -133,7 +142,7 @@
           <div class="flex items-center border border-outline-variant rounded-lg px-4 py-3 bg-white focus-within:border-primary transition-all">
             <span class="material-symbols-outlined text-outline mr-3 text-lg">pin</span>
             <input 
-              [(ngModel)]="tempPassword"
+              [ngModel]="tempPassword()" (ngModelChange)="tempPassword.set($event)"
               class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm placeholder:text-outline-variant" 
               placeholder="Ej. 123456" 
               type="text"/>
@@ -145,7 +154,7 @@
           <div class="flex items-center border border-outline-variant rounded-lg px-4 py-3 bg-white focus-within:border-primary transition-all">
             <span class="material-symbols-outlined text-outline mr-3 text-lg">lock</span>
             <input 
-              [(ngModel)]="newPassword"
+              [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)"
               class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm placeholder:text-outline-variant" 
               placeholder="••••••••••••" 
               type="password"/>
@@ -163,11 +172,11 @@
           
           <button 
             (click)="confirmNewPassword()"
-            [disabled]="!tempPassword() || !newPassword()"
-            [class.opacity-50]="!tempPassword() || !newPassword()"
+            [disabled]="!tempPassword() || !newPassword() || isPasswordSubmitting()"
+            [class.opacity-50]="!tempPassword() || !newPassword() || isPasswordSubmitting()"
             class="px-5 py-2.5 bg-primary text-white hover:bg-primary/90 rounded-xl font-bold text-sm shadow-md transition-all flex items-center gap-2"
           >
-            Confirmar Cambio <span class="material-symbols-outlined text-sm">check_circle</span>
+            {{ isPasswordSubmitting() ? 'Actualizando...' : 'Confirmar Cambio' }} <span class="material-symbols-outlined text-sm">check_circle</span>
           </button>
         </div>
       </div>
