@@ -8,6 +8,7 @@ import { MateriasService } from '../../../core/services/materias.service';
 import { AlumnosService } from '../../../core/services/alumnos.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ReportesService } from '../../../core/services/reportes.service';
+import { PeriodosService } from '../../../core/services/periodos.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 
@@ -37,15 +38,30 @@ export class MisMateriasComponent implements OnInit {
 
   materias: any[] = [];
   scheduleData: any[] = [];
+  periodoActivoNombre = 'Periodo por consultar';
 
   private inscripcionesService = inject(InscripcionesService);
   private materiasService = inject(MateriasService);
   private alumnosService = inject(AlumnosService);
   private authService = inject(AuthService);
   private reportesService = inject(ReportesService);
+  private periodosService = inject(PeriodosService);
 
   ngOnInit() {
+    this.cargarPeriodoActivo();
     this.cargarDatos();
+  }
+
+  cargarPeriodoActivo() {
+    this.periodosService.getPeriodoActivo().subscribe({
+      next: (periodo) => {
+        this.periodoActivoNombre = periodo?.nombre || 'Periodo no disponible';
+      },
+      error: (err) => {
+        console.error('Error al cargar periodo activo:', err);
+        this.periodoActivoNombre = 'Periodo no disponible';
+      }
+    });
   }
 
   alumnoId: string | null = null;
