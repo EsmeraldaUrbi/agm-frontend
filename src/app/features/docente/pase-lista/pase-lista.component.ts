@@ -200,7 +200,7 @@ export class PaseListaComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error al cargar alumnos inscritos:', err);
-        // Iniciamos el polling aunque falle, usarán el fallback
+        // El polling puede iniciar sin la lista local de alumnos; el backend sigue siendo la fuente de verdad.
         this.iniciarPolling();
       }
     });
@@ -219,8 +219,18 @@ export class PaseListaComponent implements OnInit, OnDestroy {
         if (!idSesion) return of(null);
 
         return forkJoin({
-          historial: this.asistenciasService.obtenerHistorial(idSesion).pipe(catchError(() => of([]))),
-          estadisticas: this.asistenciasService.obtenerEstadisticasSesion(idSesion).pipe(catchError(() => of(null)))
+          historial: this.asistenciasService.obtenerHistorial(idSesion).pipe(
+            catchError((err) => {
+              console.error('Error al consultar historial de asistencia:', err);
+              return of([]);
+            })
+          ),
+          estadisticas: this.asistenciasService.obtenerEstadisticasSesion(idSesion).pipe(
+            catchError((err) => {
+              console.error('Error al consultar estadísticas de asistencia:', err);
+              return of(null);
+            })
+          )
         });
       })
     ).subscribe({
@@ -316,9 +326,7 @@ export class PaseListaComponent implements OnInit, OnDestroy {
 
     this.asistenciasService.registrarAsistencia(data).subscribe({
       next: (res) => {
-        // Consultar el historial local o esperar al próximo polling
-        // Como tenemos polling, el historial se actualizará solo.
-        // Haremos un fallback temporal visual para feedback inmediato
+        // El backend ya confirmó el registro. Mostramos feedback inmediato mientras el polling actualiza el historial.
         const alumnoInfo = this.alumnosInscritos().find(a => a.matricula === res.matricula) || 
                            this.alumnosInscritos().find(a => String(a.alumno_id) === String(res.id_alumno));
                            
@@ -383,10 +391,10 @@ export class PaseListaComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error al cerrar sesión:', error);
-        // Fallback
         if (this.timerInterval) clearInterval(this.timerInterval);
+        this.pollingActivo.set(false);
         this.detenerCamara();
-        this.estadoSesion.set('finalizada');
+        alert('No se pudo cerrar la sesión en el servidor. Intente finalizarla nuevamente.');
       }
     });
   }
