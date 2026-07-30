@@ -46,9 +46,9 @@
         <div class="relative z-10">
           <h2 class="text-2xl font-extrabold text-[#003B5C] mb-2 font-['Public_Sans']">Confirmación de Cierre Académico</h2>
           <p class="text-slate-500 mb-8 max-w-xl">
-            Ha completado todos los requisitos para finalizar el periodo de evaluación de
+            Revise la información disponible antes de solicitar el cierre académico de
             <span class="font-bold text-slate-700">{{ materia().nombre }} (Sección {{ materia().seccion }})</span>.
-            Por favor, revise el resumen antes de proceder.
+            El backend validará las reglas de negocio antes de confirmar la operación.
           </p>
 
           <!-- Stats Bento Grid -->
@@ -74,8 +74,13 @@
                 <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
                 <span class="text-[10px] font-bold uppercase tracking-tighter">Asistencia</span>
               </div>
-              <div class="text-3xl font-black text-[#003B5C]">{{ materia().asistencias }}%</div>
-              <div class="text-[11px] text-slate-500 font-medium">Registros Completos</div>
+              @if (materia().asistencias !== null) {
+                <div class="text-3xl font-black text-[#003B5C]">{{ materia().asistencias }}%</div>
+                <div class="text-[11px] text-slate-500 font-medium">Registros disponibles</div>
+              } @else {
+                <div class="text-3xl font-black text-[#003B5C]">N/A</div>
+                <div class="text-[11px] text-slate-500 font-medium">Pendiente de MS-Asistencias</div>
+              }
             </div>
           </div>
 
@@ -155,9 +160,12 @@
       <div class="bg-white/70 backdrop-blur-md border border-slate-200 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6">
         <div class="flex items-center gap-6">
           <div class="flex -space-x-3">
-            <div class="w-10 h-10 rounded-full border-2 border-white bg-[#baeaff] flex items-center justify-center text-[#003b5c] font-black text-xs">JG</div>
-            <div class="w-10 h-10 rounded-full border-2 border-white bg-[#ffdcc3] flex items-center justify-center text-[#391b00] font-black text-xs">MR</div>
-            <div class="w-10 h-10 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500">+{{ materia().alumnos > 2 ? materia().alumnos - 2 : 0 }}</div>
+            <div class="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[#003b5c]">
+              <span class="material-symbols-outlined text-lg">groups</span>
+            </div>
+            <div class="w-10 h-10 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500">
+              {{ materia().alumnos || 0 }}
+            </div>
           </div>
           <div>
             <p class="text-sm font-bold text-[#003B5C]">Listado de Alumnos</p>

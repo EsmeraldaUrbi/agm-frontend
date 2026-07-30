@@ -32,7 +32,7 @@ export class CierreMateriaComponent {
     periodo: 'Cargando periodo...',
     alumnos: 0,
     promedioGrupal: 0,
-    asistencias: 0
+    asistencias: null
   });
 
   // Estado de la operación de cierre
@@ -58,7 +58,8 @@ export class CierreMateriaComponent {
       switchMap((data: any) => forkJoin({
         materia: of(data),
         rendimiento: this.calificacionesService.getRendimientoMateria(id).pipe(
-          catchError(() => of({ rendimiento_promedio: 0 }))
+          map(res => ({ ...res, disponible: true })),
+          catchError(() => of({ rendimiento_promedio: 0, disponible: false }))
         ),
         periodoNombre: this.resolverPeriodoNombre(data),
         planNombre: this.resolverPlanEstudioNombre(data)
@@ -88,6 +89,7 @@ export class CierreMateriaComponent {
         }
 
         const promedioReal = rendimiento?.rendimiento_promedio ?? 0;
+        const concentradoConsultado = Boolean((rendimiento as any)?.disponible);
 
         this.materia.set({
           materia_id: id,
@@ -96,11 +98,14 @@ export class CierreMateriaComponent {
           seccion: (data as any).seccion || '001',
           alumnos: (data as any).alumnos_inscritos || (data as any).alumnos || 0,
           promedioGrupal: Number(promedioReal.toFixed(1)),
-          asistencias: 0, // Se puede conectar a MS-5 en una fase posterior
+          asistencias: null, // Se puede conectar a MS-5 en una fase posterior
           horario: horarioFormat,
           programa: planNombre,
           periodo: periodoNombre
         });
+
+        this.actualizarChecklist('Datos de materia cargados', true);
+        this.actualizarChecklist('Concentrado consultado', concentradoConsultado);
       },
       error: (err) => {
         console.error('Error al cargar la materia', err);
@@ -174,11 +179,18 @@ export class CierreMateriaComponent {
   }
 
   checklist = [
-    { label: 'Calificaciones registradas', completado: true },
-    { label: 'Asistencias finalizadas', completado: true },
-    { label: 'Observaciones académicas', completado: true },
-    { label: 'Generación de Acta Final', completado: false },
+    { label: 'Datos de materia cargados', completado: false },
+    { label: 'Concentrado consultado', completado: false },
+    { label: 'Cierre aceptado por backend', completado: false },
+    { label: 'Acta final impresa', completado: false },
   ];
+
+  private actualizarChecklist(label: string, completado: boolean) {
+    const item = this.checklist.find(item => item.label === label);
+    if (item) {
+      item.completado = completado;
+    }
+  }
 
   // Modal de confirmación
   mostrarModalCierre = false;
@@ -200,6 +212,7 @@ export class CierreMateriaComponent {
       next: () => {
         this.cerrando.set(false);
         this.estadoMateria.set('cerrada');
+        this.actualizarChecklist('Cierre aceptado por backend', true);
         this.mostrarModalCierre = false;
       },
       error: (err) => {
@@ -245,7 +258,7 @@ export class CierreMateriaComponent {
   confirmarImpresionActa() {
     // Al confirmar, la materia queda finalizada y no acepta más cambios
     // Llamada a MS-7: GET /reportes/calificaciones/:materiaId?formato=pdf
-    this.checklist[3].completado = true;
+    this.actualizarChecklist('Acta final impresa', true);
     this.estadoMateria.set('finalizada');
     this.mostrarModalActa = false;
   }
