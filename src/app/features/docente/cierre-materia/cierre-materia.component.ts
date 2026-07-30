@@ -2,9 +2,10 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { MateriasService } from '../../../core/services/materias.service';
+import { PeriodosService } from '../../../core/services/periodos.service';
 import { CalificacionesService } from '../../../core/services/calificaciones.service';
-import { forkJoin } from 'rxjs';
-import { catchError, of } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 type EstadoMateria = 'activa' | 'cerrada' | 'finalizada';
 
@@ -41,7 +42,8 @@ export class CierreMateriaComponent {
   constructor(
     private route: ActivatedRoute,
     private materiasService: MateriasService,
-    private calificacionesService: CalificacionesService
+    private calificacionesService: CalificacionesService,
+    private periodosService: PeriodosService
   ) {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
@@ -52,27 +54,36 @@ export class CierreMateriaComponent {
   }
 
   cargarDatosMateria(id: string) {
-    // Cargamos en paralelo: datos de la materia + rendimiento de calificaciones
-    forkJoin({
-      materia: this.materiasService.getMateriaById(id),
-      rendimiento: this.calificacionesService.getRendimientoMateria(id).pipe(
-        catchError(() => of({ rendimiento_promedio: 0 }))
-      )
-    }).subscribe({
-      next: ({ materia: data, rendimiento }) => {
+    this.materiasService.getMateriaById(id).pipe(
+      switchMap((data: any) => forkJoin({
+        materia: of(data),
+        rendimiento: this.calificacionesService.getRendimientoMateria(id).pipe(
+          catchError(() => of({ rendimiento_promedio: 0 }))
+        ),
+        periodoNombre: this.resolverPeriodoNombre(data),
+        planNombre: this.resolverPlanEstudioNombre(data)
+      }))
+    ).subscribe({
+      next: ({ materia: data, rendimiento, periodoNombre, planNombre }) => {
         let horarioFormat = 'Horario no definido';
+
         if ((data as any).horarios && (data as any).horarios.length > 0) {
           const gruposHorarios: { [key: string]: string[] } = {};
+
           (data as any).horarios.forEach((h: any) => {
             const ini = h.hora_inicio?.substring(0, 5) || '';
             const fin = h.hora_fin?.substring(0, 5) || '';
             const rango = `${ini} - ${fin}`;
+            const dia = h.dia || h.dia_semana || 'Día no definido';
+
             if (!gruposHorarios[rango]) gruposHorarios[rango] = [];
-            gruposHorarios[rango].push(h.dia);
+            gruposHorarios[rango].push(dia);
           });
+
           const partes = Object.entries(gruposHorarios).map(([rango, dias]) => {
             return `${dias.join(', ')} ${rango}`;
           });
+
           horarioFormat = partes.join(' | ');
         }
 
@@ -83,18 +94,83 @@ export class CierreMateriaComponent {
           nrc: (data as any).nrc || 'N/A',
           nombre: (data as any).nombre || 'Materia sin nombre',
           seccion: (data as any).seccion || '001',
-          alumnos: (data as any).alumnos_inscritos || 0,
+          alumnos: (data as any).alumnos_inscritos || (data as any).alumnos || 0,
           promedioGrupal: Number(promedioReal.toFixed(1)),
-          asistencias: 0, // Se puede conectar a MS-5 en el futuro
+          asistencias: 0, // Se puede conectar a MS-5 en una fase posterior
           horario: horarioFormat,
-          programa: (data as any).programa || 'Licenciatura en Ciencias de la Computación',
-          periodo: (data as any).periodo?.nombre || 'Otoño 2024'
+          programa: planNombre,
+          periodo: periodoNombre
         });
       },
       error: (err) => {
         console.error('Error al cargar la materia', err);
       }
     });
+  }
+
+  private resolverPeriodoNombre(materia: any): Observable<string> {
+    const nombreDirecto =
+      materia?.periodo?.nombre ||
+      materia?.periodo_nombre ||
+      materia?.nombre_periodo;
+
+    if (nombreDirecto) {
+      return of(nombreDirecto);
+    }
+
+    const periodoId = materia?.periodo_id || materia?.id_periodo;
+
+    if (!periodoId) {
+      return of('Periodo no disponible');
+    }
+
+    return this.periodosService.getPeriodoById(String(periodoId)).pipe(
+      map(periodo => periodo?.nombre || 'Periodo no disponible'),
+      catchError((err) => {
+        console.error('Error al resolver periodo de la materia:', err);
+        return of('Periodo no disponible');
+      })
+    );
+  }
+
+  private resolverPlanEstudioNombre(materia: any): Observable<string> {
+    const nombreDirecto =
+      materia?.programa ||
+      materia?.plan_estudio?.nombre ||
+      materia?.plan?.nombre ||
+      materia?.plan_nombre ||
+      materia?.nombre_plan ||
+      materia?.carrera ||
+      materia?.tipo_formacion;
+
+    if (nombreDirecto) {
+      return of(nombreDirecto);
+    }
+
+    const planId =
+      materia?.plan_estudio_id ||
+      materia?.id_plan_estudio ||
+      materia?.plan_id;
+
+    if (planId) {
+      return this.materiasService.getPlanEstudioById(String(planId)).pipe(
+        map(plan => plan?.nombre || plan?.codigo || 'Plan de estudio no disponible'),
+        catchError((err) => {
+          console.error('Error al resolver plan de estudio de la materia:', err);
+          return of('Plan de estudio no disponible');
+        })
+      );
+    }
+
+    const planes = Array.isArray(materia?.planes_estudio)
+      ? materia.planes_estudio.filter(Boolean)
+      : [];
+
+    if (planes.length > 0) {
+      return of(planes.join(', '));
+    }
+
+    return of('Plan de estudio no disponible');
   }
 
   checklist = [
