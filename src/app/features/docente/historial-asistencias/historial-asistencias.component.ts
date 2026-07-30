@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { DocentesService } from '../../../core/services/docentes.service';
 import { MateriasService } from '../../../core/services/materias.service';
+import { MateriaContextService } from '../../../core/services/materia-context.service';
 import { AlumnosService, Alumno as AlumnoInscrito } from '../../../core/services/alumnos.service';
 import { AsistenciasService, EstadisticasAsistenciaResponse } from '../../../core/services/asistencias.service';
 import { ReportesService } from '../../../core/services/reportes.service';
@@ -43,6 +44,7 @@ export class HistorialAsistenciasComponent implements OnInit {
   private authService = inject(AuthService);
   private docentesService = inject(DocentesService);
   private materiasService = inject(MateriasService);
+  private materiaContextService = inject(MateriaContextService);
   private alumnosService = inject(AlumnosService);
   private asistenciasService = inject(AsistenciasService);
   private reportesService = inject(ReportesService);
@@ -140,13 +142,13 @@ export class HistorialAsistenciasComponent implements OnInit {
     this.materiasService.getMateriasByDocente(docenteId).subscribe({
       next: (res) => {
         this.listaMateriasDisponibles = res.items.map((m: any) => ({
-          materia_id: m.materia_ofertada_id,
+          materia_id: m.materia_id || m.materia_ofertada_id || m.id || '',
           nrc: m.nrc || 'N/A',
-          nombre: m.nombre || 'Materia sin Nombre',
+          nombre: m.nombre || m.materia?.nombre || 'Materia sin Nombre',
           seccion: m.seccion || '001',
-          horario: 'Por definir',
-          programa: 'Licenciatura',
-          periodo: m.periodo_id || 'Actual'
+          horario: m.horario || 'Horario por consultar',
+          programa: m.programa || m.plan_estudio?.nombre || 'Plan de estudio por consultar',
+          periodo: m.periodo?.nombre || m.periodo_nombre || 'Periodo por consultar'
         }));
         
         if (this.listaMateriasDisponibles.length > 0) {
@@ -167,31 +169,21 @@ export class HistorialAsistenciasComponent implements OnInit {
       this.materiaSeleccionadaNrc.set(mat.nrc);
       this.materia.set({ ...mat });
       
-      // Consultar detalles de la materia para obtener horario y programa reales
-      this.materiasService.getMateriaById(mat.materia_id).subscribe({
-        next: (data: any) => {
-          let horarioFormat = 'Horario no definido';
-          if (data.horarios && data.horarios.length > 0) {
-            const gruposHorarios: { [key: string]: string[] } = {};
-            data.horarios.forEach((h: any) => {
-              const ini = h.hora_inicio?.substring(0, 5) || '';
-              const fin = h.hora_fin?.substring(0, 5) || '';
-              const rango = `${ini} - ${fin}`;
-              if (!gruposHorarios[rango]) gruposHorarios[rango] = [];
-              gruposHorarios[rango].push(h.dia);
-            });
-            const partes = Object.entries(gruposHorarios).map(([rango, dias]) => {
-              return `${dias.join(', ')} ${rango}`;
-            });
-            horarioFormat = partes.join(' | ');
-          }
-
+      this.materiaContextService.getContextoMateria(mat.materia_id).subscribe({
+        next: (contexto) => {
           this.materia.set({
             ...mat,
-            horario: horarioFormat,
-            programa: data.programa || 'Licenciatura en Ciencias de la Computación',
-            periodo: data.periodo?.nombre || 'Otoño 2024'
+            materia_id: contexto.materia_id,
+            nrc: contexto.nrc,
+            nombre: contexto.nombre,
+            seccion: contexto.seccion,
+            horario: contexto.horario,
+            programa: contexto.programa,
+            periodo: contexto.periodo
           });
+        },
+        error: (err) => {
+          console.error('Error al cargar contexto académico de la materia:', err);
         }
       });
 
