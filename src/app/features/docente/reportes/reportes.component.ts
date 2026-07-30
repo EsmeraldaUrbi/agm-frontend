@@ -6,6 +6,7 @@ import { HorarioComponent } from '../../../shared/components/horario/horario.com
 import { AuthService } from '../../../core/services/auth.service';
 import { DocentesService } from '../../../core/services/docentes.service';
 import { MateriasService } from '../../../core/services/materias.service';
+import { MateriaContextService } from '../../../core/services/materia-context.service';
 import { ReportesService } from '../../../core/services/reportes.service';
 import { CalificacionesService } from '../../../core/services/calificaciones.service';
 import { AlumnosService } from '../../../core/services/alumnos.service';
@@ -19,7 +20,7 @@ interface AlumnoRendimiento {
   promedioFinal: number;
   promedioPonderadoReal: number;
   promedioRedondeadoOficial: number;
-  asistencia: number;
+  asistencia: number | null;
   estatus: string;
 }
 
@@ -48,6 +49,7 @@ export class ReportesComponent implements OnInit {
   private authService = inject(AuthService);
   private docentesService = inject(DocentesService);
   private materiasService = inject(MateriasService);
+  private materiaContextService = inject(MateriaContextService);
   private reportesService = inject(ReportesService);
   private calificacionesService = inject(CalificacionesService);
   private alumnosService = inject(AlumnosService);
@@ -208,13 +210,13 @@ export class ReportesComponent implements OnInit {
     this.materiasService.getMateriasByDocente(docenteId).subscribe({
       next: (res) => {
         this.listaMateriasDisponibles = res.items.map((m: any) => ({
-          materia_id: m.materia_id || m.id_materia || '',
+          materia_id: m.materia_id || m.materia_ofertada_id || m.id_materia || m.id || '',
           nrc: m.nrc || 'N/A',
-          nombre: m.nombre || 'Materia sin Nombre',
+          nombre: m.nombre || m.materia?.nombre || 'Materia sin Nombre',
           seccion: m.seccion || '001',
-          horario: 'Por definir',
-          programa: 'Licenciatura',
-          periodo: m.periodo_id || 'Actual',
+          horario: m.horario || 'Horario por consultar',
+          programa: m.programa || m.plan_estudio?.nombre || 'Plan de estudio por consultar',
+          periodo: m.periodo?.nombre || m.periodo_nombre || 'Periodo por consultar',
           promedioGeneral: 'N/A',
           tasaAprobacion: 'N/A',
           alumnosRiesgo: 'N/A',
@@ -240,28 +242,19 @@ export class ReportesComponent implements OnInit {
       this.materiaSeleccionadaNrc.set(mat.nrc);
       this.materia = mat;
       
-      // Consultar detalles de la materia para obtener horario y programa reales
-      this.materiasService.getMateriaById(mat.materia_id).subscribe({
-        next: (data: any) => {
-          let horarioFormat = 'Horario no definido';
-          if (data.horarios && data.horarios.length > 0) {
-            const gruposHorarios: { [key: string]: string[] } = {};
-            data.horarios.forEach((h: any) => {
-              const ini = h.hora_inicio?.substring(0, 5) || '';
-              const fin = h.hora_fin?.substring(0, 5) || '';
-              const rango = `${ini} - ${fin}`;
-              if (!gruposHorarios[rango]) gruposHorarios[rango] = [];
-              gruposHorarios[rango].push(h.dia);
-            });
-            const partes = Object.entries(gruposHorarios).map(([rango, dias]) => {
-              return `${dias.join(', ')} ${rango}`;
-            });
-            horarioFormat = partes.join(' | ');
-          }
-
-          mat.horario = horarioFormat;
-          mat.programa = data.programa || 'Licenciatura en Ciencias de la Computación';
-          mat.periodo = data.periodo?.nombre || 'Otoño 2024';
+      this.materiaContextService.getContextoMateria(mat.materia_id).subscribe({
+        next: (contexto) => {
+          mat.materia_id = contexto.materia_id;
+          mat.nrc = contexto.nrc;
+          mat.nombre = contexto.nombre;
+          mat.seccion = contexto.seccion;
+          mat.horario = contexto.horario;
+          mat.programa = contexto.programa;
+          mat.periodo = contexto.periodo;
+          this.materia = mat;
+        },
+        error: (err) => {
+          console.error('Error al cargar contexto académico de la materia:', err);
         }
       });
       this.alumnos.set(mat.alumnos);
