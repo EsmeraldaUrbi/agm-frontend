@@ -128,15 +128,17 @@ export class MateriasComponent implements OnInit {
               }
             });
           },
-          error: () => {
-            this.cargarMateriasFallback();
+          error: (err) => {
+            console.error('Error cargando relaciones de planes de estudio:', err);
+            this.triggerToast('No se pudieron cargar las relaciones de planes. Se mostrará el directorio de materias sin ese filtro.', 'error');
+            this.cargarMateriasSinRelacionesDePlanes();
           }
         });
       });
     });
   }
 
-  cargarMateriasFallback() {
+  cargarMateriasSinRelacionesDePlanes() {
     this.materiasService.getAllMaterias().subscribe({
       next: (materias) => {
         const mappedMaterias: MateriaView[] = materias.map((mat: Materia) => {
