@@ -309,7 +309,7 @@ export class ReportesComponent implements OnInit {
                   promedioFinal: ac.promedio_redondeado || 0,
                   promedioPonderadoReal: ac.peso_considerado || 0,
                   promedioRedondeadoOficial: ac.promedio_redondeado || 0,
-                  asistencia: 100, // Puedes conectar asistencias reales después
+                  asistencia: null,
                   estatus: promedioReal >= 6 ? 'Regular' : 'En Riesgo'
                 };
               });
@@ -345,7 +345,7 @@ export class ReportesComponent implements OnInit {
     }
   }
 
-  // Estado de descarga simulada
+  // Estado de descarga de reportes
   descargando = signal<string | null>(null);
   mensajeExito = signal<string | null>(null);
   errorDescarga = signal<string | null>(null);
@@ -371,7 +371,7 @@ export class ReportesComponent implements OnInit {
       next: (blob: Blob) => {
         this.descargando.set(null);
         
-        // Trigger browser download
+        // Iniciar descarga del archivo en el navegador
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;

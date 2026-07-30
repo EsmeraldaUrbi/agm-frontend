@@ -65,7 +65,7 @@
       <span class="material-symbols-outlined text-emerald-600 text-2xl flex-shrink-0" style="font-variation-settings:'FILL' 1">check_circle</span>
       <div>
         <h4 class="text-sm font-bold">{{ mensajeExito() }}</h4>
-        <p class="text-xs text-emerald-700 mt-0.5">El archivo ha sido guardado en su carpeta de descargas local.</p>
+        <p class="text-xs text-emerald-700 mt-0.5">El navegador inició la descarga del archivo generado.</p>
       </div>
     </div>
   }
@@ -259,7 +259,11 @@
 
               <!-- Asistencia -->
               <td class="py-4 px-6 text-center font-bold text-[#42474e]">
-                {{ item.asistencia }}%
+                @if (item.asistencia !== null && item.asistencia !== undefined) {
+                  {{ item.asistencia }}%
+                } @else {
+                  N/A
+                }
               </td>
 
               <!-- Estatus -->
