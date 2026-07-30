@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { DocentesService } from '../../../core/services/docentes.service';
 import { MateriasService } from '../../../core/services/materias.service';
+import { PeriodosService } from '../../../core/services/periodos.service';
 import { AlumnosService } from '../../../core/services/alumnos.service';
 import { CalificacionesService } from '../../../core/services/calificaciones.service';
 import { forkJoin, of } from 'rxjs';
@@ -31,12 +32,14 @@ export class MisCursosComponent implements OnInit {
   private authService = inject(AuthService);
   private docentesService = inject(DocentesService);
   private materiasService = inject(MateriasService);
+  private periodosService = inject(PeriodosService);
   private alumnosService = inject(AlumnosService);
   private calificacionesService = inject(CalificacionesService);
 
   cursos = signal<Curso[]>([]);
   docenteId: string | null = null;
   isLoading = signal(false);
+  periodoActivoNombre = signal('Periodo por consultar');
 
   searchTerm = signal('');
   statusFilter = signal('Todos');
@@ -62,7 +65,20 @@ export class MisCursosComponent implements OnInit {
   cursoToClose: Curso | null = null;
 
   ngOnInit() {
+    this.cargarPeriodoActivo();
     this.resolverDocenteYCargarCursos();
+  }
+
+  cargarPeriodoActivo() {
+    this.periodosService.getPeriodoActivo().subscribe({
+      next: (periodo) => {
+        this.periodoActivoNombre.set(periodo?.nombre || 'Periodo no disponible');
+      },
+      error: (err) => {
+        console.error('Error al cargar periodo activo:', err);
+        this.periodoActivoNombre.set('Periodo no disponible');
+      }
+    });
   }
 
   resolverDocenteYCargarCursos() {
