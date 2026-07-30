@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
-import { MateriasService } from '../../../core/services/materias.service';
+import { MateriaContextService } from '../../../core/services/materia-context.service';
 import { AlumnosService } from '../../../core/services/alumnos.service';
 import { CalificacionesService, Actividad, Calificacion } from '../../../core/services/calificaciones.service';
 
@@ -40,7 +40,7 @@ export class RegistroCalificacionesComponent {
 
   tabs = ['Alumnos', 'Ponderaciones', 'Actividades'];
 
-  // Inicializado con mock para que el HTML no rompa antes de cargar, pero los datos reales lo sobreescribirán
+  // Estado inicial de carga para evitar valores indefinidos antes de consultar la actividad real
   actividadActual = signal<any>({
     id: '',
     actividad_id: '',
@@ -53,7 +53,7 @@ export class RegistroCalificacionesComponent {
 
   constructor(
     private route: ActivatedRoute,
-    private materiasService: MateriasService,
+    private materiaContextService: MateriaContextService,
     private alumnosService: AlumnosService,
     private calificacionesService: CalificacionesService
   ) {
@@ -71,36 +71,20 @@ export class RegistroCalificacionesComponent {
   }
 
   cargarDatosMateria(id: string) {
-    this.materiasService.getMateriaById(id).subscribe({
-      next: (data: any) => {
-        let horarioFormat = 'Horario no definido';
-        if (data.horarios && data.horarios.length > 0) {
-          const gruposHorarios: { [key: string]: string[] } = {};
-          data.horarios.forEach((h: any) => {
-            const ini = h.hora_inicio?.substring(0, 5) || '';
-            const fin = h.hora_fin?.substring(0, 5) || '';
-            const rango = `${ini} - ${fin}`;
-            if (!gruposHorarios[rango]) gruposHorarios[rango] = [];
-            gruposHorarios[rango].push(h.dia);
-          });
-          const partes = Object.entries(gruposHorarios).map(([rango, dias]) => {
-            return `${dias.join(', ')} ${rango}`;
-          });
-          horarioFormat = partes.join(' | ');
-        }
-
+    this.materiaContextService.getContextoMateria(id).subscribe({
+      next: (contexto) => {
         this.materia.set({
-          materia_id: id,
-          nrc: data.nrc || 'N/A',
-          nombre: data.nombre || data.materia?.nombre || 'Materia sin nombre',
-          seccion: data.seccion || '001',
-          horario: horarioFormat,
-          programa: data.programa || 'Licenciatura en Ciencias de la Computación',
-          periodo: data.periodo?.nombre || 'Otoño 2024'
+          materia_id: contexto.materia_id,
+          nrc: contexto.nrc,
+          nombre: contexto.nombre,
+          seccion: contexto.seccion,
+          horario: contexto.horario,
+          programa: contexto.programa,
+          periodo: contexto.periodo
         });
       },
       error: (err) => {
-        console.error('Error al cargar la materia', err);
+        console.error('Error al cargar contexto académico de la materia', err);
       }
     });
   }
