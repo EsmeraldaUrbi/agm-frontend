@@ -212,6 +212,12 @@ export class HistorialAsistenciasComponent implements OnInit {
       next: (alumnos) => {
         this.alumnosInscritos.set(alumnos);
         this.consultarHoy();
+      },
+      error: (err) => {
+        console.error('Error al cargar alumnos inscritos:', err);
+        this.alumnosInscritos.set([]);
+        this.mensajeInfo.set('No se pudieron cargar los alumnos inscritos de la materia.');
+        this.isLoading.set(false);
       }
     });
   }
@@ -306,7 +312,7 @@ export class HistorialAsistenciasComponent implements OnInit {
       }
     });
     
-    // Agregamos también los que pasaron lista pero no están en la tabla de alumnos (casos raros)
+    // Incluimos registros devueltos por backend aunque no coincidan con la lista local de alumnos.
     asistencias.forEach(a => {
       const matricula = a.matricula || 'N/A';
       const exists = result.find(r => r.matricula === matricula);
@@ -325,7 +331,7 @@ export class HistorialAsistenciasComponent implements OnInit {
 
     this.historialAlumnos.set(result);
     
-    // Si el backend no trajo estadísticas (porque falló el ID de sesión), calculamos las fallback
+    // Si el backend no devuelve estadísticas agregadas, calculamos métricas derivadas del historial consultado.
     if (!this.estadisticas()) {
       const presentes = result.filter(r => r.estado === 'PRESENTE').length;
       const retardos = result.filter(r => r.estado === 'RETARDO').length;
