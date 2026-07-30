@@ -127,25 +127,65 @@ export class CalificacionesService {
     );
   }
 
-  // GET /api/v1/calificaciones/materia/:materia_id/rendimiento (MOCKED)
   getRendimientoMateria(materiaId: string): Observable<{ rendimiento_promedio: number }> {
-    return new Observable(obs => {
-      obs.next({ rendimiento_promedio: 85 });
-      obs.complete();
-    });
+    return this.getConcentrado(materiaId).pipe(
+      map(concentrado => {
+        const alumnos: any[] = Array.isArray(concentrado?.alumnos) ? concentrado.alumnos : [];
+        const promedios = alumnos
+          .map((alumno: any): number | null => this.obtenerPromedioAlumno(alumno))
+          .filter((promedio: number | null): promedio is number => promedio !== null);
+
+        if (promedios.length === 0) {
+          return { rendimiento_promedio: 0 };
+        }
+
+        const total = promedios.reduce((sum: number, promedio: number) => sum + promedio, 0);
+        return { rendimiento_promedio: total / promedios.length };
+      })
+    );
   }
 
-  // GET /api/v1/calificaciones/materia/:materia_id/distribucion (MOCKED)
-  getDistribucionCalificaciones(materiaId: string): Observable<any> {
-    return new Observable(obs => {
-      obs.next({
-        '9-10': 15,
-        '8-8.9': 10,
-        '7-7.9': 5,
-        '<7': 2
-      });
-      obs.complete();
-    });
+  getDistribucionCalificaciones(materiaId: string): Observable<Record<string, number>> {
+    return this.getConcentrado(materiaId).pipe(
+      map(concentrado => {
+        const alumnos: any[] = Array.isArray(concentrado?.alumnos) ? concentrado.alumnos : [];
+        const distribucion: Record<string, number> = {
+          '9-10': 0,
+          '8-8.9': 0,
+          '7-7.9': 0,
+          '<7': 0
+        };
+
+        alumnos
+          .map((alumno: any): number | null => this.obtenerPromedioAlumno(alumno))
+          .filter((promedio: number | null): promedio is number => promedio !== null)
+          .forEach((promedio: number) => {
+            if (promedio >= 9) {
+              distribucion['9-10']++;
+            } else if (promedio >= 8) {
+              distribucion['8-8.9']++;
+            } else if (promedio >= 7) {
+              distribucion['7-7.9']++;
+            } else {
+              distribucion['<7']++;
+            }
+          });
+
+        return distribucion;
+      })
+    );
+  }
+
+  private obtenerPromedioAlumno(alumno: any): number | null {
+    const valor = alumno?.promedio_final ??
+      alumno?.promedio ??
+      alumno?.calificacion_final ??
+      alumno?.calificacion ??
+      alumno?.total ??
+      alumno?.nota_final;
+
+    const promedio = Number(valor);
+    return Number.isFinite(promedio) ? promedio : null;
   }
 
   // POST /api/v1/concentrado/:materia_id/cierre

@@ -46,7 +46,7 @@ export class LoginComponent {
   }
 
   onLogin() {
-    // Simulamos una validación simple
+    // Validación mínima antes de enviar credenciales al backend
     if (this.email && this.password) {
       this.authService.login(this.email, this.password, this.selectedRole()).subscribe({
         next: (res) => {
