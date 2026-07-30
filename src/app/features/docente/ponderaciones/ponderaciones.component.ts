@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CalificacionesService, Criterio as BackendCriterio } from '../../../core/services/calificaciones.service';
-import { MateriasService } from '../../../core/services/materias.service';
+import { MateriaContextService } from '../../../core/services/materia-context.service';
 
 interface Criterio {
   id: number;
@@ -21,7 +21,7 @@ interface Criterio {
 })
 export class PonderacionesComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  private materiasService = inject(MateriasService);
+  private materiaContextService = inject(MateriaContextService);
   private calificacionesService = inject(CalificacionesService);
 
   materia = signal({
@@ -51,21 +51,21 @@ export class PonderacionesComponent implements OnInit {
   }
 
   cargarMateria(id: string) {
-    this.materiasService.getMateriaById(id).subscribe({
-      next: (m: any) => {
+    this.materiaContextService.getContextoMateria(id).subscribe({
+      next: (contexto) => {
         this.materia.set({
-          materia_id: m.materia_id || m.materia_ofertada_id || m.id || '',
-          nrc: m.nrc || 'N/A',
-          nombre: m.nombre || 'Sin Nombre',
-          seccion: m.seccion || '',
-          horario: 'No especificado',
-          programa: 'Facultad de Ciencias de la Computación',
-          periodo: m.periodo_id || 'Otoño 2024'
+          materia_id: contexto.materia_id,
+          nrc: contexto.nrc,
+          nombre: contexto.nombre,
+          seccion: contexto.seccion,
+          horario: contexto.horario,
+          programa: contexto.programa,
+          periodo: contexto.periodo
         });
 
-        this.cargarPonderaciones(this.materia().materia_id);
+        this.cargarPonderaciones(contexto.materia_id);
       },
-      error: (err) => console.error('Error al cargar materia:', err)
+      error: (err) => console.error('Error al cargar contexto académico de la materia:', err)
     });
   }
 
