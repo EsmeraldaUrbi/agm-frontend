@@ -78,7 +78,7 @@ export class AsistenciasService {
     );
   }
 
-  // POST /asistencias/registrar (ó /asistencias/escanear)
+  // POST /asistencias/registrar
   escanearAsistencia(payload: any): Observable<RegistroAsistencia> {
     // Normalizar el token cifrado que pueda venir en variantes
     const token = payload.token_cifrado || 
@@ -101,11 +101,9 @@ export class AsistenciasService {
     );
   }
 
-  // GET /asistencias/:id_materia/historial
-  getHistorialAsistencias(idMateria: string | number): Observable<any[]> {
-    // Si es un id de materia, intentamos consultar el historial por materia
-    // Por si el backend requiere id_sesion, damos soporte a ambos
-    return this.apiClient.get<any>(`${this.baseUrl}/asistencias/${idMateria}/historial`).pipe(
+  // GET /asistencias/:id_sesion/historial
+  getHistorialAsistencias(idSesion: string | number): Observable<any[]> {
+    return this.apiClient.get<any>(`${this.baseUrl}/asistencias/${idSesion}/historial`).pipe(
       map(res => unwrapArrayResponse<any>(res).map(normalizeAsistencia))
     );
   }
@@ -135,8 +133,8 @@ export class AsistenciasService {
     return this.getAsistenciasHoy(idMateria);
   }
 
-  obtenerHistorial(idMateria: string | number): Observable<any[]> {
-    return this.getHistorialAsistencias(idMateria);
+  obtenerHistorial(idSesion: string | number): Observable<any[]> {
+    return this.getHistorialAsistencias(idSesion);
   }
 
 
