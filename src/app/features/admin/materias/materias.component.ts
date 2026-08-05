@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 
 interface MateriaView extends Materia {
   docenteNombre: string;
+  periodoNombre: string;
 }
 
 @Component({
@@ -68,6 +69,14 @@ export class MateriasComponent implements OnInit {
     });
   }
 
+  private resolverPeriodoNombre(materia: Materia): string {
+    const periodoId = materia.periodo_id;
+    if (!periodoId) return 'Periodo no disponible';
+
+    const periodo = this.periodosList().find(p => p.periodo_id === periodoId);
+    return periodo?.nombre || 'Periodo no disponible';
+  }
+
   cargarMaterias() {
     import('rxjs').then(({ forkJoin, of }) => {
       import('rxjs/operators').then(({ catchError }) => {
@@ -113,7 +122,8 @@ export class MateriasComponent implements OnInit {
                   return {
                     ...mat,
                     planes_estudio: finalPlanes,
-                    docenteNombre
+                    docenteNombre,
+                    periodoNombre: this.resolverPeriodoNombre(mat)
                   };
                 });
                 this.materiasList.set(mappedMaterias);
@@ -151,7 +161,8 @@ export class MateriasComponent implements OnInit {
           }
           return {
             ...mat,
-            docenteNombre
+            docenteNombre,
+            periodoNombre: this.resolverPeriodoNombre(mat)
           };
         });
         this.materiasList.set(mappedMaterias);
@@ -167,6 +178,7 @@ export class MateriasComponent implements OnInit {
   searchQuery = signal<string>('');
   selectedStatusFilter = signal<'all' | 'ACTIVA' | 'INACTIVA' | 'CANCELADA'>('all');
   selectedPlan = signal<string>('all');
+  selectedPeriodo = signal<string>('all');
 
   currentPage = signal<number>(1);
   pageSize = signal<number>(10);
@@ -180,17 +192,20 @@ export class MateriasComponent implements OnInit {
     const query = (rawQuery || '').toLowerCase().trim();
     const status = this.selectedStatusFilter() || 'all';
     const plan = this.selectedPlan() || 'all';
+    const periodo = this.selectedPeriodo() || 'all';
 
     return (this.materiasList() || []).filter(m => {
       const nombre = (m.nombre || '').toLowerCase();
       const nrc = (m.nrc || '').toLowerCase();
       const docente = (m.docenteNombre || '').toLowerCase();
+      const periodoNombre = (m.periodoNombre || '').toLowerCase();
 
-      const matchesQuery = !query || nombre.includes(query) || nrc.includes(query) || docente.includes(query);
+      const matchesQuery = !query || nombre.includes(query) || nrc.includes(query) || docente.includes(query) || periodoNombre.includes(query);
       const matchesStatus = status === 'all' || m.estado === status;
       const matchesPlan = plan === 'all' || (m.planes_estudio && m.planes_estudio.includes(plan));
+      const matchesPeriodo = periodo === 'all' || m.periodo_id === periodo;
 
-      return matchesQuery && matchesStatus && matchesPlan;
+      return matchesQuery && matchesStatus && matchesPlan && matchesPeriodo;
     });
   });
 
@@ -198,6 +213,7 @@ export class MateriasComponent implements OnInit {
     this.searchQuery.set('');
     this.selectedStatusFilter.set('all');
     this.selectedPlan.set('all');
+    this.selectedPeriodo.set('all');
     this.resetPagination();
   }
 
