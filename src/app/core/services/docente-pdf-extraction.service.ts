@@ -83,8 +83,8 @@ export class DocentePdfExtractionService {
       }
     }
 
-    // Heuristic: Emails are reliable delimiters in academic PDFs for teachers
-    const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
+    // El backend de importación solo acepta correos institucionales @correo.buap.mx.
+    const emailRegex = /([a-zA-Z0-9._%+-]+@correo\.buap\.mx)/gi;
     let match;
     const emailsFound: string[] = [];
     
@@ -98,8 +98,8 @@ export class DocentePdfExtractionService {
       return docentes;
     }
 
-    // Split text by emails to create chunks around each teacher
-    const chunks = text.split(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/i);
+    // Split text by institutional emails to create chunks around each teacher
+    const chunks = text.split(/([a-zA-Z0-9._%+-]+@correo\.buap\.mx)/i);
 
     for (let i = 1; i < chunks.length; i += 2) {
       const email = chunks[i].trim();
@@ -141,7 +141,7 @@ export class DocentePdfExtractionService {
         nombre = fallbackNameMatch ? fallbackNameMatch[0].trim() : '';
       }
 
-      const tieneError = !nombre || !email;
+      const tieneError = !nombre || !email || !email.toLowerCase().endsWith('@correo.buap.mx');
 
       docentes.push({
         nombre: nombre || '',
