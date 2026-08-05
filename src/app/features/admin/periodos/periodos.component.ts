@@ -88,6 +88,18 @@ export class PeriodosComponent implements OnInit {
     return Math.round((elapsed / total) * 100);
   });
 
+  calcularDuracionSemanas(periodo: Periodo): number {
+    const start = new Date(periodo.fecha_inicio).getTime();
+    const end = new Date(periodo.fecha_fin).getTime();
+
+    if (Number.isNaN(start) || Number.isNaN(end) || end <= start) {
+      return 0;
+    }
+
+    const millisecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
+    return Math.max(1, Math.round((end - start) / millisecondsPerWeek));
+  }
+
   // Obtener periodos que no están activos
   otherPeriodos = computed(() => {
     return this.periodosList().filter(p => !p.activo);
@@ -133,7 +145,7 @@ export class PeriodosComponent implements OnInit {
       nombre: this.periodoName,
       fecha_inicio: this.periodoStartDate,
       fecha_fin: this.periodoEndDate,
-      activo: this.periodoActivo
+      activo: this.isEditing() ? this.periodoActivo : false
     };
 
     if (this.isEditing() && this.periodoId) {
