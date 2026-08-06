@@ -235,47 +235,71 @@ export class ActividadesComponent {
   archivoSeleccionado = signal<string>('');
   importando = signal(false);
   resultadoImportacion = signal<any | null>(null);
+  private archivoImportacion: File | null = null;
 
   abrirImportarModal(actividad: Actividad) {
     this.actividadSeleccionada.set(actividad);
     this.archivoSeleccionado.set('');
+    this.archivoImportacion = null;
     this.resultadoImportacion.set(null);
+    this.errorOperacion.set('');
     this.showImportModal.set(true);
   }
 
   seleccionarArchivo(event: any) {
-    const file = event.target.files[0];
+    const file = event.target.files?.[0];
     if (file) {
+      this.archivoImportacion = file;
       this.archivoSeleccionado.set(file.name);
+      this.errorOperacion.set('');
     }
   }
 
   confirmarImportacion() {
-    this.importando.set(true);
-    setTimeout(() => {
-      this.importando.set(false);
-      // Simular respuesta exacta de FastAPI (Imagen 1)
-      this.resultadoImportacion.set({
-        actividad_id: this.actividadSeleccionada()?.id || '16655e27-37d5-470a-bac2-f9ebbf48e850',
-        materia_id: '22222222-2222-2222-2222-222222222222',
-        procesadas: 0,
-        insertadas: 0,
-        actualizadas: 0,
-        omitidas: []
-      });
+    const actividad = this.actividadSeleccionada();
 
-      // Actualizar evaluados en la actividad
-      if (this.actividadSeleccionada()) {
-        this.actividades.update(list => list.map(a => 
-          a.id === this.actividadSeleccionada()!.id ? { ...a, evaluados: 30, promedio: 8.5 } : a
-        ));
+    if (!actividad || !this.archivoImportacion) {
+      this.errorOperacion.set('Selecciona un archivo antes de importar calificaciones.');
+      return;
+    }
+
+    this.importando.set(true);
+    this.errorOperacion.set('');
+
+    this.calificacionesService.importarCalificaciones({
+      actividad_id: actividad.id,
+      archivo: this.archivoImportacion
+    }).subscribe({
+      next: (res) => {
+        this.importando.set(false);
+        const resultado = res?.data || res;
+        this.resultadoImportacion.set(resultado);
+        this.cargarActividades(this.materia().materia_id);
+      },
+      error: (err) => {
+        this.importando.set(false);
+        console.error('Error al importar calificaciones:', err);
+
+        const backendMessage =
+          err?.error?.detail ||
+          err?.error?.message ||
+          err?.error?.error ||
+          err?.message ||
+          '';
+
+        this.errorOperacion.set(
+          String(backendMessage).trim() ||
+          'No se pudieron importar las calificaciones. Verifica que el archivo tenga el formato esperado por el backend.'
+        );
       }
-    }, 1500);
+    });
   }
 
   cerrarImportModal() {
     this.showImportModal.set(false);
     this.resultadoImportacion.set(null);
+    this.archivoSeleccionado.set('');
+    this.archivoImportacion = null;
   }
 
   eliminarActividad(id: string) {
