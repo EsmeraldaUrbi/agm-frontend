@@ -84,6 +84,13 @@ export class CalificacionesService {
     );
   }
 
+  // DELETE /api/v1/actividades/:actividad_id
+  deleteActividad(actividadId: string): Observable<void> {
+    return this.apiClient.delete<any>(`${this.baseUrl}/actividades/${actividadId}`).pipe(
+      map(() => undefined)
+    );
+  }
+
   // === CALIFICACIONES ===
   // GET /api/v1/calificaciones/alumno/:alumno_id/materia/:materia_id
   getCalificacionesAlumnoMateria(alumnoId: string, materiaId: string): Observable<Calificacion[]> {

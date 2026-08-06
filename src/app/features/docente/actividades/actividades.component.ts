@@ -81,6 +81,7 @@ export class ActividadesComponent {
   filtroPonderacion = signal<string>('todas');
 
   actividades = signal<Actividad[]>([]);
+  errorOperacion = signal('');
 
   actividadesFiltradas = computed(() => {
     const filtro = this.filtroPonderacion();
@@ -278,6 +279,30 @@ export class ActividadesComponent {
   }
 
   eliminarActividad(id: string) {
-    this.actividades.update(list => list.filter(a => a.id !== id));
+    const confirmar = confirm('¿Deseas eliminar esta actividad? Esta acción no se puede deshacer.');
+    if (!confirmar) return;
+
+    this.errorOperacion.set('');
+
+    this.calificacionesService.deleteActividad(id).subscribe({
+      next: () => {
+        this.actividades.update(list => list.filter(a => a.id !== id));
+      },
+      error: (err) => {
+        console.error('Error al eliminar actividad:', err);
+
+        const backendMessage =
+          err?.error?.detail ||
+          err?.error?.message ||
+          err?.error?.error ||
+          err?.message ||
+          '';
+
+        this.errorOperacion.set(
+          String(backendMessage).trim() ||
+          'No se pudo eliminar la actividad. Es posible que ya tenga calificaciones registradas.'
+        );
+      }
+    });
   }
 }
