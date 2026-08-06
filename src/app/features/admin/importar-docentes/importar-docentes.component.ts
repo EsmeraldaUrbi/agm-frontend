@@ -48,7 +48,6 @@ export class ImportarDocentesComponent implements OnDestroy {
   pdfPreviewUrl = signal<SafeResourceUrl | null>(null);
   private rawPdfUrl: string | null = null;
 
-  private currentFileSignature = '';
 
   ngOnDestroy() {
     this.revokePdfUrl();
@@ -92,17 +91,8 @@ export class ImportarDocentesComponent implements OnDestroy {
       return;
     }
 
-    const signature = `${file.name}_${file.size}`;
-    const uploaded = JSON.parse(localStorage.getItem('agm_uploaded_docentes') || '[]');
-    // if (uploaded.includes(signature)) {
-    //   this.showDuplicateError.set(true);
-    //   this.triggerToast('Este archivo de docentes ya fue cargado y procesado anteriormente.', 'error');
-    //   return;
-    // }
-
     this.selectedFile.set(file);
     this.showDuplicateError.set(false);
-    this.currentFileSignature = signature;
     
     this.revokePdfUrl();
     this.rawPdfUrl = URL.createObjectURL(file);
@@ -154,11 +144,6 @@ export class ImportarDocentesComponent implements OnDestroy {
       .subscribe({
         next: () => {
           this.isSaving.set(false);
-          const uploaded = JSON.parse(localStorage.getItem('agm_uploaded_docentes') || '[]');
-          if (!uploaded.includes(this.currentFileSignature)) {
-            uploaded.push(this.currentFileSignature);
-            localStorage.setItem('agm_uploaded_docentes', JSON.stringify(uploaded));
-          }
         },
         error: (err: HttpErrorResponse) => {
           this.isSaving.set(false);
