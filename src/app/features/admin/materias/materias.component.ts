@@ -180,6 +180,13 @@ export class MateriasComponent implements OnInit {
   selectedPlan = signal<string>('all');
   selectedPeriodo = signal<string>('all');
 
+  hasActiveFilters = computed(() =>
+    !!this.searchQuery().trim() ||
+    this.selectedPeriodo() !== 'all' ||
+    this.selectedPlan() !== 'all' ||
+    this.selectedStatusFilter() !== 'all'
+  );
+
   currentPage = signal<number>(1);
   pageSize = signal<number>(10);
 

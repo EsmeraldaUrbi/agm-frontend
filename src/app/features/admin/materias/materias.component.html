@@ -31,32 +31,43 @@
 
   <div *ngIf="!isLoading() && materiasList().length > 0" class="space-y-6">
     <agm-card [hoverable]="false" customClass="bg-white border-outline-variant/15 shadow-md" bodyClass="p-0">
-      <div class="p-5 border-b border-outline-variant/15 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
-        <h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-wider">Listado de Materias</h2>
-        <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 flex-wrap">
-          <div class="relative flex-grow md:max-w-[240px]">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">search</span>
-            <input type="text" [placeholder]="'Buscar por nombre, NRC o docente...'" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event || ''); resetPagination()" class="w-full h-9 pl-9 pr-4 text-xs font-medium bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface" />
+      <div class="p-5 border-b border-outline-variant/15 space-y-4">
+        <h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
+          Listado de Materias
+        </h2>
+
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
+          <div class="flex flex-col md:flex-row md:flex-wrap items-stretch md:items-center gap-3">
+            <div class="relative w-full md:w-[280px]">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">search</span>
+              <input type="text" [placeholder]="'Buscar por nombre, NRC o docente...'" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event || ''); resetPagination()" class="w-full h-9 pl-9 pr-4 text-xs font-medium bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface" />
+            </div>
+
+            <select [ngModel]="selectedPeriodo()" (ngModelChange)="selectedPeriodo.set($event); resetPagination()" class="h-9 px-3 text-xs font-semibold bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface cursor-pointer md:w-[200px] truncate">
+              <option value="all">Todos los Periodos</option>
+              <option *ngFor="let periodo of periodosList()" [value]="periodo.periodo_id">{{ periodo.nombre }}</option>
+            </select>
+
+            <select [ngModel]="selectedPlan()" (ngModelChange)="selectedPlan.set($event); resetPagination()" class="h-9 px-3 text-xs font-semibold bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface cursor-pointer md:w-[200px] truncate">
+              <option value="all">Todos los Planes</option>
+              <option *ngFor="let plan of planesList()" [value]="plan.nombre">{{ plan.nombre }}</option>
+            </select>
+
+            <select [ngModel]="selectedStatusFilter()" (ngModelChange)="selectedStatusFilter.set($event); resetPagination()" class="h-9 px-3 text-xs font-semibold bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface cursor-pointer md:w-[180px]">
+              <option value="all">Todos los Estados</option>
+              <option value="ACTIVA">Activas</option>
+              <option value="INACTIVA">Inactivas</option>
+            </select>
           </div>
-          <select [ngModel]="selectedPeriodo()" (ngModelChange)="selectedPeriodo.set($event); resetPagination()" class="h-9 px-3 text-xs font-semibold bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface cursor-pointer max-w-[200px] truncate">
-            <option value="all">Todos los Periodos</option>
-            <option *ngFor="let periodo of periodosList()" [value]="periodo.periodo_id">{{ periodo.nombre }}</option>
-          </select>
-          <select [ngModel]="selectedPlan()" (ngModelChange)="selectedPlan.set($event); resetPagination()" class="h-9 px-3 text-xs font-semibold bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface cursor-pointer max-w-[200px] truncate">
-            <option value="all">Todos los Planes</option>
-            <option *ngFor="let plan of planesList()" [value]="plan.nombre">{{ plan.nombre }}</option>
-          </select>
-          <select [ngModel]="selectedStatusFilter()" (ngModelChange)="selectedStatusFilter.set($event); resetPagination()" class="h-9 px-3 text-xs font-semibold bg-surface-variant/20 border border-outline-variant/30 rounded-xl focus:outline-none focus:border-primary text-on-surface cursor-pointer">
-            <option value="all">Todos los Estados</option>
-            <option value="ACTIVA">Activas</option>
-            <option value="INACTIVA">Inactivas</option>
-          </select>
-          <button *ngIf="searchQuery() || selectedPeriodo() !== 'all' || selectedPlan() !== 'all' || selectedStatusFilter() !== 'all'" 
-                  (click)="limpiarFiltros()" 
-                  class="h-9 px-3 flex items-center gap-1.5 text-xs font-bold text-error bg-error/10 hover:bg-error/20 rounded-xl transition-colors shrink-0 self-end md:self-auto md:ml-auto">
-            <span class="material-symbols-outlined text-[16px]">close</span>
-            Limpiar Filtros
-          </button>
+
+          <div class="min-h-9 xl:min-w-[150px] flex justify-end">
+            <button *ngIf="hasActiveFilters()"
+                    (click)="limpiarFiltros()"
+                    class="h-9 px-3 flex items-center gap-1.5 text-xs font-bold text-error bg-error/10 hover:bg-error/20 rounded-xl transition-colors shrink-0">
+              <span class="material-symbols-outlined text-[16px]">close</span>
+              Limpiar Filtros
+            </button>
+          </div>
         </div>
       </div>
 
