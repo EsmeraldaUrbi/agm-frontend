@@ -100,6 +100,36 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  private normalizarEstadoMateria(materia: any): string {
+    return String(
+      materia?.estado ||
+      materia?.estatus ||
+      materia?.estado_materia ||
+      'ACTIVA'
+    ).trim().toUpperCase();
+  }
+
+  private esMateriaVisibleEnDashboard(materia: any): boolean {
+    const estado = this.normalizarEstadoMateria(materia);
+
+    return (
+      estado === 'ACTIVA' ||
+      estado === 'PROXIMO_CIERRE' ||
+      estado === 'POR CERRAR'
+    );
+  }
+
+  private obtenerIdentidadAlumno(alumno: any): string {
+    return String(
+      alumno?.alumno_id ||
+      alumno?.id ||
+      alumno?.matricula ||
+      alumno?.correo ||
+      alumno?.email ||
+      ''
+    ).trim().toLowerCase();
+  }
+
   cargarMateriasDelDocente(docenteId: string) {
     this.materiasService.getMateriasByDocente(docenteId, { limit: 100 }).subscribe({
       next: (response) => {
@@ -118,8 +148,10 @@ export class DashboardComponent implements OnInit {
         ).length;
 
         if (this.materias.length > 0) {
-          // 3. Alumnos inscritos (MS-3: getAlumnosByMateria)
-          let alumnosTotales = 0;
+          // 3. Alumnos únicos activos.
+          // MS-3 devuelve alumnos por materia; aquí deduplicamos para no contar al mismo alumno varias veces.
+          const alumnosUnicos = new Set<string>();
+
           const peticionesAlumnos = this.materias.map(m => {
             const materiaId = m.materia_ofertada_id || m.materia_id || m.id;
             return this.alumnosService.getAlumnosByMateria(materiaId).pipe(
@@ -128,15 +160,23 @@ export class DashboardComponent implements OnInit {
                 return of([]);
               }),
               map((alumnos: any[]) => {
-                m.alumnos = alumnos?.length || 0;
-                alumnosTotales += m.alumnos;
-                return alumnos;
+                const lista = alumnos || [];
+                m.alumnos = lista.length;
+
+                lista.forEach((alumno: any) => {
+                  const identidad = this.obtenerIdentidadAlumno(alumno);
+                  if (identidad) {
+                    alumnosUnicos.add(identidad);
+                  }
+                });
+
+                return lista;
               })
             );
           });
 
           forkJoin(peticionesAlumnos).subscribe(() => {
-            this.totalAlumnosValue = alumnosTotales;
+            this.totalAlumnosValue = alumnosUnicos.size;
           });
 
           // 4. Rendimiento por Materia (MS-7)
