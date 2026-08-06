@@ -32,6 +32,7 @@ export class PonderacionesComponent implements OnInit {
     horario: '',
     programa: 'Cargando...',
     periodo: 'Cargando...',
+    estado: '',
   });
 
   // Criterios de evaluación — reactivos con signal
@@ -60,7 +61,8 @@ export class PonderacionesComponent implements OnInit {
           seccion: contexto.seccion,
           horario: contexto.horario,
           programa: contexto.programa,
-          periodo: contexto.periodo
+          periodo: contexto.periodo,
+          estado: contexto.estado || ''
         });
 
         this.cargarPonderaciones(contexto.materia_id);
@@ -130,6 +132,44 @@ export class PonderacionesComponent implements OnInit {
 
   haCambiado = computed(() => JSON.stringify(this.criterios()) !== JSON.stringify(this.criteriosOriginales));
 
+  materiaCerrada = computed(() =>
+    String(this.materia().estado || '').trim().toUpperCase() === 'CERRADA'
+  );
+
+  motivoBloqueo = computed(() => {
+    if (this.materiaCerrada()) {
+      return 'La materia está cerrada. No se pueden modificar sus ponderaciones.';
+    }
+
+    const items = this.criterios();
+
+    if (items.length === 0) {
+      return 'Agrega al menos un criterio de evaluación.';
+    }
+
+    if (this.totalPonderacion() > 100) {
+      return `El total excede el 100% por ${this.totalPonderacion() - 100}%.`;
+    }
+
+    if (this.totalPonderacion() < 100) {
+      return `Faltan ${100 - this.totalPonderacion()}% por distribuir.`;
+    }
+
+    const nombres = items.map(c => c.nombre.trim()).filter(Boolean);
+    if (nombres.length !== items.length) {
+      return 'Todos los criterios deben tener nombre.';
+    }
+
+    const nombresNormalizados = nombres.map(n => n.toLowerCase());
+    if (new Set(nombresNormalizados).size !== nombresNormalizados.length) {
+      return 'Los nombres de los criterios no deben repetirse.';
+    }
+
+    return '';
+  });
+
+  puedeGuardar = computed(() => this.esValido() && !this.materiaCerrada());
+
   // Color del indicador circular según el total
   colorIndicador = computed(() => {
     const t = this.totalPonderacion();
@@ -165,9 +205,11 @@ export class PonderacionesComponent implements OnInit {
 
   // Guardar (POST /api/v1/ponderaciones/:materia_id)
   guardado = signal(false);
+  errorGuardado = signal('');
   guardar() {
     const materiaId = this.materia().materia_id;
-    if (!this.esValido() || !materiaId) return;
+    this.errorGuardado.set('');
+    if (!this.puedeGuardar() || !materiaId) return;
 
     const payload: any[] = this.criterios().map((c, idx) => ({
       nombre: c.nombre.trim(),
@@ -183,13 +225,14 @@ export class PonderacionesComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al guardar ponderaciones:', err);
-        alert('Hubo un error al guardar las ponderaciones. Asegúrese de que los nombres no se repitan y no existan actividades calificadas.');
+        alert('Hubo un error al guardar las ponderaciones. Asegúrese de que los nombres no se repitan y no existan actividades calificadas y/o asociadas.');
       }
     });
   }
 
   // Descartar cambios — reset a valores originales cargados de BD
   descartar() {
+    this.errorGuardado.set('');
     this.criterios.set(JSON.parse(JSON.stringify(this.criteriosOriginales)));
   }
 

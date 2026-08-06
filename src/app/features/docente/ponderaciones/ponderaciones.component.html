@@ -66,6 +66,33 @@
         </div>
       }
 
+      @if (errorGuardado()) {
+        <div class="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <span class="material-symbols-outlined text-red-600" style="font-variation-settings:'FILL' 1">error</span>
+          <div>
+            <p class="text-sm font-bold text-red-800">No se pudieron guardar las ponderaciones</p>
+            <p class="text-xs text-red-700 mt-0.5">{{ errorGuardado() }}</p>
+          </div>
+        </div>
+      }
+
+      @if (materiaCerrada()) {
+        <div class="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+          <span class="material-symbols-outlined text-amber-600" style="font-variation-settings:'FILL' 1">lock</span>
+          <div>
+            <p class="text-sm font-bold text-amber-800">Materia cerrada</p>
+            <p class="text-xs text-amber-700 mt-0.5">Las ponderaciones ya no pueden modificarse porque esta materia fue cerrada académicamente.</p>
+          </div>
+        </div>
+      }
+
+      @if (!puedeGuardar() && motivoBloqueo()) {
+        <div class="flex items-start gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+          <span class="material-symbols-outlined text-slate-500">info</span>
+          <p class="text-sm font-semibold text-slate-600">{{ motivoBloqueo() }}</p>
+        </div>
+      }
+
       <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm p-6">
         <!-- Header del formulario -->
         <div class="flex items-start justify-between mb-6">
@@ -76,7 +103,9 @@
           <div class="flex gap-2 flex-shrink-0">
 
             <button (click)="agregarCriterio()"
-              class="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-sm hover:bg-[#00253b] transition-colors">
+              [disabled]="materiaCerrada()"
+              [title]="materiaCerrada() ? 'La materia está cerrada. No se pueden agregar criterios.' : 'Agregar criterio'"
+              class="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-sm hover:bg-[#00253b] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
               <span class="material-symbols-outlined text-sm">add</span>
               Agregar Criterio
             </button>
@@ -96,10 +125,12 @@
               <!-- Nombre y descripción (editables inline) -->
               <div class="flex-1 min-w-0">
                 <input [(ngModel)]="criterio.nombre"
-                  class="w-full text-sm font-bold text-[#003b5c] bg-transparent border-b border-transparent hover:border-[#c2c7ce] focus:border-[#003b5c] focus:outline-none transition-colors py-0.5"
+                  [disabled]="materiaCerrada()"
+                  class="w-full text-sm font-bold text-[#003b5c] bg-transparent border-b border-transparent hover:border-[#c2c7ce] focus:border-[#003b5c] focus:outline-none transition-colors py-0.5 disabled:opacity-70 disabled:cursor-not-allowed"
                   placeholder="Nombre del criterio"/>
                 <input [(ngModel)]="criterio.descripcion"
-                  class="w-full text-xs text-[#72787e] italic bg-transparent border-b border-transparent hover:border-[#c2c7ce] focus:border-[#003b5c] focus:outline-none transition-colors py-0.5 mt-0.5"
+                  [disabled]="materiaCerrada()"
+                  class="w-full text-xs text-[#72787e] italic bg-transparent border-b border-transparent hover:border-[#c2c7ce] focus:border-[#003b5c] focus:outline-none transition-colors py-0.5 mt-0.5 disabled:opacity-70 disabled:cursor-not-allowed"
                   placeholder="Descripción"/>
               </div>
 
@@ -108,6 +139,7 @@
                 <div class="relative">
                   <input type="number" min="0" max="100"
                     [value]="criterio.porcentaje"
+                    [disabled]="materiaCerrada()"
                     (input)="updatePorcentaje(criterio.id, $any($event.target).value)"
                     class="w-full pl-3 pr-8 py-2 border-2 rounded-lg text-right font-bold text-[#003b5c] focus:outline-none transition-all text-sm"
                     [ngClass]="esValido()
@@ -119,7 +151,9 @@
 
               <!-- Botón eliminar -->
               <button (click)="eliminar(criterio.id)"
-                class="p-2 text-[#c2c7ce] hover:text-[#ba1a1a] transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100">
+                [disabled]="materiaCerrada()"
+                [title]="materiaCerrada() ? 'La materia está cerrada. No se pueden eliminar criterios.' : 'Eliminar criterio'"
+                class="p-2 text-[#c2c7ce] hover:text-[#ba1a1a] transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100 disabled:opacity-20 disabled:cursor-not-allowed">
                 <span class="material-symbols-outlined">delete</span>
               </button>
 
@@ -162,9 +196,10 @@
               Descartar Cambios
             </button>
             <button (click)="guardar()"
-              [disabled]="!esValido()"
+              [disabled]="!puedeGuardar()"
+              [title]="motivoBloqueo() || 'Guardar ponderaciones'"
               class="px-8 py-2.5 text-sm font-bold text-white rounded-lg shadow-md transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-              [ngClass]="esValido() ? 'bg-[#003b5c] hover:bg-[#00253b]' : 'bg-[#42474e]'">
+              [ngClass]="puedeGuardar() ? 'bg-[#003b5c] hover:bg-[#00253b]' : 'bg-[#42474e]'">
               <span class="material-symbols-outlined text-sm">save</span>
               Guardar Ponderaciones
             </button>
@@ -261,7 +296,7 @@
         </div>
         <h3 class="text-sm font-bold mb-4 flex items-center gap-2 relative z-10">
           <span class="material-symbols-outlined text-sm text-[#42d0fe]">lightbulb</span>
-          Lineamientos BUAP
+          Lineamientos Académicos
         </h3>
         <ul class="text-xs space-y-2.5 font-medium text-[#a0cbf3] relative z-10">
           <li class="flex gap-2">
