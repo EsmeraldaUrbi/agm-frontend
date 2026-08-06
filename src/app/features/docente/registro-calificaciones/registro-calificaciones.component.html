@@ -1,404 +1,808 @@
-<div class="font-['Inter']">
-
-  <!-- ===== Header de Materia (Banner) ===== -->
-  <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden mb-6">
-    <div class="p-8 bg-gradient-to-r from-[#003B5C] to-[#00566d] text-white">
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <div class="flex items-center gap-2 mb-3">
-            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia().programa }}</span>
-            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia().periodo }}</span>
-          </div>
-          <h1 class="text-3xl font-extrabold tracking-tight mb-3 font-['Public_Sans']">{{ materia().nombre }}</h1>
-          <div class="flex flex-wrap gap-4 text-white/80 font-medium text-sm">
-            <div class="flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-sm">numbers</span>
-              NRC: {{ materia().nrc }}
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-sm">meeting_room</span>
-              Sección: {{ materia().seccion }}
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-sm">schedule</span>
-              {{ materia().horario }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tabs de navegación -->
-    <nav class="flex border-b border-slate-100 bg-white px-6 overflow-x-auto">
-      @for (tab of tabs; track tab) {
-        <a class="px-5 py-4 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 cursor-pointer"
-          [routerLink]="['/docente/materias', materia().materia_id, tab.toLowerCase()]"
-          [ngClass]="tab === 'Actividades'
-            ? 'text-[#003b5c] border-[#003b5c]'
-            : 'text-slate-500 hover:text-[#003b5c] border-transparent'">
-          {{ tab }}
-        </a>
-      }
-    </nav>
-  </div>
-
-  <!-- ===== Contenido de Calificaciones ===== -->
-  <div class="space-y-6">
-
-    <!-- Barra de Actividad Seleccionada y Acciones -->
-    <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-      <!-- Breadcrumb y Título -->
-      <div class="mb-6 flex flex-col gap-2">
-        <div class="flex items-center gap-2 text-sm text-[#72787e] font-semibold uppercase tracking-wider">
-          <span>{{ actividadActual().ponderacion_nombre }}</span>
-          <span class="w-1 h-1 rounded-full bg-[#c2c7ce]"></span>
-          <span>Valor: {{ actividadActual().valor_maximo }} pts</span>
-        </div>
-        <h2 class="text-3xl font-black text-[#003b5c] font-['Public_Sans']">{{ actividadActual().nombre }}</h2>
-      </div>
-
-      <div class="flex flex-wrap gap-3 w-full md:w-auto justify-end">
-        <button (click)="abrirImportarModal()"
-          class="flex items-center gap-2 px-4 py-2.5 border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 rounded-lg font-bold text-sm transition-colors shadow-sm flex-1 md:flex-none justify-center">
-          <span class="material-symbols-outlined text-sm">upload_file</span>
-          Importar Excel
-        </button>
-
-        <button (click)="cargarDatosCalificacion(materia().materia_id, actividadActual().actividad_id)"
-          class="px-5 py-2.5 bg-[#003b5c] text-white rounded-lg shadow hover:bg-[#00253b] transition-colors font-bold text-sm flex items-center gap-2">
-          <span class="material-symbols-outlined text-[18px]">refresh</span>
-          Actualizar Datos
-        </button>
-      </div>
-    </div>
-
-    <!-- Tabla Principal de Calificaciones -->
-    <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden">
-      <!-- Header Tabla -->
-      <div class="flex items-center justify-between p-4 bg-[#f8f9fa] border-b border-[#c2c7ce] rounded-t-xl">
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-[#003b5c] text-lg font-light">group</span>
-          <h3 class="text-sm font-bold text-[#42474e] uppercase tracking-wider font-['Public_Sans']">Lista de Alumnos Inscritos ({{ calificaciones().length }})</h3>
-        </div>
-        <div class="text-sm font-bold text-[#42474e]">
-          Promedio de la Actividad: <span class="text-[#003b5c] text-base">{{ promedioActividad() | number:'1.1-2' }} / {{ actividadActual().valor_maximo }}</span>
-        </div>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse whitespace-nowrap">
-          <thead>
-            <tr class="bg-slate-50/50 border-b border-[#c2c7ce]/40 text-[11px] font-extrabold text-[#72787e] uppercase tracking-widest">
-              <th class="py-4 px-6">MATRÃCULA</th>
-              <th class="py-4 px-6">ALUMNO</th>
-              <th class="py-4 px-6">CORREO INSTITUCIONAL</th>
-              <th class="py-4 px-6 text-center w-36" title="Calificación registrada para esta actividad">CALIFICACIÃN REGISTRADA</th>
-              <th class="py-4 px-6 text-center w-36">ACCIONES</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 font-medium text-sm">
-            @for (item of calificaciones(); track item.alumno_id) {
-              <tr class="hover:bg-[#f3f4f5]/40 transition-colors group" [ngClass]="{'bg-red-50/10': item.calificacion === 0}">
-                <td class="py-4 px-6 font-mono font-bold text-[#003b5c]">{{ item.matricula }}</td>
-                <td class="py-4 px-6 font-bold text-[#42474e]">{{ item.nombre }}</td>
-                <td class="py-4 px-6 text-xs text-[#72787e]">{{ item.correo }}</td>
-                
-                <!-- Calificación Registrada -->
-                <td class="p-4 align-middle text-center">
-                  @if (item.calificacion !== null) {
-                    <div class="inline-flex items-center justify-center px-4 py-1.5 bg-[#f3f4f5] border border-[#c2c7ce] rounded-lg shadow-sm">
-                      <span class="font-bold text-[#003b5c] text-base">{{ item.calificacion }}</span>
-                      <span class="text-[#72787e] text-xs font-bold mx-1">/</span>
-                      <span class="text-[#72787e] text-xs font-bold">{{ actividadActual().valor_maximo }}</span>
-                    </div>
-                  } @else {
-                    <div class="inline-flex items-center justify-center px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg shadow-sm">
-                      <span class="text-xs font-bold uppercase tracking-wider">Sin Calificar</span>
-                    </div>
-                  }
-                </td>
-
-                <!-- Acciones (Calificar Manualmente) -->
-                <td class="py-3 px-6 text-center bg-slate-50/40 group-hover:bg-white transition-colors">
-                  <button (click)="abrirManualModal(item)"
-                    class="flex items-center gap-1.5 px-3 py-1.5 bg-[#003b5c] text-white hover:bg-[#00253b] rounded-lg text-xs font-bold transition-all shadow-sm mx-auto">
-                    <span class="material-symbols-outlined text-sm">edit_square</span>
-                    Calificar Manual
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Table Footer -->
-      <div class="p-4 bg-white border-t border-[#c2c7ce] rounded-b-xl flex items-center justify-between text-sm">
-        <div class="flex items-center gap-6">
-          <div class="flex items-center gap-2">
-            <div class="w-2.5 h-2.5 rounded-full bg-[#003b5c]"></div>
-            <span class="font-bold text-[#42474e]">Aprobados: {{ alumnosAprobados() }}</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-2.5 h-2.5 rounded-full bg-[#ba1a1a]"></div>
-            <span class="font-bold text-[#42474e]">Sin Calificar / Cero: {{ alumnosSinCalificarOCero() }}</span>
-          </div>
-        </div>
-        <div class="text-[#72787e] font-medium text-xs">
-          Sincronización en tiempo real vía gRPC con MS-Alumnos y MS-Calificaciones
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ========================================================================= -->
-  <!-- MODAL: IMPORTAR EXCEL DE CALIFICACIONES                                   -->
-  <!-- ========================================================================= -->
-  @if (showImportModal()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div class="bg-white rounded-2xl shadow-2xl border border-[#c2c7ce] w-full max-w-2xl overflow-hidden animate-scale-up flex flex-col max-h-[90vh]">
-        
-        <!-- Header Modal -->
-        <div class="bg-gradient-to-r from-[#003b5c] to-[#006782] p-6 text-white flex justify-between items-center flex-shrink-0">
-          <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="material-symbols-outlined text-2xl">upload_file</span>
-              <h3 class="text-xl font-bold font-['Public_Sans']">Importar Calificaciones desde Excel</h3>
-            </div>
-            <p class="text-xs text-white/80 font-medium pl-8">Actividad: {{ actividadActual().nombre }}</p>
-          </div>
-          <button (click)="cerrarImportModal()" class="text-white/80 hover:text-white transition-colors">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
-        <!-- Body Modal -->
-        <div class="p-6 space-y-6 overflow-y-auto flex-1">
-          
-          @if (!resultadoImportacion()) {
-            <!-- Paso 1: Selección de Archivo -->
-            <div class="border-2 border-dashed border-[#c2c7ce] rounded-xl p-8 text-center hover:border-[#003b5c] transition-colors relative group bg-[#f3f4f5]/30">
-              <input type="file" accept=".xlsx,.xls,.csv" (change)="seleccionarArchivo($event)"
-                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"/>
-              
-              <span class="material-symbols-outlined text-5xl text-[#003b5c] mb-3 block group-hover:scale-110 transition-transform duration-300">
-                cloud_upload
-              </span>
-
-              @if (archivoSeleccionado()) {
-                <p class="text-sm font-bold text-[#003b5c] mb-1">{{ archivoSeleccionado() }}</p>
-                <p class="text-xs text-emerald-600 font-semibold flex items-center justify-center gap-1">
-                  <span class="material-symbols-outlined text-sm">check_circle</span> Archivo listo para importar
-                </p>
-              } @else {
-                <p class="text-sm font-bold text-[#003b5c] mb-1">Haz clic para buscar o arrastra tu archivo Excel aquí</p>
-                <p class="text-xs text-[#72787e]">Formatos soportados: .xlsx, .xls, .csv</p>
-              }
-            </div>
-
-            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 text-amber-800 text-xs leading-relaxed font-medium">
-              <span class="material-symbols-outlined text-amber-600 flex-shrink-0" style="font-variation-settings:'FILL' 1">warning</span>
-              <div>
-                <strong class="font-bold block mb-0.5">Aviso importante sobre el formato:</strong>
-                El archivo Excel debe contener la columna de <strong>correo</strong> institucional del alumno y la columna de calificación. Las filas en blanco o sin puntos se considerarÃ¡n como no calificadas.
-              </div>
-            </div>
-          }
-
-          @if (importando()) {
-            <!-- Estado de Carga -->
-            <div class="py-16 text-center space-y-4">
-              <div class="w-12 h-12 border-4 border-[#003b5c]/20 border-t-[#003b5c] rounded-full animate-spin mx-auto"></div>
-              <p class="text-sm font-bold text-[#003b5c]">Procesando archivo Excel y verificando alumnos con MS-Alumnos...</p>
-              <p class="text-xs text-[#72787e]">Por favor no cierres esta ventana.</p>
-            </div>
-          }
-
-          @if (resultadoImportacion() && !importando()) {
-            <!-- Paso 2: Resultados de Importación -->
-            <div class="space-y-6 animate-fade-in">
-              
-              <!-- Banner de Ãxito -->
-              <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3">
-                <span class="material-symbols-outlined text-emerald-600 text-2xl" style="font-variation-settings:'FILL' 1">check_circle</span>
-                <div>
-                  <h4 class="text-sm font-bold text-emerald-800">Importación de calificaciones finalizada</h4>
-                  <p class="text-xs text-emerald-700 font-mono mt-0.5">Actividad ID: {{ resultadoImportacion().actividad_id }}</p>
-                </div>
-              </div>
-
-              <!-- Tarjetas de Resumen -->
-              <div class="grid grid-cols-4 gap-4">
-                <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl text-center">
-                  <span class="text-2xl font-black text-[#003b5c] block mb-1">{{ resultadoImportacion().procesadas }}</span>
-                  <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Procesadas</span>
-                </div>
-                <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center">
-                  <span class="text-2xl font-black text-emerald-700 block mb-1">{{ resultadoImportacion().insertadas }}</span>
-                  <span class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Insertadas</span>
-                </div>
-                <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl text-center">
-                  <span class="text-2xl font-black text-blue-700 block mb-1">{{ resultadoImportacion().actualizadas }}</span>
-                  <span class="text-[10px] font-extrabold text-blue-800 uppercase tracking-wider">Actualizadas</span>
-                </div>
-                <div class="bg-red-50 border border-red-200 p-4 rounded-xl text-center">
-                  <span class="text-2xl font-black text-red-700 block mb-1">{{ resultadoImportacion().omitidas.length }}</span>
-                  <span class="text-[10px] font-extrabold text-red-800 uppercase tracking-wider">Omitidas</span>
-                </div>
-              </div>
-
-              <!-- Tabla de Omitidas / Errores -->
-              @if (resultadoImportacion().omitidas.length > 0) {
-                <div class="border border-red-200 rounded-xl overflow-hidden shadow-sm">
-                  <div class="bg-red-50 px-4 py-3 border-b border-red-200 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-red-600 text-sm" style="font-variation-settings:'FILL' 1">error</span>
-                    <h5 class="text-xs font-bold text-red-800 uppercase tracking-wider">Filas Omitidas / Sin Calificar</h5>
-                  </div>
-                  <table class="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
-                        <th class="p-3">FILA</th>
-                        <th class="p-3">CORREO INSTITUCIONAL</th>
-                        <th class="p-3">MOTIVO DEL RECHAZO</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 bg-white font-medium">
-                      @for (omit of resultadoImportacion().omitidas; track omit.correo) {
-                        <tr class="hover:bg-red-50/20 transition-colors">
-                          <td class="p-3 font-bold text-slate-700 font-mono">{{ omit.fila }}</td>
-                          <td class="p-3 text-[#003b5c] font-semibold">{{ omit.correo }}</td>
-                          <td class="p-3 text-[#ba1a1a] italic">{{ omit.motivo }}</td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                </div>
-              }
-
-            </div>
-          }
-
-        </div>
-
-        <!-- Footer Modal -->
-        <div class="p-6 bg-[#f3f4f5] border-t border-[#c2c7ce]/60 flex justify-end gap-3 flex-shrink-0">
-          @if (!resultadoImportacion()) {
-            <button (click)="cerrarImportModal()"
-              class="px-5 py-2.5 text-sm font-bold text-[#42474e] hover:bg-slate-200 rounded-lg transition-colors">
-              Cancelar
-            </button>
-            <button (click)="confirmarImportacion()" [disabled]="!archivoSeleccionado() || importando()"
-              class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
-              <span class="material-symbols-outlined text-sm">cloud_upload</span>
-              Confirmar e Importar
-            </button>
-          } @else {
-            <button (click)="cerrarImportModal()"
-              class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all">
-              Cerrar y Ver Calificaciones
-            </button>
-          }
-        </div>
-
-      </div>
-    </div>
-  }
-
-  <!-- ========================================================================= -->
-  <!-- MODAL: CALIFICACIÃN MANUAL POR ALUMNO                                     -->
-  <!-- ========================================================================= -->
-  @if (showManualModal() && alumnoSeleccionado()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div class="bg-white rounded-2xl shadow-2xl border border-[#c2c7ce] w-full max-w-lg overflow-hidden animate-scale-up flex flex-col">
-        
-        <!-- Header Modal -->
-        <div class="bg-gradient-to-r from-[#003b5c] to-[#00566d] p-6 text-white flex justify-between items-center flex-shrink-0">
-          <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="material-symbols-outlined text-2xl">edit_square</span>
-              <h3 class="text-xl font-bold font-['Public_Sans']">Calificar Alumno Manualmente</h3>
-            </div>
-            <p class="text-xs text-white/80 font-medium pl-8">Actividad: {{ actividadActual().nombre }}</p>
-          </div>
-          <button (click)="cerrarManualModal()" class="text-white/80 hover:text-white transition-colors">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
-        <!-- Body Modal -->
-        <div class="p-6 space-y-6 overflow-y-auto flex-1">
-          
-          <!-- Tarjeta de Información del Alumno -->
-          <div class="p-4 bg-[#f3f4f5] border border-[#c2c7ce]/60 rounded-xl flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-[#003b5c] text-white flex items-center justify-center font-bold text-lg flex-shrink-0 font-['Public_Sans']">
-              {{ alumnoSeleccionado()!.nombre.charAt(0) }}
-            </div>
-            <div>
-              <h4 class="text-base font-bold text-[#003b5c]">{{ alumnoSeleccionado()!.nombre }}</h4>
-              <p class="text-xs text-[#72787e] font-mono mt-0.5">Matrícula: {{ alumnoSeleccionado()!.matricula }} | {{ alumnoSeleccionado()!.correo }}</p>
-            </div>
-          </div>
-
-          <!-- Formulario de Calificación -->
-          <div class="space-y-4">
-            <div>
-              <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">
-                Calificación Obtenida (Puntos sobre {{ actividadActual().valor_maximo }})
-              </label>
-              <input type="number" [(ngModel)]="formCalificacionManual().calificacion" min="0" [max]="actividadActual().valor_maximo" step="0.1"
-                class="w-full bg-[#f8f9fa] border-2 border-[#c2c7ce] rounded-lg px-4 py-2.5 text-base font-bold text-[#003b5c] focus:border-[#003b5c] focus:ring-1 focus:ring-[#003b5c] outline-none transition-all"/>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">
-                Estatus de Entrega
-              </label>
-              <select [(ngModel)]="formCalificacionManual().estatus_entrega"
-                class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-4 py-2 text-sm text-[#191c1d] focus:border-[#003b5c] outline-none transition-all">
-                <option value="Entregado a Tiempo">Entregado a Tiempo</option>
-                <option value="Entrega Tardía">Entrega Tardía</option>
-                <option value="Justificado">Justificado</option>
-                <option value="No Entregó">No Entregó</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">
-                Comentarios / Retroalimentación (Opcional)
-              </label>
-              <textarea [(ngModel)]="formCalificacionManual().observaciones" rows="3"
-                class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg p-3 text-sm text-[#191c1d] focus:border-[#003b5c] outline-none transition-all"
-                placeholder="Escribe comentarios o notas sobre el desempeño en esta actividad..."></textarea>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Footer Modal -->
-        <div class="p-6 bg-[#f3f4f5] border-t border-[#c2c7ce]/60 flex justify-end gap-3 flex-shrink-0">
-          <button (click)="cerrarManualModal()"
-            class="px-5 py-2.5 text-sm font-bold text-[#42474e] hover:bg-slate-200 rounded-lg transition-colors">
-            Cancelar
-          </button>
-          <button (click)="guardarCalificacionManual()"
-            class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all flex items-center gap-2">
-            <span class="material-symbols-outlined text-sm">save</span>
-            Guardar Calificación
-          </button>
-        </div>
-
-      </div>
-    </div>
-  }
-
-  <!-- Toast de Ãxito Calificación Manual -->
-  @if (mensajeExitoManual()) {
-    <div class="fixed bottom-6 right-6 z-50 flex items-center gap-3 p-4 bg-emerald-600 text-white rounded-xl shadow-2xl animate-bounce-in border border-emerald-500 max-w-md">
-      <span class="material-symbols-outlined text-2xl flex-shrink-0" style="font-variation-settings:'FILL' 1">check_circle</span>
-      <p class="text-sm font-bold">{{ mensajeExitoManual() }}</p>
-    </div>
-  }
-
-</div>
-
+<div class="font-['Inter']">
+
+
+
+  <!-- ===== Header de Materia (Banner) ===== -->
+
+  <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden mb-6">
+
+    <div class="p-8 bg-gradient-to-r from-[#003B5C] to-[#00566d] text-white">
+
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+
+        <div>
+
+          <div class="flex items-center gap-2 mb-3">
+
+            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia().programa }}</span>
+
+            <span class="px-2 py-0.5 bg-white/20 rounded text-[10px] font-bold uppercase tracking-widest">{{ materia().periodo }}</span>
+
+          </div>
+
+          <h1 class="text-3xl font-extrabold tracking-tight mb-3 font-['Public_Sans']">{{ materia().nombre }}</h1>
+
+          <div class="flex flex-wrap gap-4 text-white/80 font-medium text-sm">
+
+            <div class="flex items-center gap-1.5">
+
+              <span class="material-symbols-outlined text-sm">numbers</span>
+
+              NRC: {{ materia().nrc }}
+
+            </div>
+
+            <div class="flex items-center gap-1.5">
+
+              <span class="material-symbols-outlined text-sm">meeting_room</span>
+
+              Sección: {{ materia().seccion }}
+
+            </div>
+
+            <div class="flex items-center gap-1.5">
+
+              <span class="material-symbols-outlined text-sm">schedule</span>
+
+              {{ materia().horario }}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- Tabs de navegación -->
+
+    <nav class="flex border-b border-slate-100 bg-white px-6 overflow-x-auto">
+
+      @for (tab of tabs; track tab) {
+
+        <a class="px-5 py-4 text-sm font-semibold whitespace-nowrap transition-colors border-b-2 cursor-pointer"
+
+          [routerLink]="['/docente/materias', materia().materia_id, tab.toLowerCase()]"
+
+          [ngClass]="tab === 'Actividades'
+
+            ? 'text-[#003b5c] border-[#003b5c]'
+
+            : 'text-slate-500 hover:text-[#003b5c] border-transparent'">
+
+          {{ tab }}
+
+        </a>
+
+      }
+
+    </nav>
+
+  </div>
+
+
+
+  <!-- ===== Contenido de Calificaciones ===== -->
+
+  <div class="space-y-6">
+
+
+
+    <!-- Barra de Actividad Seleccionada y Acciones -->
+
+    <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+
+      <!-- Breadcrumb y Título -->
+
+      <div class="mb-6 flex flex-col gap-2">
+
+        <div class="flex items-center gap-2 text-sm text-[#72787e] font-semibold uppercase tracking-wider">
+
+          <span>{{ actividadActual().ponderacion_nombre }}</span>
+
+          <span class="w-1 h-1 rounded-full bg-[#c2c7ce]"></span>
+
+          <span>Valor: {{ actividadActual().valor_maximo }} pts</span>
+
+        </div>
+
+        <h2 class="text-3xl font-black text-[#003b5c] font-['Public_Sans']">{{ actividadActual().nombre }}</h2>
+
+      </div>
+
+
+
+      <div class="flex flex-wrap gap-3 w-full md:w-auto justify-end">
+
+        <button (click)="abrirImportarModal()"
+
+          class="flex items-center gap-2 px-4 py-2.5 border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 rounded-lg font-bold text-sm transition-colors shadow-sm flex-1 md:flex-none justify-center">
+
+          <span class="material-symbols-outlined text-sm">upload_file</span>
+
+          Importar Excel
+
+        </button>
+
+
+
+        <button (click)="cargarDatosCalificacion(materia().materia_id, actividadActual().actividad_id)"
+
+          class="px-5 py-2.5 bg-[#003b5c] text-white rounded-lg shadow hover:bg-[#00253b] transition-colors font-bold text-sm flex items-center gap-2">
+
+          <span class="material-symbols-outlined text-[18px]">refresh</span>
+
+          Actualizar Datos
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- Tabla Principal de Calificaciones -->
+
+    <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden">
+
+      <!-- Header Tabla -->
+
+      <div class="flex items-center justify-between p-4 bg-[#f8f9fa] border-b border-[#c2c7ce] rounded-t-xl">
+
+        <div class="flex items-center gap-2">
+
+          <span class="material-symbols-outlined text-[#003b5c] text-lg font-light">group</span>
+
+          <h3 class="text-sm font-bold text-[#42474e] uppercase tracking-wider font-['Public_Sans']">Lista de Alumnos Inscritos ({{ calificaciones().length }})</h3>
+
+        </div>
+
+        <div class="text-sm font-bold text-[#42474e]">
+
+          Promedio de la Actividad: <span class="text-[#003b5c] text-base">{{ promedioActividad() | number:'1.1-2' }} / {{ actividadActual().valor_maximo }}</span>
+
+        </div>
+
+      </div>
+
+
+
+      <div class="overflow-x-auto">
+
+        <table class="w-full text-left border-collapse whitespace-nowrap">
+
+          <thead>
+
+            <tr class="bg-slate-50/50 border-b border-[#c2c7ce]/40 text-[11px] font-extrabold text-[#72787e] uppercase tracking-widest">
+
+              <th class="py-4 px-6">MATRÃCULA</th>
+
+              <th class="py-4 px-6">ALUMNO</th>
+
+              <th class="py-4 px-6">CORREO INSTITUCIONAL</th>
+
+              <th class="py-4 px-6 text-center w-36" title="Calificación registrada para esta actividad">CALIFICACIÃN REGISTRADA</th>
+
+              <th class="py-4 px-6 text-center w-36">ACCIONES</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody class="divide-y divide-slate-100 font-medium text-sm">
+
+            @for (item of calificaciones(); track item.alumno_id) {
+
+              <tr class="hover:bg-[#f3f4f5]/40 transition-colors group" [ngClass]="{'bg-red-50/10': item.calificacion === 0}">
+
+                <td class="py-4 px-6 font-mono font-bold text-[#003b5c]">{{ item.matricula }}</td>
+
+                <td class="py-4 px-6 font-bold text-[#42474e]">{{ item.nombre }}</td>
+
+                <td class="py-4 px-6 text-xs text-[#72787e]">{{ item.correo }}</td>
+
+                
+
+                <!-- Calificación Registrada -->
+
+                <td class="p-4 align-middle text-center">
+
+                  @if (item.calificacion !== null) {
+
+                    <div class="inline-flex items-center justify-center px-4 py-1.5 bg-[#f3f4f5] border border-[#c2c7ce] rounded-lg shadow-sm">
+
+                      <span class="font-bold text-[#003b5c] text-base">{{ item.calificacion }}</span>
+
+                      <span class="text-[#72787e] text-xs font-bold mx-1">/</span>
+
+                      <span class="text-[#72787e] text-xs font-bold">{{ actividadActual().valor_maximo }}</span>
+
+                    </div>
+
+                  } @else {
+
+                    <div class="inline-flex items-center justify-center px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-lg shadow-sm">
+
+                      <span class="text-xs font-bold uppercase tracking-wider">Sin Calificar</span>
+
+                    </div>
+
+                  }
+
+                </td>
+
+
+
+                <!-- Acciones (Calificar Manualmente) -->
+
+                <td class="py-3 px-6 text-center bg-slate-50/40 group-hover:bg-white transition-colors">
+
+                  <button (click)="abrirManualModal(item)"
+
+                    class="flex items-center gap-1.5 px-3 py-1.5 bg-[#003b5c] text-white hover:bg-[#00253b] rounded-lg text-xs font-bold transition-all shadow-sm mx-auto">
+
+                    <span class="material-symbols-outlined text-sm">edit_square</span>
+
+                    Calificar Manual
+
+                  </button>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+
+      <!-- Table Footer -->
+
+      <div class="p-4 bg-white border-t border-[#c2c7ce] rounded-b-xl flex items-center justify-between text-sm">
+
+        <div class="flex items-center gap-6">
+
+          <div class="flex items-center gap-2">
+
+            <div class="w-2.5 h-2.5 rounded-full bg-[#003b5c]"></div>
+
+            <span class="font-bold text-[#42474e]">Aprobados: {{ alumnosAprobados() }}</span>
+
+          </div>
+
+          <div class="flex items-center gap-2">
+
+            <div class="w-2.5 h-2.5 rounded-full bg-[#ba1a1a]"></div>
+
+            <span class="font-bold text-[#42474e]">Sin Calificar / Cero: {{ alumnosSinCalificarOCero() }}</span>
+
+          </div>
+
+        </div>
+
+        <div class="text-[#72787e] font-medium text-xs">
+
+          Sincronización en tiempo real vía gRPC con MS-Alumnos y MS-Calificaciones
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+  </div>
+
+
+
+  <!-- ========================================================================= -->
+
+  <!-- MODAL: IMPORTAR EXCEL DE CALIFICACIONES                                   -->
+
+  <!-- ========================================================================= -->
+
+  @if (showImportModal()) {
+
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+
+      <div class="bg-white rounded-2xl shadow-2xl border border-[#c2c7ce] w-full max-w-2xl overflow-hidden animate-scale-up flex flex-col max-h-[90vh]">
+
+        
+
+        <!-- Header Modal -->
+
+        <div class="bg-gradient-to-r from-[#003b5c] to-[#006782] p-6 text-white flex justify-between items-center flex-shrink-0">
+
+          <div>
+
+            <div class="flex items-center gap-2 mb-1">
+
+              <span class="material-symbols-outlined text-2xl">upload_file</span>
+
+              <h3 class="text-xl font-bold font-['Public_Sans']">Importar Calificaciones desde Excel</h3>
+
+            </div>
+
+            <p class="text-xs text-white/80 font-medium pl-8">Actividad: {{ actividadActual().nombre }}</p>
+
+          </div>
+
+          <button (click)="cerrarImportModal()" class="text-white/80 hover:text-white transition-colors">
+
+            <span class="material-symbols-outlined">close</span>
+
+          </button>
+
+        </div>
+
+
+
+        <!-- Body Modal -->
+
+        <div class="p-6 space-y-6 overflow-y-auto flex-1">
+
+          
+
+          @if (!resultadoImportacion()) {
+
+            <!-- Paso 1: Selección de Archivo -->
+
+            <div class="border-2 border-dashed border-[#c2c7ce] rounded-xl p-8 text-center hover:border-[#003b5c] transition-colors relative group bg-[#f3f4f5]/30">
+
+              <input type="file" accept=".xlsx,.xls,.csv" (change)="seleccionarArchivo($event)"
+
+                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"/>
+
+              
+
+              <span class="material-symbols-outlined text-5xl text-[#003b5c] mb-3 block group-hover:scale-110 transition-transform duration-300">
+
+                cloud_upload
+
+              </span>
+
+
+
+              @if (archivoSeleccionado()) {
+
+                <p class="text-sm font-bold text-[#003b5c] mb-1">{{ archivoSeleccionado() }}</p>
+
+                <p class="text-xs text-emerald-600 font-semibold flex items-center justify-center gap-1">
+
+                  <span class="material-symbols-outlined text-sm">check_circle</span> Archivo listo para importar
+
+                </p>
+
+              } @else {
+
+                <p class="text-sm font-bold text-[#003b5c] mb-1">Haz clic para buscar o arrastra tu archivo Excel aquí</p>
+
+                <p class="text-xs text-[#72787e]">Formatos soportados: .xlsx, .xls, .csv</p>
+
+              }
+
+            </div>
+
+
+
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 text-amber-800 text-xs leading-relaxed font-medium">
+
+              <span class="material-symbols-outlined text-amber-600 flex-shrink-0" style="font-variation-settings:'FILL' 1">warning</span>
+
+              <div>
+
+                <strong class="font-bold block mb-0.5">Aviso importante sobre el formato:</strong>
+
+                El archivo Excel debe contener la columna de <strong>correo</strong> institucional del alumno y la columna de calificación. Las filas en blanco o sin puntos se considerarÃ¡n como no calificadas.
+
+              </div>
+
+            </div>
+
+          }
+
+
+
+          @if (importando()) {
+
+            <!-- Estado de Carga -->
+
+            <div class="py-16 text-center space-y-4">
+
+              <div class="w-12 h-12 border-4 border-[#003b5c]/20 border-t-[#003b5c] rounded-full animate-spin mx-auto"></div>
+
+              <p class="text-sm font-bold text-[#003b5c]">Procesando archivo Excel y verificando alumnos con MS-Alumnos...</p>
+
+              <p class="text-xs text-[#72787e]">Por favor no cierres esta ventana.</p>
+
+            </div>
+
+          }
+
+
+
+          @if (resultadoImportacion() && !importando()) {
+
+            <!-- Paso 2: Resultados de Importación -->
+
+            <div class="space-y-6 animate-fade-in">
+
+              
+
+              <!-- Banner de Ãxito -->
+
+              <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3">
+
+                <span class="material-symbols-outlined text-emerald-600 text-2xl" style="font-variation-settings:'FILL' 1">check_circle</span>
+
+                <div>
+
+                  <h4 class="text-sm font-bold text-emerald-800">Importación de calificaciones finalizada</h4>
+
+                  <p class="text-xs text-emerald-700 font-mono mt-0.5">Actividad ID: {{ resultadoImportacion().actividad_id }}</p>
+
+                </div>
+
+              </div>
+
+
+
+              <!-- Tarjetas de Resumen -->
+
+              <div class="grid grid-cols-4 gap-4">
+
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl text-center">
+
+                  <span class="text-2xl font-black text-[#003b5c] block mb-1">{{ resultadoImportacion().procesadas }}</span>
+
+                  <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Procesadas</span>
+
+                </div>
+
+                <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center">
+
+                  <span class="text-2xl font-black text-emerald-700 block mb-1">{{ resultadoImportacion().insertadas }}</span>
+
+                  <span class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Insertadas</span>
+
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl text-center">
+
+                  <span class="text-2xl font-black text-blue-700 block mb-1">{{ resultadoImportacion().actualizadas }}</span>
+
+                  <span class="text-[10px] font-extrabold text-blue-800 uppercase tracking-wider">Actualizadas</span>
+
+                </div>
+
+                <div class="bg-red-50 border border-red-200 p-4 rounded-xl text-center">
+
+                  <span class="text-2xl font-black text-red-700 block mb-1">{{ resultadoImportacion().omitidas.length }}</span>
+
+                  <span class="text-[10px] font-extrabold text-red-800 uppercase tracking-wider">Omitidas</span>
+
+                </div>
+
+              </div>
+
+
+
+              <!-- Tabla de Omitidas / Errores -->
+
+              @if (resultadoImportacion().omitidas.length > 0) {
+
+                <div class="border border-red-200 rounded-xl overflow-hidden shadow-sm">
+
+                  <div class="bg-red-50 px-4 py-3 border-b border-red-200 flex items-center gap-2">
+
+                    <span class="material-symbols-outlined text-red-600 text-sm" style="font-variation-settings:'FILL' 1">error</span>
+
+                    <h5 class="text-xs font-bold text-red-800 uppercase tracking-wider">Filas Omitidas / Sin Calificar</h5>
+
+                  </div>
+
+                  <table class="w-full text-left border-collapse text-xs">
+
+                    <thead>
+
+                      <tr class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+
+                        <th class="p-3">FILA</th>
+
+                        <th class="p-3">CORREO INSTITUCIONAL</th>
+
+                        <th class="p-3">MOTIVO DEL RECHAZO</th>
+
+                      </tr>
+
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-100 bg-white font-medium">
+
+                      @for (omit of resultadoImportacion().omitidas; track omit.correo) {
+
+                        <tr class="hover:bg-red-50/20 transition-colors">
+
+                          <td class="p-3 font-bold text-slate-700 font-mono">{{ omit.fila }}</td>
+
+                          <td class="p-3 text-[#003b5c] font-semibold">{{ omit.correo }}</td>
+
+                          <td class="p-3 text-[#ba1a1a] italic">{{ omit.motivo }}</td>
+
+                        </tr>
+
+                      }
+
+                    </tbody>
+
+                  </table>
+
+                </div>
+
+              }
+
+
+
+            </div>
+
+          }
+
+
+
+        </div>
+
+
+
+        <!-- Footer Modal -->
+
+        <div class="p-6 bg-[#f3f4f5] border-t border-[#c2c7ce]/60 flex justify-end gap-3 flex-shrink-0">
+
+          @if (!resultadoImportacion()) {
+
+            <button (click)="cerrarImportModal()"
+
+              class="px-5 py-2.5 text-sm font-bold text-[#42474e] hover:bg-slate-200 rounded-lg transition-colors">
+
+              Cancelar
+
+            </button>
+
+            <button (click)="confirmarImportacion()" [disabled]="!archivoSeleccionado() || importando()"
+
+              class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+
+              <span class="material-symbols-outlined text-sm">cloud_upload</span>
+
+              Confirmar e Importar
+
+            </button>
+
+          } @else {
+
+            <button (click)="cerrarImportModal()"
+
+              class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all">
+
+              Cerrar y Ver Calificaciones
+
+            </button>
+
+          }
+
+        </div>
+
+
+
+      </div>
+
+    </div>
+
+  }
+
+
+
+  <!-- ========================================================================= -->
+
+  <!-- MODAL: CALIFICACIÃN MANUAL POR ALUMNO                                     -->
+
+  <!-- ========================================================================= -->
+
+  @if (showManualModal() && alumnoSeleccionado()) {
+
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+
+      <div class="bg-white rounded-2xl shadow-2xl border border-[#c2c7ce] w-full max-w-lg overflow-hidden animate-scale-up flex flex-col">
+
+        
+
+        <!-- Header Modal -->
+
+        <div class="bg-gradient-to-r from-[#003b5c] to-[#00566d] p-6 text-white flex justify-between items-center flex-shrink-0">
+
+          <div>
+
+            <div class="flex items-center gap-2 mb-1">
+
+              <span class="material-symbols-outlined text-2xl">edit_square</span>
+
+              <h3 class="text-xl font-bold font-['Public_Sans']">Calificar Alumno Manualmente</h3>
+
+            </div>
+
+            <p class="text-xs text-white/80 font-medium pl-8">Actividad: {{ actividadActual().nombre }}</p>
+
+          </div>
+
+          <button (click)="cerrarManualModal()" class="text-white/80 hover:text-white transition-colors">
+
+            <span class="material-symbols-outlined">close</span>
+
+          </button>
+
+        </div>
+
+
+
+        <!-- Body Modal -->
+
+        <div class="p-6 space-y-6 overflow-y-auto flex-1">
+
+          
+
+          <!-- Tarjeta de Información del Alumno -->
+
+          <div class="p-4 bg-[#f3f4f5] border border-[#c2c7ce]/60 rounded-xl flex items-center gap-4">
+
+            <div class="w-12 h-12 rounded-full bg-[#003b5c] text-white flex items-center justify-center font-bold text-lg flex-shrink-0 font-['Public_Sans']">
+
+              {{ alumnoSeleccionado()!.nombre.charAt(0) }}
+
+            </div>
+
+            <div>
+
+              <h4 class="text-base font-bold text-[#003b5c]">{{ alumnoSeleccionado()!.nombre }}</h4>
+
+              <p class="text-xs text-[#72787e] font-mono mt-0.5">Matrícula: {{ alumnoSeleccionado()!.matricula }} | {{ alumnoSeleccionado()!.correo }}</p>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- Formulario de Calificación -->
+
+          <div class="space-y-4">
+
+            <div>
+
+              <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">
+
+                Calificación Obtenida (Puntos sobre {{ actividadActual().valor_maximo }})
+
+              </label>
+
+              <input type="number" [(ngModel)]="formCalificacionManual().calificacion" min="0" [max]="actividadActual().valor_maximo" step="0.1"
+
+                class="w-full bg-[#f8f9fa] border-2 border-[#c2c7ce] rounded-lg px-4 py-2.5 text-base font-bold text-[#003b5c] focus:border-[#003b5c] focus:ring-1 focus:ring-[#003b5c] outline-none transition-all"/>
+
+            </div>
+
+
+
+            <div>
+
+              <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">
+
+                Estatus de Entrega
+
+              </label>
+
+              <select [(ngModel)]="formCalificacionManual().estatus_entrega"
+
+                class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg px-4 py-2 text-sm text-[#191c1d] focus:border-[#003b5c] outline-none transition-all">
+
+                <option value="Entregado a Tiempo">Entregado a Tiempo</option>
+
+                <option value="Entrega Tardía">Entrega Tardía</option>
+
+                <option value="Justificado">Justificado</option>
+
+                <option value="No Entregó">No Entregó</option>
+
+              </select>
+
+            </div>
+
+
+
+            <div>
+
+              <label class="block text-xs font-bold text-[#42474e] mb-1.5 uppercase tracking-wider">
+
+                Comentarios / Retroalimentación (Opcional)
+
+              </label>
+
+              <textarea [(ngModel)]="formCalificacionManual().observaciones" rows="3"
+
+                class="w-full bg-[#f8f9fa] border border-[#c2c7ce] rounded-lg p-3 text-sm text-[#191c1d] focus:border-[#003b5c] outline-none transition-all"
+
+                placeholder="Escribe comentarios o notas sobre el desempeño en esta actividad..."></textarea>
+
+            </div>
+
+          </div>
+
+
+
+        </div>
+
+
+
+        <!-- Footer Modal -->
+
+        <div class="p-6 bg-[#f3f4f5] border-t border-[#c2c7ce]/60 flex justify-end gap-3 flex-shrink-0">
+
+          <button (click)="cerrarManualModal()"
+
+            class="px-5 py-2.5 text-sm font-bold text-[#42474e] hover:bg-slate-200 rounded-lg transition-colors">
+
+            Cancelar
+
+          </button>
+
+          <button (click)="guardarCalificacionManual()"
+
+            class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all flex items-center gap-2">
+
+            <span class="material-symbols-outlined text-sm">save</span>
+
+            Guardar Calificación
+
+          </button>
+
+        </div>
+
+
+
+      </div>
+
+    </div>
+
+  }
+
+
+
+  <!-- Toast de Ãxito Calificación Manual -->
+
+  @if (mensajeExitoManual()) {
+
+    <div class="fixed bottom-6 right-6 z-50 flex items-center gap-3 p-4 bg-emerald-600 text-white rounded-xl shadow-2xl animate-bounce-in border border-emerald-500 max-w-md">
+
+      <span class="material-symbols-outlined text-2xl flex-shrink-0" style="font-variation-settings:'FILL' 1">check_circle</span>
+
+      <p class="text-sm font-bold">{{ mensajeExitoManual() }}</p>
+
+    </div>
+
+  }
+
+
+
+</div>
+
+
+

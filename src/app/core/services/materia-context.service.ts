@@ -3,6 +3,7 @@ import { Observable, forkJoin, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { MateriasService } from './materias.service';
 import { PeriodosService } from './periodos.service';
+import { PlanesEstudioService } from './planes-estudio.service';
 
 export interface MateriaContextoAcademico {
   materia_id: string;
@@ -25,14 +26,17 @@ export interface MateriaContextoAcademico {
 export class MateriaContextService {
   private materiasService = inject(MateriasService);
   private periodosService = inject(PeriodosService);
+  private planesEstudioService = inject(PlanesEstudioService);
 
   getContextoMateria(materiaId: string): Observable<MateriaContextoAcademico> {
     return this.materiasService.getMateriaById(materiaId).pipe(
-      switchMap((materia: any) => forkJoin({
-        materia: of(materia),
-        periodoNombre: this.resolverPeriodoNombre(materia),
-        planNombre: this.resolverPlanEstudioNombre(materia)
-      })),
+      switchMap((materia: any) => {
+        return forkJoin({
+          materia: of(materia),
+          periodoNombre: this.resolverPeriodoNombre(materia),
+          planNombre: this.resolverPlanEstudioNombre(materia)
+        });
+      }),
       map(({ materia, periodoNombre, planNombre }) => ({
         materia_id: String(materia?.materia_id || materia?.id || materiaId),
         nrc: materia?.nrc || 'N/A',
@@ -85,8 +89,8 @@ export class MateriaContextService {
       materia?.carrera ||
       materia?.tipo_formacion;
 
-    if (nombreDirecto) {
-      return of(nombreDirecto);
+    if (nombreDirecto && String(nombreDirecto).trim()) {
+      return of(String(nombreDirecto).trim());
     }
 
     const planId =
@@ -112,7 +116,98 @@ export class MateriaContextService {
       return of(planes.join(', '));
     }
 
-    return of('Plan de estudio no disponible');
+    const materiaCatalogoId =
+      materia?.materia_catalogo_id ||
+      materia?.materia?.materia_catalogo_id ||
+      materia?.materia_catalogo?.materia_catalogo_id ||
+      materia?.catalogo?.materia_catalogo_id;
+
+    const claveMateria =
+      materia?.clave ||
+      materia?.materia?.clave ||
+      materia?.materia_catalogo?.clave ||
+      materia?.catalogo?.clave;
+
+    const nombreMateria =
+      materia?.nombre ||
+      materia?.materia?.nombre ||
+      materia?.materia_catalogo?.nombre ||
+      materia?.catalogo?.nombre;
+
+    if (!materiaCatalogoId && !claveMateria && !nombreMateria) {
+      return of('Plan de estudio no disponible');
+    }
+
+    return this.planesEstudioService.getPlanesEstudio(1, 100, true).pipe(
+      map((res: any) => Array.isArray(res) ? res : (res?.items || [])),
+      switchMap((planesActivos: any[]) => {
+        if (!planesActivos.length) {
+          return of('Plan de estudio no disponible');
+        }
+
+        const consultas = planesActivos.map((plan: any) => {
+          const planEstudioId = plan?.plan_estudio_id || plan?.id;
+
+          if (!planEstudioId) {
+            return of(null);
+          }
+
+          return this.planesEstudioService.getMateriasPorPlan(String(planEstudioId), 1, 100).pipe(
+            map((res: any) => {
+              const materiasPlan = Array.isArray(res) ? res : (res?.items || res?.data || []);
+
+              const existeRelacion = materiasPlan.some((item: any) => {
+                const catalogoId =
+                  item?.materia_catalogo_id ||
+                  item?.materia?.materia_catalogo_id ||
+                  item?.materia_catalogo?.materia_catalogo_id ||
+                  item?.id;
+
+                const clave =
+                  item?.clave ||
+                  item?.materia?.clave ||
+                  item?.materia_catalogo?.clave;
+
+                const nombre =
+                  item?.nombre ||
+                  item?.materia?.nombre ||
+                  item?.materia_catalogo?.nombre;
+
+                const coincidePorId =
+                  materiaCatalogoId && catalogoId &&
+                  String(catalogoId) === String(materiaCatalogoId);
+
+                const coincidePorClave =
+                  claveMateria && clave &&
+                  String(clave).trim().toLowerCase() === String(claveMateria).trim().toLowerCase();
+
+                const coincidePorNombre =
+                  nombreMateria && nombre &&
+                  String(nombre).trim().toLowerCase() === String(nombreMateria).trim().toLowerCase();
+
+                return coincidePorId || coincidePorClave || coincidePorNombre;
+              });
+
+              return existeRelacion ? (plan?.nombre || plan?.codigo || null) : null;
+            }),
+            catchError(() => of(null))
+          );
+        });
+
+        return forkJoin(consultas).pipe(
+          map((nombres: Array<string | null>) => {
+            const encontrados = nombres.filter((n): n is string => !!n);
+            return encontrados.length
+              ? encontrados.join(', ')
+              : 'Plan de estudio no disponible';
+          })
+        );
+      }),
+      catchError((err) => {
+        console.error('Error al resolver plan por relaciones de planes de estudio:', err);
+        return of('Plan de estudio no disponible');
+      })
+    );
   }
 
   private formatearHorario(horarios: any[]): string {
