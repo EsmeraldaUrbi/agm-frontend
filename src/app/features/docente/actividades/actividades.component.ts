@@ -37,6 +37,7 @@ export class ActividadesComponent {
     horario: 'Sin horario asignado',
     programa: 'Cargando programa...',
     periodo: 'Cargando periodo...',
+    estado: '',
   });
 
   constructor(
@@ -63,7 +64,8 @@ export class ActividadesComponent {
           seccion: contexto.seccion,
           horario: contexto.horario,
           programa: contexto.programa,
-          periodo: contexto.periodo
+          periodo: contexto.periodo,
+          estado: contexto.estado || contexto.raw?.estado || contexto.raw?.estado_materia || ''
         });
 
         this.cargarPonderaciones(contexto.materia_id);
@@ -82,6 +84,10 @@ export class ActividadesComponent {
 
   actividades = signal<Actividad[]>([]);
   errorOperacion = signal('');
+
+  materiaCerrada = computed(() =>
+    String(this.materia().estado || '').trim().toUpperCase() === 'CERRADA'
+  );
 
   actividadesFiltradas = computed(() => {
     const filtro = this.filtroPonderacion();
@@ -191,6 +197,11 @@ export class ActividadesComponent {
   }
 
   abrirCrearModal() {
+    if (this.materiaCerrada()) {
+      this.errorOperacion.set('No se pueden crear actividades porque la materia está cerrada.');
+      return;
+    }
+
     if (this.ponderaciones.length === 0) {
       alert('Primero debes configurar las ponderaciones de esta materia.');
       return;
@@ -206,6 +217,11 @@ export class ActividadesComponent {
   }
 
   guardarActividad() {
+    if (this.materiaCerrada()) {
+      this.errorOperacion.set('No se pueden guardar actividades porque la materia está cerrada.');
+      return;
+    }
+
     if (!this.nuevaActividad.nombre || !this.nuevaActividad.ponderacion_id) return;
     
     const payload = {
@@ -238,6 +254,11 @@ export class ActividadesComponent {
   private archivoImportacion: File | null = null;
 
   abrirImportarModal(actividad: Actividad) {
+    if (this.materiaCerrada()) {
+      this.errorOperacion.set('No se pueden importar calificaciones porque la materia está cerrada.');
+      return;
+    }
+
     this.actividadSeleccionada.set(actividad);
     this.archivoSeleccionado.set('');
     this.archivoImportacion = null;
@@ -256,6 +277,11 @@ export class ActividadesComponent {
   }
 
   confirmarImportacion() {
+    if (this.materiaCerrada()) {
+      this.errorOperacion.set('No se puede importar: la materia está cerrada.');
+      return;
+    }
+
     const actividad = this.actividadSeleccionada();
 
     if (!actividad || !this.archivoImportacion) {
@@ -303,6 +329,11 @@ export class ActividadesComponent {
   }
 
   eliminarActividad(id: string) {
+    if (this.materiaCerrada()) {
+      this.errorOperacion.set('No se pueden eliminar actividades porque la materia está cerrada.');
+      return;
+    }
+
     const confirmar = confirm('¿Deseas eliminar esta actividad? Esta acción no se puede deshacer.');
     if (!confirmar) return;
 

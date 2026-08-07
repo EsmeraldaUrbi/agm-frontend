@@ -2,7 +2,20 @@
 
 
 
-  <!-- ===== Header de Materia (Banner) ===== -->
+  
+  @if (materiaCerrada()) {
+    <div class="mb-6 flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+      <span class="material-symbols-outlined text-amber-600" style="font-variation-settings:'FILL' 1">lock</span>
+      <div>
+        <p class="text-sm font-bold text-amber-900">Materia cerrada</p>
+        <p class="text-xs text-amber-700 mt-0.5">
+          Esta materia ya fue cerrada. No se permiten importar ni capturar calificaciones.
+        </p>
+      </div>
+    </div>
+  }
+
+<!-- ===== Header de Materia (Banner) ===== -->
 
   <div class="bg-white rounded-xl border border-[#c2c7ce] shadow-sm overflow-hidden mb-6">
 
@@ -120,7 +133,7 @@
 
         <button (click)="abrirImportarModal()"
 
-          class="flex items-center gap-2 px-4 py-2.5 border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 rounded-lg font-bold text-sm transition-colors shadow-sm flex-1 md:flex-none justify-center">
+          class="flex items-center gap-2 px-4 py-2.5 border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 rounded-lg font-bold text-sm transition-colors shadow-sm flex-1 md:flex-none justify-center" [disabled]="materiaCerrada()">
 
           <span class="material-symbols-outlined text-sm">upload_file</span>
 
@@ -244,7 +257,7 @@
 
                   <button (click)="abrirManualModal(item)"
 
-                    class="flex items-center gap-1.5 px-3 py-1.5 bg-[#003b5c] text-white hover:bg-[#00253b] rounded-lg text-xs font-bold transition-all shadow-sm mx-auto">
+                    class="flex items-center gap-1.5 px-3 py-1.5 bg-[#003b5c] text-white hover:bg-[#00253b] rounded-lg text-xs font-bold transition-all shadow-sm mx-auto" [disabled]="materiaCerrada()">
 
                     <span class="material-symbols-outlined text-sm">edit_square</span>
 
@@ -578,7 +591,7 @@
 
             </button>
 
-            <button (click)="confirmarImportacion()" [disabled]="!archivoSeleccionado() || importando()"
+            <button (click)="confirmarImportacion()" [disabled]="(!archivoSeleccionado() || importando()) || materiaCerrada()"
 
               class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
 
@@ -766,7 +779,7 @@
 
           <button (click)="guardarCalificacionManual()"
 
-            class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all flex items-center gap-2">
+            class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all flex items-center gap-2" [disabled]="materiaCerrada()">
 
             <span class="material-symbols-outlined text-sm">save</span>
 

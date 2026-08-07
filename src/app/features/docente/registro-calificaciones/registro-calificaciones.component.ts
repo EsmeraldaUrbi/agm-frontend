@@ -36,6 +36,7 @@ export class RegistroCalificacionesComponent {
     horario: 'Sin horario asignado',
     programa: 'Cargando programa...',
     periodo: 'Cargando periodo...',
+    estado: '',
   });
 
   tabs = ['Alumnos', 'Ponderaciones', 'Actividades'];
@@ -80,7 +81,8 @@ export class RegistroCalificacionesComponent {
           seccion: contexto.seccion,
           horario: contexto.horario,
           programa: contexto.programa,
-          periodo: contexto.periodo
+          periodo: contexto.periodo,
+          estado: contexto.estado || contexto.raw?.estado || contexto.raw?.estado_materia || ''
         });
       },
       error: (err) => {
@@ -156,7 +158,16 @@ export class RegistroCalificacionesComponent {
   importando = signal(false);
   resultadoImportacion = signal<any | null>(null);
 
+  materiaCerrada = computed(() =>
+    String(this.materia().estado || '').trim().toUpperCase() === 'CERRADA'
+  );
+
   abrirImportarModal() {
+    if (this.materiaCerrada()) {
+      alert('No se pueden importar calificaciones porque la materia está cerrada.');
+      return;
+    }
+
     this.archivoSeleccionado.set('');
     this.archivoParaSubir = null;
     this.resultadoImportacion.set(null);
@@ -177,6 +188,11 @@ export class RegistroCalificacionesComponent {
   }
 
   confirmarImportacion() {
+    if (this.materiaCerrada()) {
+      alert('No se puede importar: la materia está cerrada.');
+      return;
+    }
+
     const actId = this.actividadActual().actividad_id;
     if (!actId) {
       alert('Error: No se encontró el ID de la actividad.');
@@ -227,6 +243,11 @@ export class RegistroCalificacionesComponent {
   mensajeExitoManual = signal<string | null>(null);
 
   abrirManualModal(alumno: CalificacionActividad) {
+    if (this.materiaCerrada()) {
+      alert('No se pueden capturar calificaciones manuales porque la materia está cerrada.');
+      return;
+    }
+
     this.alumnoSeleccionado.set(alumno);
     this.formCalificacionManual.set({
       calificacion: alumno.calificacion || 0,
@@ -242,6 +263,11 @@ export class RegistroCalificacionesComponent {
   }
 
   guardarCalificacionManual() {
+    if (this.materiaCerrada()) {
+      alert('No se puede guardar la calificación: la materia está cerrada.');
+      return;
+    }
+
     const current = this.alumnoSeleccionado();
     const actId = this.actividadActual().actividad_id;
     
