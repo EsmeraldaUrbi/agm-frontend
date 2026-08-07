@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -6,6 +6,7 @@ import { forkJoin } from 'rxjs';
 import { MateriaContextService } from '../../../core/services/materia-context.service';
 import { AlumnosService } from '../../../core/services/alumnos.service';
 import { CalificacionesService, Actividad, Calificacion } from '../../../core/services/calificaciones.service';
+import { FinalActService } from '../../../core/services/final-act.service';
 
 interface CalificacionActividad {
   id: string; // calificacion_id si existe, vacío si no
@@ -28,6 +29,7 @@ interface CalificacionActividad {
   templateUrl: './registro-calificaciones.component.html'
 })
 export class RegistroCalificacionesComponent {
+  private finalActService = inject(FinalActService);
   materia = signal<any>({
     materia_id: '',
     nrc: '',
@@ -156,7 +158,16 @@ export class RegistroCalificacionesComponent {
   importando = signal(false);
   resultadoImportacion = signal<any | null>(null);
 
+  materiaFinalizada = computed(() =>
+    this.finalActService.isFinalActPrinted(this.materia().materia_id)
+  );
+
   abrirImportarModal() {
+    if (this.materiaFinalizada()) {
+      alert('No se pueden importar calificaciones porque la Lista Final ya fue impresa.');
+      return;
+    }
+
     this.archivoSeleccionado.set('');
     this.archivoParaSubir = null;
     this.resultadoImportacion.set(null);
@@ -177,6 +188,11 @@ export class RegistroCalificacionesComponent {
   }
 
   confirmarImportacion() {
+    if (this.materiaFinalizada()) {
+      alert('No se puede importar: la Lista Final ya fue impresa.');
+      return;
+    }
+
     const actId = this.actividadActual().actividad_id;
     if (!actId) {
       alert('Error: No se encontró el ID de la actividad.');
@@ -227,6 +243,11 @@ export class RegistroCalificacionesComponent {
   mensajeExitoManual = signal<string | null>(null);
 
   abrirManualModal(alumno: CalificacionActividad) {
+    if (this.materiaFinalizada()) {
+      alert('No se pueden capturar calificaciones porque la Lista Final ya fue impresa.');
+      return;
+    }
+
     this.alumnoSeleccionado.set(alumno);
     this.formCalificacionManual.set({
       calificacion: alumno.calificacion || 0,
@@ -242,6 +263,11 @@ export class RegistroCalificacionesComponent {
   }
 
   guardarCalificacionManual() {
+    if (this.materiaFinalizada()) {
+      alert('No se puede guardar la calificación porque la Lista Final ya fue impresa.');
+      return;
+    }
+
     const current = this.alumnoSeleccionado();
     const actId = this.actividadActual().actividad_id;
     

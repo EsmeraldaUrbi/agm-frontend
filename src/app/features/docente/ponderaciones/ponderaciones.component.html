@@ -75,16 +75,18 @@
           </div>
         </div>
       }
+  @if (materiaFinalizada()) {
+    <div class="mb-6 flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+      <span class="material-symbols-outlined text-red-600" style="font-variation-settings:'FILL' 1">lock</span>
+      <div>
+        <p class="text-sm font-bold text-red-900">Lista Final impresa</p>
+        <p class="text-xs text-red-700 mt-0.5">
+          Ya no se permiten modificaciones académicas después de imprimir la lista final.
+        </p>
+      </div>
+    </div>
+  }
 
-      @if (materiaFinalizada()) {
-        <div class="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-          <span class="material-symbols-outlined text-amber-600" style="font-variation-settings:'FILL' 1">lock</span>
-          <div>
-            <p class="text-sm font-bold text-amber-800">Acta final impresa</p>
-            <p class="text-xs text-amber-700 mt-0.5">Las ponderaciones ya no pueden modificarse porque la lista final ya fue impresa.</p>
-          </div>
-        </div>
-      }
 
       @if (!puedeGuardar() && motivoBloqueo()) {
         <div class="flex items-start gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">

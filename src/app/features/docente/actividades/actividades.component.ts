@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,7 @@ import { CalificacionesService } from '../../../core/services/calificaciones.ser
 import { AlumnosService } from '../../../core/services/alumnos.service';
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { FinalActService } from '../../../core/services/final-act.service';
 
 interface Actividad {
   id: string;
@@ -29,6 +30,7 @@ interface Actividad {
   templateUrl: './actividades.component.html'
 })
 export class ActividadesComponent {
+  private finalActService = inject(FinalActService);
   materia = signal<any>({
     materia_id: '',
     nrc: '',
@@ -190,7 +192,16 @@ export class ActividadesComponent {
     });
   }
 
+  materiaFinalizada = computed(() =>
+    this.finalActService.isFinalActPrinted(this.materia().materia_id)
+  );
+
   abrirCrearModal() {
+    if (this.materiaFinalizada()) {
+      this.errorOperacion.set('No se pueden crear actividades porque la Lista Final ya fue impresa.');
+      return;
+    }
+
     if (this.ponderaciones.length === 0) {
       alert('Primero debes configurar las ponderaciones de esta materia.');
       return;
@@ -206,6 +217,11 @@ export class ActividadesComponent {
   }
 
   guardarActividad() {
+    if (this.materiaFinalizada()) {
+      this.errorOperacion.set('No se pueden guardar actividades porque la Lista Final ya fue impresa.');
+      return;
+    }
+
     if (!this.nuevaActividad.nombre || !this.nuevaActividad.ponderacion_id) return;
     
     const payload = {
@@ -238,6 +254,11 @@ export class ActividadesComponent {
   private archivoImportacion: File | null = null;
 
   abrirImportarModal(actividad: Actividad) {
+    if (this.materiaFinalizada()) {
+      this.errorOperacion.set('No se pueden importar calificaciones porque la Lista Final ya fue impresa.');
+      return;
+    }
+
     this.actividadSeleccionada.set(actividad);
     this.archivoSeleccionado.set('');
     this.archivoImportacion = null;
@@ -256,6 +277,11 @@ export class ActividadesComponent {
   }
 
   confirmarImportacion() {
+    if (this.materiaFinalizada()) {
+      this.errorOperacion.set('No se puede importar: la Lista Final ya fue impresa.');
+      return;
+    }
+
     const actividad = this.actividadSeleccionada();
 
     if (!actividad || !this.archivoImportacion) {
@@ -303,6 +329,11 @@ export class ActividadesComponent {
   }
 
   eliminarActividad(id: string) {
+    if (this.materiaFinalizada()) {
+      this.errorOperacion.set('No se pueden eliminar actividades porque la Lista Final ya fue impresa.');
+      return;
+    }
+
     const confirmar = confirm('¿Deseas eliminar esta actividad? Esta acción no se puede deshacer.');
     if (!confirmar) return;
 

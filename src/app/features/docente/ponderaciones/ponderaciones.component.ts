@@ -4,6 +4,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CalificacionesService, Criterio as BackendCriterio } from '../../../core/services/calificaciones.service';
 import { MateriaContextService } from '../../../core/services/materia-context.service';
+import { FinalActService } from '../../../core/services/final-act.service';
 
 interface Criterio {
   id: number;
@@ -20,6 +21,7 @@ interface Criterio {
   templateUrl: './ponderaciones.component.html'
 })
 export class PonderacionesComponent implements OnInit {
+  private finalActService = inject(FinalActService);
   private route = inject(ActivatedRoute);
   private materiaContextService = inject(MateriaContextService);
   private calificacionesService = inject(CalificacionesService);
@@ -134,7 +136,7 @@ export class PonderacionesComponent implements OnInit {
 
   materiaFinalizada = computed(() => {
     const estado = String(this.materia().estado || '').trim().toUpperCase();
-    return ['FINALIZADA', 'ACTA_IMPRESA', 'ACTA FINAL IMPRESA', 'LISTA_FINAL_IMPRESA'].includes(estado);
+    return ['FINALIZADA', 'ACTA_IMPRESA', 'ACTA FINAL IMPRESA', 'LISTA_FINAL_IMPRESA'].includes(estado) || this.finalActService.isFinalActPrinted(this.materia().materia_id);
   });
 
   motivoBloqueo = computed(() => {

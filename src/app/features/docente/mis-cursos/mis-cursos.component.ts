@@ -10,6 +10,7 @@ import { AlumnosService } from '../../../core/services/alumnos.service';
 import { CalificacionesService } from '../../../core/services/calificaciones.service';
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { FinalActService } from '../../../core/services/final-act.service';
 
 interface Curso {
   materia_id: string;
@@ -32,6 +33,7 @@ export class MisCursosComponent implements OnInit {
   private authService = inject(AuthService);
   private docentesService = inject(DocentesService);
   private materiasService = inject(MateriasService);
+  private finalActService = inject(FinalActService);
   private periodosService = inject(PeriodosService);
   private alumnosService = inject(AlumnosService);
   private calificacionesService = inject(CalificacionesService);
@@ -172,6 +174,33 @@ export class MisCursosComponent implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  actaFinalImpresa(curso: any): boolean {
+    return this.finalActService.isFinalActPrinted(curso?.materia_id);
+  }
+
+  imprimirListaFinal(curso: any): void {
+    if (!curso?.materia_id) return;
+
+    if (curso.estado !== 'CERRADA') {
+      alert('Solo se puede imprimir la Lista Final cuando la materia ya está cerrada.');
+      return;
+    }
+
+    if (this.actaFinalImpresa(curso)) {
+      alert('La Lista Final de esta materia ya fue marcada como impresa.');
+      return;
+    }
+
+    const confirmar = confirm(
+      '¿Deseas marcar la Lista Final como impresa? Después de esto ya no se permitirán cambios en ponderaciones, actividades ni calificaciones desde la interfaz.'
+    );
+
+    if (!confirmar) return;
+
+    this.finalActService.markFinalActPrinted(curso.materia_id);
+    alert('Lista Final marcada como impresa. Las modificaciones académicas quedaron bloqueadas desde la interfaz.');
   }
 
   abrirModalCierre(curso: Curso) {

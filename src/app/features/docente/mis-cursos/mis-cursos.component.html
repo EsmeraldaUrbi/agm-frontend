@@ -129,18 +129,65 @@
 
         <!-- Card Footer Actions -->
         <div class="border-t border-[#c2c7ce] p-4 bg-[#f3f4f5] flex gap-3">
-          <button [routerLink]="['../materias', curso.materia_id, 'actividades']"
-            class="flex-1 bg-[#003b5c] text-white py-2.5 rounded-lg text-sm font-bold hover:bg-[#00253b] transition-colors flex items-center justify-center gap-2 shadow-sm truncate">
-            <span class="material-symbols-outlined text-[18px]">manage_accounts</span>
-            Administrar Materia
-          </button>
-          <button (click)="abrirModalCierre(curso)" [disabled]="curso.estado === 'CERRADA'"
-            [ngClass]="curso.estado === 'CERRADA' ? 'opacity-50 cursor-not-allowed border-slate-300 text-slate-500 hover:bg-transparent' : 'border-amber-500 text-amber-600 hover:bg-amber-50'"
-            class="px-4 py-2.5 border-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-1.5 flex-shrink-0"
-            title="Cerrar Materia">
-            <span class="material-symbols-outlined text-[18px]">lock_reset</span>
-            Cierre
-          </button>
+          <div class="relative group/action" [ngClass]="curso.estado === 'CERRADA' ? 'w-11 h-11 flex-shrink-0 ml-auto' : 'flex-1 min-w-0'">
+            <button [routerLink]="['../materias', curso.materia_id, 'actividades']"
+              class="flex items-center justify-center gap-2 rounded-lg font-bold text-xs transition-all shadow-sm bg-[#003b5c] text-white hover:bg-[#00253b]"
+              [ngClass]="curso.estado === 'CERRADA' ? 'w-11 h-11 px-0' : 'w-full px-4 py-2.5'"
+              aria-label="Administrar materia">
+              <span class="material-symbols-outlined text-sm">settings</span>
+              @if (curso.estado !== 'CERRADA') {
+                <span class="truncate">Administrar Materia</span>
+              }
+            </button>
+
+            @if (curso.estado === 'CERRADA') {
+              <div class="pointer-events-none absolute left-1/2 bottom-full z-50 mb-3 w-max max-w-56 -translate-x-1/2 scale-95 rounded-xl bg-slate-900 px-4 py-2.5 text-center text-xs font-bold text-white opacity-0 shadow-xl transition-all duration-150 group-hover/action:scale-100 group-hover/action:opacity-100">
+                Administrar materia
+                <div class="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-slate-900"></div>
+              </div>
+            }
+          </div>
+          <div class="relative group/action" [ngClass]="curso.estado === 'CERRADA' ? 'w-11 h-11 flex-shrink-0' : 'flex-1 min-w-0'">
+            <button (click)="abrirModalCierre(curso)" [disabled]="curso.estado === 'CERRADA'"
+              class="flex items-center justify-center gap-2 border rounded-lg font-bold text-xs transition-all"
+              [ngClass]="curso.estado === 'CERRADA'
+                ? 'w-11 h-11 px-0 opacity-50 cursor-not-allowed border-slate-300 text-slate-500 hover:bg-transparent'
+                : 'w-full px-4 py-2.5 border-amber-500 text-amber-600 hover:bg-amber-50'"
+              aria-label="Cierre académico">
+              <span class="material-symbols-outlined text-sm">lock</span>
+              @if (curso.estado !== 'CERRADA') {
+                <span class="truncate">Cierre</span>
+              }
+            </button>
+
+            @if (curso.estado === 'CERRADA') {
+              <div class="pointer-events-none absolute left-1/2 bottom-full z-50 mb-3 w-max max-w-56 -translate-x-1/2 scale-95 rounded-xl bg-slate-900 px-4 py-2.5 text-center text-xs font-bold text-white opacity-0 shadow-xl transition-all duration-150 group-hover/action:scale-100 group-hover/action:opacity-100">
+                Cierre académico
+                <div class="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-slate-900"></div>
+              </div>
+            }
+          </div>
+
+          @if (curso.estado === 'CERRADA') {
+            <div class="relative group/action w-11 h-11 flex-shrink-0 mr-auto">
+              <button (click)="imprimirListaFinal(curso)"
+                [disabled]="actaFinalImpresa(curso)"
+                [ngClass]="actaFinalImpresa(curso)
+                  ? 'opacity-50 cursor-not-allowed border-slate-300 text-slate-500 hover:bg-transparent'
+                  : 'border-red-500 text-red-600 hover:bg-red-50'"
+                class="flex items-center justify-center w-11 h-11 border rounded-lg font-bold text-xs transition-all"
+                [attr.aria-label]="actaFinalImpresa(curso) ? 'Lista Final Impresa' : 'Imprimir Lista Final'">
+                <span class="material-symbols-outlined text-sm">
+                  {{ actaFinalImpresa(curso) ? 'task_alt' : 'print' }}
+                </span>
+              </button>
+
+              <div class="pointer-events-none absolute left-1/2 bottom-full z-50 mb-3 w-max max-w-56 -translate-x-1/2 scale-95 rounded-xl bg-slate-900 px-4 py-2.5 text-center text-xs font-bold text-white opacity-0 shadow-xl transition-all duration-150 group-hover/action:scale-100 group-hover/action:opacity-100">
+                {{ actaFinalImpresa(curso) ? 'Lista Final Impresa' : 'Imprimir Lista Final' }}
+                <div class="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-slate-900"></div>
+              </div>
+            </div>
+          }
         </div>
       </div>
       }
