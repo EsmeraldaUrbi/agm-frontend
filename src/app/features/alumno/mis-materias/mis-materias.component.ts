@@ -39,6 +39,11 @@ export class MisMateriasComponent implements OnInit {
   materias: any[] = [];
   scheduleData: any[] = [];
   periodoActivoNombre = 'Periodo por consultar';
+  periodoActivoId: string | null = null;
+
+  get totalMateriasHorario(): number {
+    return this.materias.filter(m => m.activa).length;
+  }
 
   private inscripcionesService = inject(InscripcionesService);
   private materiasService = inject(MateriasService);
@@ -48,7 +53,6 @@ export class MisMateriasComponent implements OnInit {
   private periodosService = inject(PeriodosService);
 
   ngOnInit() {
-    this.cargarPeriodoActivo();
     this.cargarDatos();
   }
 
@@ -56,10 +60,12 @@ export class MisMateriasComponent implements OnInit {
     this.periodosService.getPeriodoActivo().subscribe({
       next: (periodo) => {
         this.periodoActivoNombre = periodo?.nombre || 'Periodo no disponible';
+        this.periodoActivoId = this.obtenerPeriodoId(periodo);
       },
       error: (err) => {
         console.error('Error al cargar periodo activo:', err);
         this.periodoActivoNombre = 'Periodo no disponible';
+        this.periodoActivoId = null;
       }
     });
   }
@@ -67,87 +73,173 @@ export class MisMateriasComponent implements OnInit {
   alumnoId: string | null = null;
 
   cargarDatos() {
+    this.cargando = true;
+
     const user = this.authService.getCurrentUser();
-    if (!user) return;
-    
-    // Primero buscar el alumno_id correspondiente a este user_id
-    this.alumnosService.getAlumnos({ limit: 1000 }).pipe(
-      switchMap(alumnos => {
-        const miRegistro = alumnos.find(a => a.user_id === user.user_id);
+    if (!user) {
+      this.materias = [];
+      this.scheduleData = [];
+      this.cargando = false;
+      return;
+    }
+
+    this.periodosService.getPeriodoActivo().pipe(
+      switchMap((periodo: any) => {
+        this.periodoActivoNombre = periodo?.nombre || 'Periodo no disponible';
+        this.periodoActivoId = this.obtenerPeriodoId(periodo);
+        return this.alumnosService.getAlumnos({ limit: 1000 });
+      }),
+      switchMap((alumnos: any[]) => {
+        const miRegistro = this.resolverAlumnoActual(alumnos, user);
+
         if (!miRegistro || !miRegistro.alumno_id) {
+          this.alumnoId = null;
           return of([]);
         }
+
         this.alumnoId = miRegistro.alumno_id;
         return this.inscripcionesService.getInscripcionesByAlumno(miRegistro.alumno_id);
+      }),
+      catchError((err) => {
+        console.error('Error al cargar datos académicos del alumno:', err);
+        return of([]);
       })
     ).subscribe({
       next: (inscripciones) => {
-        if (!inscripciones || inscripciones.length === 0) {
+        const inscripcionesPeriodo = this.normalizarLista(inscripciones)
+          .filter((ins: any) => this.esInscripcionDelPeriodoActivo(ins));
+
+        if (!this.periodoActivoId || inscripcionesPeriodo.length === 0) {
           this.materias = [];
           this.scheduleData = [];
+          this.cargando = false;
           return;
         }
 
-        const infoPeticiones = inscripciones.map(ins => 
+        const infoPeticiones = inscripcionesPeriodo.map((ins: any) =>
           this.materiasService.getMateriaById(ins.materia_id).pipe(
             catchError(() => of(null))
           )
         );
 
-        const horariosPeticiones = inscripciones.map(ins => 
+        const horariosPeticiones = inscripcionesPeriodo.map((ins: any) =>
           this.materiasService.getHorarios({ materia_ofertada_id: ins.materia_id }).pipe(
             catchError(() => of([]))
           )
         );
 
-        const statsPeticion = this.reportesService.getEstadisticasAlumno(this.alumnoId!).pipe(
-          catchError(() => of({ estadisticas: [] }))
-        );
+        const statsPeticion = this.alumnoId
+          ? this.reportesService.getEstadisticasAlumno(this.alumnoId).pipe(
+              catchError(() => of({ estadisticas: [] }))
+            )
+          : of({ estadisticas: [] });
 
-        forkJoin([forkJoin(infoPeticiones), forkJoin(horariosPeticiones), statsPeticion]).subscribe(([materiasInfo, horariosData, statsData]: [any[], any[], any]) => {
-          const statsMap = new Map();
-          if (statsData && statsData.estadisticas) {
-            statsData.estadisticas.forEach((s: any) => statsMap.set(s.materia_id, s.promedio));
-          }
+        forkJoin([forkJoin(infoPeticiones), forkJoin(horariosPeticiones), statsPeticion]).subscribe({
+          next: ([materiasInfo, horariosData, statsData]: [any[], any[], any]) => {
+            const statsMap = new Map();
 
-          this.materias = inscripciones.map((ins, index) => {
-            const info = materiasInfo[index] as any;
-            const promedio = statsMap.get(ins.materia_id);
-            return {
-              materia_id: ins.materia_id,
-              inscripcion_id: ins.inscripcion_id,
-              nrc: ins.nrc_materia || info?.nrc || 'S/N',
-              nombre: info?.nombre || 'Materia sin nombre',
-              docente: info?.docente_nombre || 'Asignado',
-              creditos: info?.creditos || 6,
-              promedio: promedio !== undefined ? promedio.toFixed(1) : 'N/A',
-              activa: ins.activa !== false
-            };
-          });
+            if (statsData && statsData.estadisticas) {
+              statsData.estadisticas.forEach((s: any) => {
+                statsMap.set(s.materia_id, s.promedio);
+              });
+            }
 
-          let allHorarios: any[] = [];
-          horariosData.forEach((horariosMateria: any[], index) => {
-            const inscripcion = inscripciones[index];
-            if (inscripcion.activa === false) return; // No mostrar materias dadas de baja en el horario
-            
-            const info = materiasInfo[index];
-            horariosMateria.forEach(h => {
-              allHorarios.push({
-                ...h,
-                materia_nombre: info?.nombre || 'Materia',
-                materia_id: inscripcion.materia_id
+            this.materias = inscripcionesPeriodo.map((ins: any, index: number) => {
+              const info = materiasInfo[index] as any;
+              const promedio = statsMap.get(ins.materia_id);
+
+              return {
+                materia_id: ins.materia_id,
+                inscripcion_id: ins.inscripcion_id,
+                periodo_id: this.obtenerPeriodoId(ins),
+                nrc: ins.nrc_materia || info?.nrc || 'S/N',
+                nombre: info?.nombre || 'Materia sin nombre',
+                docente: info?.docente_nombre || 'Asignado',
+                creditos: info?.creditos || 6,
+                promedio: promedio !== undefined && promedio !== null ? Number(promedio).toFixed(1) : 'N/A',
+                activa: ins.activa !== false
+              };
+            });
+
+            const allHorarios: any[] = [];
+
+            horariosData.forEach((horariosMateria: any[], index: number) => {
+              const inscripcion = inscripcionesPeriodo[index];
+
+              if (inscripcion.activa === false) return;
+
+              const info = materiasInfo[index];
+
+              horariosMateria.forEach(h => {
+                allHorarios.push({
+                  ...h,
+                  materia_nombre: info?.nombre || 'Materia',
+                  materia_id: inscripcion.materia_id
+                });
               });
             });
-          });
-          this.scheduleData = allHorarios;
-          this.cargando = false;
+
+            this.scheduleData = allHorarios;
+            this.cargando = false;
+          },
+          error: (err) => {
+            console.error('Error al cargar materias u horarios del periodo activo:', err);
+            this.materias = [];
+            this.scheduleData = [];
+            this.cargando = false;
+          }
         });
       },
       error: (err) => {
         console.error("Error al cargar inscripciones", err);
+        this.materias = [];
+        this.scheduleData = [];
         this.cargando = false;
       }
     });
+  }
+
+  private resolverAlumnoActual(alumnos: any[], user: any): any | null {
+    const userId = String(user?.user_id || user?.id || '').trim();
+    const email = String(user?.email || user?.correo || '').trim().toLowerCase();
+
+    return (alumnos || []).find((alumno: any) => {
+      const alumnoUserId = String(alumno?.user_id || alumno?.usuario_id || '').trim();
+      const alumnoCorreo = String(alumno?.correo || alumno?.email || '').trim().toLowerCase();
+
+      return Boolean(
+        (userId && alumnoUserId && alumnoUserId === userId) ||
+        (email && alumnoCorreo && alumnoCorreo === email)
+      );
+    }) || null;
+  }
+
+  private esInscripcionDelPeriodoActivo(inscripcion: any): boolean {
+    const periodoInscripcionId = this.obtenerPeriodoId(inscripcion);
+
+    return Boolean(
+      this.periodoActivoId &&
+      periodoInscripcionId &&
+      periodoInscripcionId === this.periodoActivoId
+    );
+  }
+
+  private obtenerPeriodoId(valor: any): string | null {
+    const id = valor?.periodo_id ||
+      valor?.id_periodo ||
+      valor?.periodo?.periodo_id ||
+      valor?.periodo?.id ||
+      valor?.id;
+
+    return id ? String(id).trim() : null;
+  }
+
+  private normalizarLista(valor: any): any[] {
+    if (Array.isArray(valor)) return valor;
+    if (Array.isArray(valor?.data)) return valor.data;
+    if (Array.isArray(valor?.items)) return valor.items;
+    if (Array.isArray(valor?.results)) return valor.results;
+    return [];
   }
 
   materiaSeleccionada: any = null;
