@@ -30,6 +30,7 @@ export class CierreMateriaComponent {
     horario: 'Sin horario asignado',
     programa: 'Cargando programa...',
     periodo: 'Cargando periodo...',
+    estado: '',
     alumnos: 0,
     promedioGrupal: 0,
     asistencias: null
@@ -78,8 +79,15 @@ export class CierreMateriaComponent {
           asistencias: null,
           horario: contexto.horario,
           programa: contexto.programa,
-          periodo: contexto.periodo
+          periodo: contexto.periodo,
+          estado: contexto.estado || ''
         });
+
+        const estadoReal = String(contexto.estado || '').trim().toUpperCase();
+        if (estadoReal === 'CERRADA') {
+          this.estadoMateria.set('cerrada');
+          this.actualizarChecklist('Cierre aceptado por backend', true);
+        }
 
         this.actualizarChecklist('Datos de materia cargados', true);
         this.actualizarChecklist('Concentrado consultado', concentradoConsultado);
@@ -113,6 +121,16 @@ export class CierreMateriaComponent {
     this.mostrarModalCierre = true;
   }
 
+  private obtenerMensajeError(err: any, fallback: string): string {
+    return String(
+      err?.error?.detail ||
+      err?.error?.message ||
+      err?.error?.error ||
+      err?.message ||
+      fallback
+    ).trim();
+  }
+
   confirmarCierre() {
     const materiaId = this.materia().materia_id;
     if (!materiaId) return;
@@ -120,45 +138,45 @@ export class CierreMateriaComponent {
     this.cerrando.set(true);
     this.errorCierre.set(null);
 
-    this.calificacionesService.cerrarConcentrado(materiaId).subscribe({
+    this.calificacionesService.cerrarConcentrado(materiaId).pipe(
+      switchMap(() => this.materiasService.cerrarMateriaOfertada(materiaId))
+    ).subscribe({
       next: () => {
         this.cerrando.set(false);
         this.estadoMateria.set('cerrada');
         this.actualizarChecklist('Cierre aceptado por backend', true);
         this.mostrarModalCierre = false;
+        this.cargarDatosMateria(materiaId);
       },
       error: (err) => {
         this.cerrando.set(false);
         this.mostrarModalCierre = false;
 
-        // Interpretar el error correctamente sin redirigir
         const status = err?.status;
-        const mensaje = err?.error?.message || err?.error?.detail || err?.message;
 
         if (status === 400) {
           this.errorCierre.set(
-            mensaje || 'No se puede cerrar la materia: verifica que todas las calificaciones estén registradas.'
+            this.obtenerMensajeError(err, 'No se puede cerrar la materia: verifica que existan ponderaciones, actividades y alumnos inscritos. Las calificaciones faltantes se considerarán como 0.')
           );
         } else if (status === 403) {
-          // 403 de negocio ≠ 403 de permisos de rol
-          // El interceptor ya redirige a /acceso-denegado si el backend devuelve 403 genérico.
-          // Por eso, el backend del concentrado debería devolver 400 o 422 para errores de validación.
           this.errorCierre.set(
-            mensaje || 'Error al cerrar la materia: verifica que la materia tenga ponderaciones configuradas.'
+            this.obtenerMensajeError(err, 'Error al cerrar la materia: verifica permisos o reglas de cierre.')
           );
         } else if (status === 404) {
-          this.errorCierre.set('No se encontró el concentrado de calificaciones para esta materia.');
+          this.errorCierre.set(
+            this.obtenerMensajeError(err, 'No se encontró la materia o el concentrado de calificaciones.')
+          );
         } else if (status === 422) {
           this.errorCierre.set(
-            mensaje || 'Validación fallida: verifica que todas las ponderaciones y calificaciones estén completas.'
+            this.obtenerMensajeError(err, 'Validación fallida: verifica que las ponderaciones sumen 100%, que existan actividades y que la materia tenga alumnos inscritos.')
           );
         } else {
           this.errorCierre.set(
-            mensaje || `Error inesperado (${status}). Intente de nuevo o contacte a soporte.`
+            this.obtenerMensajeError(err, `Error inesperado (${status}). Intente de nuevo o contacte a soporte.`)
           );
         }
 
-        console.error('Error al cerrar concentrado:', err);
+        console.error('Error al cerrar materia académicamente:', err);
       }
     });
   }
