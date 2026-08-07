@@ -1,19 +1,6 @@
 <div class="font-['Inter']">
 
-  
-  @if (materiaCerrada()) {
-    <div class="mb-6 flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-      <span class="material-symbols-outlined text-amber-600" style="font-variation-settings:'FILL' 1">lock</span>
-      <div>
-        <p class="text-sm font-bold text-amber-900">Materia cerrada</p>
-        <p class="text-xs text-amber-700 mt-0.5">
-          Esta materia ya fue cerrada. No se permiten crear, eliminar ni modificar actividades o calificaciones.
-        </p>
-      </div>
-    </div>
-  }
-
-<!-- ===== Breadcrumb de navegación ===== -->
+  <!-- ===== Breadcrumb de navegación ===== -->
   <nav class="mb-6 bg-white border border-[#e7e8e9] rounded-xl shadow-sm px-6 py-4 flex flex-wrap items-center gap-2 text-sm font-semibold">
     <a routerLink="/docente/mis-cursos" class="text-[#8b9bb0] hover:text-[#003b5c] transition-colors">Mis Cursos</a>
     <span class="text-[#8b9bb0]">›</span>
@@ -91,7 +78,7 @@
         </div>
 
         <button (click)="abrirCrearModal()"
-          [disabled]="(ponderaciones.length === 0) || materiaCerrada()"
+          [disabled]="ponderaciones.length === 0"
           [title]="ponderaciones.length === 0 ? 'Primero debes configurar las ponderaciones' : 'Crear nueva actividad'"
           class="flex items-center gap-2 px-5 py-2.5 bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all text-sm font-bold flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
           <span class="material-symbols-outlined text-sm">add</span>
@@ -155,7 +142,7 @@
 
             <button (click)="eliminarActividad(act.id)"
               class="p-2 text-[#c2c7ce] hover:text-[#ba1a1a] transition-colors flex-shrink-0"
-              title="Eliminar Actividad" [disabled]="materiaCerrada()">
+              title="Eliminar Actividad">
               <span class="material-symbols-outlined text-[18px]">delete</span>
             </button>
           </div>
@@ -237,7 +224,7 @@
             class="px-5 py-2.5 text-sm font-bold text-[#42474e] hover:bg-slate-200 rounded-lg transition-colors">
             Cancelar
           </button>
-          <button (click)="guardarActividad()" [disabled]="(!nuevaActividad.nombre) || materiaCerrada()"
+          <button (click)="guardarActividad()" [disabled]="!nuevaActividad.nombre"
             class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all disabled:opacity-40 disabled:cursor-not-allowed">
             Crear Actividad
           </button>
@@ -383,7 +370,7 @@
               class="px-5 py-2.5 text-sm font-bold text-[#42474e] hover:bg-slate-200 rounded-lg transition-colors">
               Cancelar
             </button>
-            <button (click)="confirmarImportacion()" [disabled]="(!archivoSeleccionado() || importando()) || materiaCerrada()"
+            <button (click)="confirmarImportacion()" [disabled]="!archivoSeleccionado() || importando()"
               class="px-6 py-2.5 text-sm font-bold bg-[#003b5c] text-white rounded-lg shadow-md hover:bg-[#00253b] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">cloud_upload</span>
               Confirmar e Importar
