@@ -8,7 +8,7 @@
       </div>
       <div>
         <span class="block text-[10px] text-[#72787e] uppercase tracking-wider">Reportes y estadísticas</span>
-        <span class="text-base font-black font-['Public_Sans']">Seleccionar Materia Activa:</span>
+        <span class="text-base font-black font-['Public_Sans']">Seleccionar materia:</span>
       </div>
     </div>
     <select [ngModel]="materiaSeleccionadaNrc()" (ngModelChange)="cambiarMateria($event)"
@@ -124,7 +124,7 @@
       </div>
       <div>
         <div class="text-3xl font-black text-blue-700 font-['Public_Sans']">{{ materia?.asistenciaPromedio }}</div>
-        <p class="text-xs text-[#72787e] mt-1">Sincronizado con MS-Asistencias</p>
+        <p class="text-xs text-[#72787e] mt-1">Dato agregado desde MS-Reportes</p>
       </div>
     </div>
   </div>
@@ -135,9 +135,9 @@
       <div>
         <div class="flex items-center gap-2 text-sm font-bold text-[#003b5c] uppercase tracking-wider font-['Public_Sans']">
           <span class="material-symbols-outlined text-xl">download_for_offline</span>
-          Reportes y estadísticas — Generación y Exportación de Actas
+          Reportes y estadísticas — Descarga de concentrados
         </div>
-        <p class="text-xs text-[#72787e] mt-0.5">Descarga actas y concentrados generados en tiempo real mediante librerías especializadas en MS-Reportes.</p>
+        <p class="text-xs text-[#72787e] mt-0.5">Descarga concentrados generados en tiempo real mediante MS-Reportes.</p>
       </div>
       <span class="px-3 py-1 bg-[#003b5c]/10 text-[#003b5c] font-bold rounded-lg text-xs">XLSX / PDF</span>
     </div>
@@ -152,16 +152,16 @@
             <h3 class="text-base font-bold font-['Public_Sans']">Concentrado de calificaciones</h3>
           </div>
           <p class="text-xs text-[#72787e] mb-6 leading-relaxed">
-            concentrado de calificaciones reales y finales en la materia
+            Concentrado de calificaciones reales de la materia seleccionada.
           </p>
         </div>
         <div class="flex gap-2">
-          <button (click)="descargarReporte('Calificaciones Finales', 'xlsx')"
+          <button (click)="descargarReporte('calificaciones', 'xlsx')"
             class="flex-1 py-2.5 bg-[#003b5c] hover:bg-[#00253b] text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm">
             <span class="material-symbols-outlined text-base">table</span>
             Excel (XLSX)
           </button>
-          <button (click)="descargarReporte('Calificaciones Finales', 'pdf')"
+          <button (click)="descargarReporte('calificaciones', 'pdf')"
             class="flex-1 py-2.5 border-2 border-[#003b5c] text-[#003b5c] hover:bg-[#003b5c]/5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5">
             <span class="material-symbols-outlined text-base">picture_as_pdf</span>
             PDF
@@ -177,16 +177,16 @@
             <h3 class="text-base font-bold font-['Public_Sans']">Concentrado de Asistencias</h3>
           </div>
           <p class="text-xs text-[#72787e] mb-6 leading-relaxed">
-            Registro histórico de pases de lista, retardos y porcentaje global de asistencia por alumno.
+            Descarga el concentrado de asistencias de la materia seleccionada.
           </p>
         </div>
         <div class="flex gap-2">
-          <button (click)="descargarReporte('Concentrado de Asistencias', 'xlsx')"
+          <button (click)="descargarReporte('asistencias', 'xlsx')"
             class="flex-1 py-2.5 bg-[#003b5c] hover:bg-[#00253b] text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm">
             <span class="material-symbols-outlined text-base">table</span>
             Excel (XLSX)
           </button>
-          <button (click)="descargarReporte('Concentrado de Asistencias', 'pdf')"
+          <button (click)="descargarReporte('asistencias', 'pdf')"
             class="flex-1 py-2.5 border-2 border-[#003b5c] text-[#003b5c] hover:bg-[#003b5c]/5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5">
             <span class="material-symbols-outlined text-base">picture_as_pdf</span>
             PDF
@@ -204,10 +204,10 @@
     <div class="bg-[#f3f4f5] px-6 py-4 border-b border-[#c2c7ce]/60 flex justify-between items-center">
       <div class="flex items-center gap-2 text-xs font-bold text-[#42474e] uppercase tracking-wider">
         <span class="material-symbols-outlined text-[18px] text-[#003b5c]">table_chart</span>
-        Desglose de Promedios y Rendimiento por Alumno ({{ alumnos().length }})
+        Vista previa de promedios por alumno ({{ alumnos().length }})
       </div>
       <div class="text-xs text-[#72787e] font-semibold">
-        Sincronizado con MS-Calificaciones y MS-Asistencias
+        Calificaciones desde MS-Calificaciones; asistencia individual en reporte descargable
       </div>
     </div>
 

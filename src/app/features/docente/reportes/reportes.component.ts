@@ -2,7 +2,6 @@ import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { HorarioComponent } from '../../../shared/components/horario/horario.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { DocentesService } from '../../../core/services/docentes.service';
 import { MateriasService } from '../../../core/services/materias.service';
@@ -59,7 +58,6 @@ export class ReportesComponent implements OnInit {
 
   materiaSeleccionadaNrc = signal<string>('');
   materia: MateriaActiva | null = null;
-  tabs = ['Alumnos', 'Ponderaciones', 'Actividades'];
   alumnos = signal<AlumnoRendimiento[]>([]);
 
   // Horario modal state
@@ -90,10 +88,49 @@ export class ReportesComponent implements OnInit {
     return this.periodosHistorial().find(p => p.periodo_id === this.selectedPeriodoId()) || null;
   });
 
+  private formatearPorcentaje(valor: unknown): string {
+    const numero = Number(valor);
+    if (!Number.isFinite(numero)) return 'N/A';
+    return `${Math.round(numero)}%`;
+  }
+
   getPorcentajeAprobacion(aprobados: number, reprobados: number): number {
     const total = aprobados + reprobados;
     if (total === 0) return 0;
     return Math.round((aprobados / total) * 100);
+  }
+
+  private buscarEstadisticasMateria(materia: MateriaActiva): any | null {
+    for (const periodo of this.periodosHistorial()) {
+      const encontrada = periodo.materias.find((m: any) =>
+        String(m.materia_id || '') === String(materia.materia_id || '') ||
+        String(m.nrc || '') === String(materia.nrc || '')
+      );
+
+      if (encontrada) return encontrada;
+    }
+
+    return null;
+  }
+
+  private aplicarEstadisticasReportesAMaterias(): void {
+    this.listaMateriasDisponibles.forEach(mat => {
+      const stats = this.buscarEstadisticasMateria(mat);
+      if (!stats) return;
+
+      mat.asistenciaPromedio = this.formatearPorcentaje(stats.porcentaje_asistencia);
+    });
+
+    if (this.materia) {
+      const actualizada = this.listaMateriasDisponibles.find(mat =>
+        mat.materia_id === this.materia?.materia_id ||
+        mat.nrc === this.materia?.nrc
+      );
+
+      if (actualizada) {
+        this.materia = actualizada;
+      }
+    }
   }
 
   cargarHistorialAcademico(docenteId: string) {
@@ -106,20 +143,7 @@ export class ReportesComponent implements OnInit {
         if (periodos.length > 0) {
           this.selectedPeriodoId.set(periodos[0].periodo_id);
         }
-
-        // Actualizar la asistencia promedio de las materias disponibles con los datos reales
-        this.listaMateriasDisponibles.forEach(mat => {
-           for (const p of periodos) {
-              const mStats = p.materias.find((m: any) => m.materia_id === mat.materia_id);
-              if (mStats) {
-                 mat.asistenciaPromedio = (mStats.porcentaje_asistencia || 0) + '%';
-                 // Actualizar también la lista local de alumnos para la tabla
-                 mat.alumnos.forEach((a: any) => {
-                    a.asistencia = mStats.porcentaje_asistencia || 0; 
-                 });
-              }
-           }
-        });
+        this.aplicarEstadisticasReportesAMaterias();
 
         this.isLoadingHistorial.set(false);
       },
@@ -213,7 +237,7 @@ export class ReportesComponent implements OnInit {
           materia_id: m.materia_id || m.materia_ofertada_id || m.id_materia || m.id || '',
           nrc: m.nrc || 'N/A',
           nombre: m.nombre || m.materia?.nombre || 'Materia sin Nombre',
-          seccion: m.seccion || '001',
+          seccion: m.seccion || 'Por consultar',
           horario: m.horario || 'Horario por consultar',
           programa: m.programa || m.plan_estudio?.nombre || 'Plan de estudio por consultar',
           periodo: m.periodo?.nombre || m.periodo_nombre || 'Periodo por consultar',
@@ -224,6 +248,8 @@ export class ReportesComponent implements OnInit {
           alumnos: []
         }));
         
+        this.aplicarEstadisticasReportesAMaterias();
+
         if (this.listaMateriasDisponibles.length > 0) {
           this.cambiarMateria(this.listaMateriasDisponibles[0].nrc);
         }
@@ -257,6 +283,7 @@ export class ReportesComponent implements OnInit {
           console.error('Error al cargar contexto académico de la materia:', err);
         }
       });
+      this.aplicarEstadisticasReportesAMaterias();
       this.alumnos.set(mat.alumnos);
       this.currentPage.set(1);
       
@@ -300,7 +327,7 @@ export class ReportesComponent implements OnInit {
                   nombre: infoAlumno?.nombre_completo || 'Alumno Desconocido',
                   promedioActual: promedioReal,
                   promedioFinal: ac.promedio_redondeado || 0,
-                  promedioPonderadoReal: ac.peso_considerado || 0,
+                  promedioPonderadoReal: promedioReal,
                   promedioRedondeadoOficial: ac.promedio_redondeado || 0,
                   asistencia: null,
                   estatus: promedioReal >= 6 ? 'Regular' : 'En Riesgo'
@@ -312,7 +339,7 @@ export class ReportesComponent implements OnInit {
               for (const p of this.periodosHistorial()) {
                 const mStats = p.materias.find((m: any) => m.materia_id === mat.materia_id);
                 if (mStats) {
-                  asisPromedio = (mStats.porcentaje_asistencia || 0) + '%';
+                  asisPromedio = this.formatearPorcentaje(mStats.porcentaje_asistencia);
                   break;
                 }
               }
@@ -321,12 +348,12 @@ export class ReportesComponent implements OnInit {
               mat.promedioGeneral = (sumaPromedios / total).toFixed(2);
               mat.tasaAprobacion = Math.round((alumnosAprobados / total) * 100).toString() + '%';
               mat.alumnosRiesgo = enRiesgo.toString();
-              mat.asistenciaPromedio = asisPromedio;
+              mat.asistenciaPromedio = 'N/A';
             } else {
-              mat.promedioGeneral = '0.00';
-              mat.tasaAprobacion = '0%';
-              mat.alumnosRiesgo = '0';
-              mat.asistenciaPromedio = '0%';
+              mat.promedioGeneral = 'N/A';
+              mat.tasaAprobacion = 'N/A';
+              mat.alumnosRiesgo = 'N/A';
+              mat.asistenciaPromedio = 'N/A';
             }
 
             mat.alumnos = alumnosRendimiento;
@@ -338,12 +365,18 @@ export class ReportesComponent implements OnInit {
     }
   }
 
+  private getNombreReporte(tipo: 'calificaciones' | 'asistencias'): string {
+    return tipo === 'calificaciones'
+      ? 'Concentrado de calificaciones'
+      : 'Concentrado de asistencias';
+  }
+
   // Estado de descarga de reportes
   descargando = signal<string | null>(null);
   mensajeExito = signal<string | null>(null);
   errorDescarga = signal<string | null>(null);
 
-  descargarReporte(tipo: string, formato: string) {
+  descargarReporte(tipo: 'calificaciones' | 'asistencias', formato: 'pdf' | 'xlsx') {
     if (!this.materia) return;
     
     this.descargando.set(`${tipo} (${formato})`);
@@ -354,10 +387,10 @@ export class ReportesComponent implements OnInit {
     const materiaId = this.materia.materia_id;
     let request$;
 
-    if (tipo === 'Calificaciones Finales') {
-      request$ = this.reportesService.descargarReporteCalificaciones(materiaId, formato as 'pdf' | 'xlsx');
+    if (tipo === 'calificaciones') {
+      request$ = this.reportesService.descargarReporteCalificaciones(materiaId, formato);
     } else {
-      request$ = this.reportesService.descargarReporteAsistencias(materiaId, formato as 'pdf' | 'xlsx');
+      request$ = this.reportesService.descargarReporteAsistencias(materiaId, formato);
     }
 
     request$.subscribe({
@@ -380,7 +413,7 @@ export class ReportesComponent implements OnInit {
         window.URL.revokeObjectURL(url);
         a.remove();
 
-        this.mensajeExito.set(`¡El reporte "${tipo}" para la materia ${this.materia?.nombre || ''} (NRC: ${nrc}) en formato ${formato.toUpperCase()} se ha generado y descargado exitosamente vía MS-Reportes!`);
+        this.mensajeExito.set(`¡El reporte "${this.getNombreReporte(tipo)}" para la materia ${this.materia?.nombre || ''} (NRC: ${nrc}) en formato ${formato.toUpperCase()} se ha generado y descargado exitosamente vía MS-Reportes!`);
         
         setTimeout(() => {
           this.mensajeExito.set(null);
@@ -389,7 +422,7 @@ export class ReportesComponent implements OnInit {
       error: (err) => {
         console.error('Error al descargar el reporte:', err);
         this.descargando.set(null);
-        this.errorDescarga.set(`Ocurrió un error al descargar el reporte "${tipo}". Por favor intente de nuevo.`);
+        this.errorDescarga.set(`Ocurrió un error al descargar el reporte "${this.getNombreReporte(tipo)}". Por favor intente de nuevo.`);
       }
     });
   }
