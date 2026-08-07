@@ -132,13 +132,14 @@ export class PonderacionesComponent implements OnInit {
 
   haCambiado = computed(() => JSON.stringify(this.criterios()) !== JSON.stringify(this.criteriosOriginales));
 
-  materiaCerrada = computed(() =>
-    String(this.materia().estado || '').trim().toUpperCase() === 'CERRADA'
-  );
+  materiaFinalizada = computed(() => {
+    const estado = String(this.materia().estado || '').trim().toUpperCase();
+    return ['FINALIZADA', 'ACTA_IMPRESA', 'ACTA FINAL IMPRESA', 'LISTA_FINAL_IMPRESA'].includes(estado);
+  });
 
   motivoBloqueo = computed(() => {
-    if (this.materiaCerrada()) {
-      return 'La materia está cerrada. No se pueden modificar sus ponderaciones.';
+    if (this.materiaFinalizada()) {
+      return 'La lista final ya fue impresa. No se pueden modificar sus ponderaciones.';
     }
 
     const items = this.criterios();
@@ -168,7 +169,7 @@ export class PonderacionesComponent implements OnInit {
     return '';
   });
 
-  puedeGuardar = computed(() => this.esValido() && !this.materiaCerrada());
+  puedeGuardar = computed(() => this.esValido() && !this.materiaFinalizada());
 
   // Color del indicador circular según el total
   colorIndicador = computed(() => {
