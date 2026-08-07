@@ -23,11 +23,13 @@ export const ALUMNO_ROUTES: Routes = [
   },
   {
     path: 'notificaciones',
-    loadComponent: () => import('./notificaciones/notificaciones.component').then(m => m.NotificacionesComponent)
+    redirectTo: 'dashboard',
+    pathMatch: 'full'
   },
   {
     path: 'reportes',
-    loadComponent: () => import('./reportes/reportes.component').then(m => m.ReportesComponent)
+    redirectTo: 'dashboard',
+    pathMatch: 'full'
   },
   {
     path: '',
