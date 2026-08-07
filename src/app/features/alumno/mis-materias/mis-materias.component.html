@@ -11,6 +11,22 @@
         </button>
     </div>
 
+    <!-- Selector de Periodo -->
+    <div class="bg-white p-4 rounded-xl shadow-[0px_2px_4px_rgba(0,59,92,0.05)] border border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+            <label class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Periodo consultado</label>
+            <p class="text-sm text-slate-500">La tabla cambia por periodo; el horario conserva únicamente el periodo activo.</p>
+        </div>
+
+        <select [(ngModel)]="periodoSeleccionadoId"
+                (ngModelChange)="onPeriodoSeleccionadoChange($event)"
+                class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm font-bold text-[#003B5C] outline-none focus:border-[#003B5C]">
+            @for (periodo of periodos; track $index) {
+                <option [value]="obtenerPeriodoId(periodo) || ''">{{ etiquetaPeriodo(periodo) }}</option>
+            }
+        </select>
+    </div>
+
     <!-- Filter Bar -->
     <div class="flex gap-2 mb-4">
         <button (click)="filtroActivo = 'todas'" [class.bg-primary-container]="filtroActivo === 'todas'" [class.text-white]="filtroActivo === 'todas'" [class.bg-slate-100]="filtroActivo !== 'todas'" [class.text-slate-500]="filtroActivo !== 'todas'" class="px-4 py-1.5 rounded-full text-xs font-bold hover:bg-slate-200 transition-colors">Todas</button>
