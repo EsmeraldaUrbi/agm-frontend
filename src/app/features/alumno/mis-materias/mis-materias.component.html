@@ -27,6 +27,25 @@
         </select>
     </div>
 
+    @if (mensajeExito) {
+        <div class="rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-green-800 flex items-start justify-between gap-4 shadow-[0px_2px_4px_rgba(0,59,92,0.05)] animate-fade-in-up">
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-green-600 text-xl">check_circle</span>
+                <div>
+                    <p class="text-sm font-black">Materia dada de baja</p>
+                    <p class="text-sm font-medium">{{ mensajeExito }}</p>
+                </div>
+            </div>
+
+            <button type="button"
+                    (click)="cerrarMensajeExito()"
+                    class="text-green-700 hover:text-green-900 rounded-lg px-2 py-1 transition-colors"
+                    aria-label="Cerrar mensaje">
+                <span class="material-symbols-outlined text-base">close</span>
+            </button>
+        </div>
+    }
+
     <!-- Filter Bar -->
     <div class="flex gap-2 mb-4">
         <button (click)="filtroActivo = 'todas'" [class.bg-primary-container]="filtroActivo === 'todas'" [class.text-white]="filtroActivo === 'todas'" [class.bg-slate-100]="filtroActivo !== 'todas'" [class.text-slate-500]="filtroActivo !== 'todas'" class="px-4 py-1.5 rounded-full text-xs font-bold hover:bg-slate-200 transition-colors">Todas</button>

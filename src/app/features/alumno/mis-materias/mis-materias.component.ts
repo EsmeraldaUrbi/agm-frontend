@@ -24,6 +24,7 @@ export class MisMateriasComponent implements OnInit {
   mostrarHorarioModal = false;
   mostrarBajaModal = false;
   cargando = true;
+  mensajeExito: string | null = null;
 
   filtroActivo: 'todas' | 'activas' | 'bajas' = 'todas';
 
@@ -349,6 +350,10 @@ export class MisMateriasComponent implements OnInit {
     }
   }
 
+  cerrarMensajeExito() {
+    this.mensajeExito = null;
+  }
+
   abrirHorario() {
     this.mostrarHorarioModal = true;
   }
@@ -373,8 +378,12 @@ export class MisMateriasComponent implements OnInit {
       return;
     }
 
+    const nombreMateria = this.materiaSeleccionada?.nombre || 'La materia';
+    this.mensajeExito = null;
+
     this.alumnosService.bajaMateria(this.alumnoId, this.materiaSeleccionada.materia_id).subscribe({
       next: () => {
+        this.mensajeExito = `${nombreMateria} fue dada de baja correctamente.`;
         this.cargarDatos();
         this.cerrarBaja();
       },
