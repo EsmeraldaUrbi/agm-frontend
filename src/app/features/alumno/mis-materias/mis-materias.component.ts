@@ -52,6 +52,7 @@ export class MisMateriasComponent implements OnInit {
   private periodosService = inject(PeriodosService);
 
   ngOnInit() {
+    this.cargarMensajeDesdeNavegacion();
     this.cargarDatos();
   }
 
@@ -79,6 +80,14 @@ export class MisMateriasComponent implements OnInit {
   onPeriodoSeleccionadoChange(periodoId: string) {
     this.periodoSeleccionadoId = periodoId || null;
     this.actualizarMateriasPeriodoSeleccionado();
+  }
+
+  private cargarMensajeDesdeNavegacion(): void {
+    const state = history.state as { bajaExitosa?: boolean; mensaje?: string };
+
+    if (state?.bajaExitosa) {
+      this.mensajeExito = state.mensaje || 'La materia fue dada de baja correctamente.';
+    }
   }
 
   cargarDatos() {

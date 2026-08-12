@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-solicitar-baja',
   standalone: true,
-  imports: [RouterModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './solicitar-baja.component.html',
   styles: ``
 })

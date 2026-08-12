@@ -11,7 +11,8 @@ export const ALUMNO_ROUTES: Routes = [
   },
   {
     path: 'horario',
-    loadComponent: () => import('../../shared/components/horario/horario.component').then(m => m.HorarioComponent)
+    redirectTo: 'materias',
+    pathMatch: 'full'
   },
   {
     path: 'qr',

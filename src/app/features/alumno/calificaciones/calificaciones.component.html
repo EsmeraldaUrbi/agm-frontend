@@ -131,6 +131,10 @@
 
 <!-- Modal Solicitar Baja -->
 @if (mostrarBajaModal) {
-    <app-solicitar-baja (cerrar)="cerrarBaja()" (confirmar)="ejecutarBaja()"></app-solicitar-baja>
+    <app-solicitar-baja
+        [nombreMateria]="materiaInfo()?.nombre || 'la materia'"
+        (cerrar)="cerrarBaja()"
+        (confirmar)="ejecutarBaja()">
+    </app-solicitar-baja>
 }
 </div>

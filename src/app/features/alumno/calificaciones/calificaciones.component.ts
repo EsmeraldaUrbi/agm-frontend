@@ -61,7 +61,7 @@ export class CalificacionesComponent implements OnInit {
     // 2. Obtener el alumno_id, luego ponderaciones, actividades y calificaciones
     this.alumnosService.getAlumnos({ limit: 1000 }).pipe(
       switchMap(alumnos => {
-        const miRegistro = alumnos.find(a => a.user_id === user.user_id);
+        const miRegistro = this.resolverAlumnoActual(alumnos, user);
         if (!miRegistro || !miRegistro.alumno_id) {
           return of(null);
         }
@@ -142,6 +142,21 @@ export class CalificacionesComponent implements OnInit {
     });
   }
 
+  private resolverAlumnoActual(alumnos: any[], user: any): any | null {
+    const userId = String(user?.user_id || user?.id || '').trim();
+    const email = String(user?.email || user?.correo || '').trim().toLowerCase();
+
+    return (alumnos || []).find((alumno: any) => {
+      const alumnoUserId = String(alumno?.user_id || alumno?.usuario_id || '').trim();
+      const alumnoCorreo = String(alumno?.correo || alumno?.email || '').trim().toLowerCase();
+
+      return Boolean(
+        (userId && alumnoUserId && alumnoUserId === userId) ||
+        (email && alumnoCorreo && alumnoCorreo === email)
+      );
+    }) || null;
+  }
+
   abrirBaja() {
     this.mostrarBajaModal = true;
   }
@@ -151,30 +166,37 @@ export class CalificacionesComponent implements OnInit {
   }
 
   ejecutarBaja() {
-    this.route.paramMap.subscribe(params => {
-      const materiaId = params.get('materiaId');
-      const user = this.authService.getCurrentUser();
-      
-      if (!materiaId || !user) return;
+    const materiaId = this.route.snapshot.paramMap.get('materiaId');
+    const user = this.authService.getCurrentUser();
+    const nombreMateria = this.materiaInfo()?.nombre || 'La materia';
 
-      this.alumnosService.getAlumnos({ limit: 1000 }).pipe(
-        switchMap(alumnos => {
-          const miRegistro = alumnos.find(a => a.user_id === user.user_id);
-          if (!miRegistro || !miRegistro.alumno_id) return of(null);
-          
-          return this.alumnosService.bajaMateria(miRegistro.alumno_id, materiaId);
-        })
-      ).subscribe({
-        next: (result) => {
-          if (result === null) return;
-          this.cerrarBaja();
-          this.router.navigate(['/alumno/materias']);
-        },
-        error: (err: any) => {
-          console.error('Error al dar de baja:', err);
-          alert('No se pudo dar de baja la materia.');
+    if (!materiaId || !user) return;
+
+    this.alumnosService.getAlumnos({ limit: 1000 }).pipe(
+      switchMap(alumnos => {
+        const miRegistro = this.resolverAlumnoActual(alumnos, user);
+
+        if (!miRegistro?.alumno_id) {
+          return of(null);
         }
-      });
+
+        return this.alumnosService.bajaMateria(miRegistro.alumno_id, materiaId);
+      })
+    ).subscribe({
+      next: () => {
+        this.cerrarBaja();
+
+        this.router.navigate(['/alumno/materias'], {
+          state: {
+            bajaExitosa: true,
+            mensaje: `${nombreMateria} fue dada de baja correctamente.`
+          }
+        });
+      },
+      error: (err: any) => {
+        console.error('Error al dar de baja:', err);
+        alert('No se pudo dar de baja la materia.');
+      }
     });
   }
 }
