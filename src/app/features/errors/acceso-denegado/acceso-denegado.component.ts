@@ -46,6 +46,6 @@ export class AccesoDenegadoComponent {
 
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/'], { replaceUrl: true });
   }
 }

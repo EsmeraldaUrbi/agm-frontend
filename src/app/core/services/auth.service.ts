@@ -95,13 +95,12 @@ export class AuthService {
   // POST /auth/logout
   logout(): Observable<any> {
     const url = `${API_CONFIG.auth}/auth/logout`;
-    return this.apiClient.post<any>(url, {}).pipe(
-      catchError(() => of(null)), // Si falla por token inválido, igual salimos
-      tap(() => {
-        this.clearSession();
-        this.router.navigate(['/login']);
-      })
+    this.clearSession();
+    const obs = this.apiClient.post<any>(url, {}).pipe(
+      catchError(() => of(null))
     );
+    obs.subscribe();
+    return obs;
   }
 
   // POST /auth/forgot-password
