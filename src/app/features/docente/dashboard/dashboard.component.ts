@@ -14,6 +14,7 @@ import { AsistenciasService } from '../../../core/services/asistencias.service';
 import { CalificacionesService } from '../../../core/services/calificaciones.service';
 import { ReportesService } from '../../../core/services/reportes.service';
 import { AlumnosService } from '../../../core/services/alumnos.service';
+import { PeriodosService } from '../../../core/services/periodos.service';
 
 @Component({
   selector: 'app-docente-dashboard',
@@ -31,8 +32,12 @@ export class DashboardComponent implements OnInit {
   private calificacionesService = inject(CalificacionesService);
   private reportesService = inject(ReportesService);
   private alumnosService = inject(AlumnosService);
+  private periodosService = inject(PeriodosService);
 
   materias: any[] = [];
+  periodos: any[] = [];
+  selectedPeriodoId = '';
+  materiasFiltradas: any[] = [];
 
   totalMateriasValue: number = 0;
   totalAlumnosValue: number = 0;
@@ -81,22 +86,34 @@ export class DashboardComponent implements OnInit {
     const user = this.authService.currentUser();
     if (!user || !user.email) return;
 
-    this.docentesService.getDocentes({ limit: 500 }).subscribe({
-      next: (docentes) => {
-        const docente = docentes.find(d => {
-          const docenteEmail = (d as any).email || d.correo || '';
-          return docenteEmail.toLowerCase() === user.email.toLowerCase();
-        });
-
-        if (docente && (docente.docente_id || docente.id)) {
-          const docenteId = docente.docente_id || docente.id;
-          
-          this.cargarMateriasDelDocente(docenteId as string);
-        } else {
-          console.warn('Docente no encontrado en el padrón.');
+    this.periodosService.getPeriodos(1, 100).subscribe({
+      next: (res) => {
+        this.periodos = res.items || [];
+        const activo = this.periodos.find(p => p.activo);
+        if (activo) {
+          this.selectedPeriodoId = activo.periodo_id || '';
+        } else if (this.periodos.length > 0) {
+          this.selectedPeriodoId = this.periodos[0].periodo_id || '';
         }
+
+        this.docentesService.getDocentes({ limit: 500 }).subscribe({
+          next: (docentes) => {
+            const docente = docentes.find(d => {
+              const docenteEmail = (d as any).email || d.correo || '';
+              return docenteEmail.toLowerCase() === user.email.toLowerCase();
+            });
+
+            if (docente && (docente.docente_id || docente.id)) {
+              const docenteId = docente.docente_id || docente.id;
+              this.cargarMateriasDelDocente(docenteId as string);
+            } else {
+              console.warn('Docente no encontrado en el padrón.');
+            }
+          },
+          error: (err) => console.error('Error cargando padrón docente MS3', err)
+        });
       },
-      error: (err) => console.error('Error cargando padrón docente MS3', err)
+      error: (err) => console.error('Error cargando periodos', err)
     });
   }
 
@@ -135,104 +152,144 @@ export class DashboardComponent implements OnInit {
       next: (response) => {
         this.materias = response.items || [];
         
-        this.totalMateriasValue = this.materias.length;
+        // 4. Rendimiento por Materia (MS-7)
+        this.reportesService.getEstadisticasDocente(docenteId).subscribe({
+          next: (estadisticas: any) => {
+            const periodos = estadisticas?.periodos || [];
 
-        // 7. Materias por cerrar (calculado manualmente para evitar que quede en 0 si no funciona el endpoint)
-        this.materiasPorCerrarValue = this.materias.filter(m => 
-            m.estado === 'ACTIVA' || 
-            m.estado === 'PROXIMO_CIERRE' || 
-            m.estado === 'POR CERRAR' ||
-            m.estatus === 'ACTIVA' ||
-            m.estatus === 'PROXIMO_CIERRE' ||
-            m.estatus === 'POR CERRAR'
-        ).length;
+            let materiasMS7: any[] = [];
 
-        if (this.materias.length > 0) {
-          // 3. Alumnos únicos activos.
-          // MS-3 devuelve alumnos por materia; aquí deduplicamos para no contar al mismo alumno varias veces.
-          const alumnosUnicos = new Set<string>();
-
-          const peticionesAlumnos = this.materias.map(m => {
-            const materiaId = m.materia_ofertada_id || m.materia_id || m.id;
-            return this.alumnosService.getAlumnosByMateria(materiaId).pipe(
-              catchError((err) => {
-                console.error(`Error loading alumnos from MS3 for materia ${materiaId}`, err);
-                return of([]);
-              }),
-              map((alumnos: any[]) => {
-                const lista = alumnos || [];
-                m.alumnos = lista.length;
-
-                lista.forEach((alumno: any) => {
-                  const identidad = this.obtenerIdentidadAlumno(alumno);
-                  if (identidad) {
-                    alumnosUnicos.add(identidad);
-                  }
-                });
-
-                return lista;
-              })
-            );
-          });
-
-          forkJoin(peticionesAlumnos).subscribe(() => {
-            this.totalAlumnosValue = alumnosUnicos.size;
-          });
-
-          // 4. Rendimiento por Materia (MS-7)
-          this.reportesService.getEstadisticasDocente(docenteId).subscribe({
-            next: (estadisticas: any) => {
-              const periodos = estadisticas?.periodos || [];
-
-              let materiasMS7: any[] = [];
-
-              periodos.forEach((periodo: any) => {
-                if (Array.isArray(periodo.materias)) {
-                  materiasMS7 = [...materiasMS7, ...periodo.materias];
-                }
-              });
-
-              // Calcular asistencia promedio del docente usando MS7
-              const porcentajesAsistencia = materiasMS7
-                .map((materia: any) => Number(materia.porcentaje_asistencia ?? 0))
-                .filter((valor: number) => !Number.isNaN(valor));
-
-              if (porcentajesAsistencia.length > 0) {
-                const suma = porcentajesAsistencia.reduce((acc, valor) => acc + valor, 0);
-                this.asistenciaPromedioValue = Math.round(suma / porcentajesAsistencia.length);
-              } else {
-                this.asistenciaPromedioValue = 0;
+            periodos.forEach((periodo: any) => {
+              if (Array.isArray(periodo.materias)) {
+                materiasMS7 = [...materiasMS7, ...periodo.materias];
               }
+            });
 
-              // Mantener cálculo de rendimiento por materia
-              this.materias.forEach(m => {
-                const materiaId = m.materia_ofertada_id || m.materia_id || m.id;
+            // Calcular asistencia promedio del docente usando MS7
+            const porcentajesAsistencia = materiasMS7
+              .map((materia: any) => Number(materia.porcentaje_asistencia ?? 0))
+              .filter((valor: number) => !Number.isNaN(valor));
 
-                const materiaMS7 = materiasMS7.find((x: any) =>
-                  x.materia_id === materiaId ||
-                  x.materia_ofertada_id === materiaId
-                );
-
-                m.rendimiento = materiaMS7 ? Number(materiaMS7.promedio_grupal || 0) : 0;
-              });
-            },
-            error: (err) => {
-              console.error('Error MS7:', err);
+            if (porcentajesAsistencia.length > 0) {
+              const suma = porcentajesAsistencia.reduce((acc, valor) => acc + valor, 0);
+              this.asistenciaPromedioValue = Math.round(suma / porcentajesAsistencia.length);
+            } else {
               this.asistenciaPromedioValue = 0;
-              this.materias.forEach(m => m.rendimiento = 0);
             }
-          });
 
-          // Seleccionar primera materia
-          this.selectedMateriaIdForAsistencia = this.materias[0].materia_ofertada_id || this.materias[0].materia_id || this.materias[0].id;
-          this.selectedMateriaIdForChart = this.materias[0].materia_ofertada_id || this.materias[0].materia_id || this.materias[0].id;
-          
-          this.onAsistenciaMateriaChange();
-          this.onChartMateriaChange();
-        }
+            // Mantener cálculo de rendimiento por materia
+            this.materias.forEach(m => {
+              const materiaId = m.materia_ofertada_id || m.materia_id || m.id;
+
+              const materiaMS7 = materiasMS7.find((x: any) =>
+                x.materia_id === materiaId ||
+                x.materia_ofertada_id === materiaId
+              );
+
+              m.rendimiento = materiaMS7 ? Number(materiaMS7.promedio_grupal || 0) : 0;
+            });
+
+            // Filtrar materias por periodo
+            this.filtrarMateriasPorPeriodo();
+          },
+          error: (err) => {
+            console.error('Error MS7:', err);
+            this.asistenciaPromedioValue = 0;
+            this.materias.forEach(m => m.rendimiento = 0);
+            this.filtrarMateriasPorPeriodo();
+          }
+        });
       },
       error: (err) => console.error('Error cargando materias', err)
     });
+  }
+
+  onPeriodoChange() {
+    this.filtrarMateriasPorPeriodo();
+  }
+
+  filtrarMateriasPorPeriodo() {
+    if (!this.selectedPeriodoId) {
+      this.materiasFiltradas = this.materias;
+    } else {
+      this.materiasFiltradas = this.materias.filter(m => m.periodo_id === this.selectedPeriodoId);
+    }
+
+    this.totalMateriasValue = this.materiasFiltradas.length;
+
+    // Materias por cerrar del periodo filtrado
+    this.materiasPorCerrarValue = this.materiasFiltradas.filter(m => 
+        m.estado === 'ACTIVA' || 
+        m.estado === 'PROXIMO_CIERRE' || 
+        m.estado === 'POR CERRAR' ||
+        m.estatus === 'ACTIVA' ||
+        m.estatus === 'PROXIMO_CIERRE' ||
+        m.estatus === 'POR CERRAR'
+    ).length;
+
+    // Deduplicar alumnos activos para el periodo filtrado
+    const alumnosUnicos = new Set<string>();
+    const peticionesAlumnos = this.materiasFiltradas.map(m => {
+      const materiaId = m.materia_ofertada_id || m.materia_id || m.id;
+      return this.alumnosService.getAlumnosByMateria(materiaId).pipe(
+        catchError((err) => {
+          console.error(`Error loading alumnos from MS3 for materia ${materiaId}`, err);
+          return of([]);
+        }),
+        map((alumnos: any[]) => {
+          const lista = alumnos || [];
+          m.alumnos = lista.length;
+
+          lista.forEach((alumno: any) => {
+            const identidad = this.obtenerIdentidadAlumno(alumno);
+            if (identidad) {
+              alumnosUnicos.add(identidad);
+            }
+          });
+
+          return lista;
+        })
+      );
+    });
+
+    if (peticionesAlumnos.length > 0) {
+      forkJoin(peticionesAlumnos).subscribe(() => {
+        this.totalAlumnosValue = alumnosUnicos.size;
+      });
+    } else {
+      this.totalAlumnosValue = 0;
+    }
+
+    // Seleccionar primeras materias del periodo filtrado para las gráficas
+    if (this.materiasFiltradas.length > 0) {
+      const firstId = this.materiasFiltradas[0].materia_ofertada_id || this.materiasFiltradas[0].materia_id || this.materiasFiltradas[0].id;
+      
+      const idAsistenciaValido = this.materiasFiltradas.some(m => (m.materia_ofertada_id || m.materia_id || m.id) === this.selectedMateriaIdForAsistencia);
+      if (!idAsistenciaValido) {
+        this.selectedMateriaIdForAsistencia = firstId;
+      }
+      this.onAsistenciaMateriaChange();
+
+      const idChartValido = this.materiasFiltradas.some(m => (m.materia_ofertada_id || m.materia_id || m.id) === this.selectedMateriaIdForChart);
+      if (!idChartValido) {
+        this.selectedMateriaIdForChart = firstId;
+      }
+      this.onChartMateriaChange();
+    } else {
+      this.selectedMateriaIdForAsistencia = '';
+      this.selectedMateriaIdForChart = '';
+      this.hasAttendanceData = false;
+      this.attendanceMessage = 'No hay materias registradas en este periodo.';
+      this.chartData = {
+        labels: ['Excelencia (9.0 - 10)', 'Regular (6.0 - 8.9)', 'Reprobados (< 6.0)'],
+        datasets: [{
+          data: [0, 0, 0],
+          backgroundColor: ['#2E7D32', '#0070A8', '#C62828'],
+          borderRadius: 4,
+          barPercentage: 0.6,
+        }]
+      };
+    }
   }
 
   get totalMaterias(): number { return this.totalMateriasValue; }
