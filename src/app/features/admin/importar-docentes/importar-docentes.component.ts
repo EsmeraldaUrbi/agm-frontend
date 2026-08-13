@@ -112,7 +112,7 @@ export class ImportarDocentesComponent implements OnDestroy {
           academia: '',
           tieneError: true
         });
-        this.triggerToast('No se detectaron docentes con correo institucional @correo.buap.mx. Verifica que el PDF use el formato requerido.', 'error');
+        this.triggerToast('No se detectaron docentes con correo institucional válido. Verifica que el PDF use el formato requerido.', 'error');
       }
 
       this.previsualizacionDatos.set(extraidos);

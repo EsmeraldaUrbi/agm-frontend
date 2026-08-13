@@ -177,7 +177,7 @@ export class ImportarAlumnosComponent {
       const detectado = this.normalizarNrc(nrcDetectado);
 
       if (!detectado) {
-        this.errorImportacion.set('No se pudo identificar el NRC dentro del PDF. Verifica que sea un acta BUAP válida.');
+        this.errorImportacion.set('No se pudo identificar el NRC dentro del PDF. Verifica que sea un acta oficial válida.');
       } else if (esperado !== detectado) {
         this.errorImportacion.set(`El PDF contiene el NRC ${nrcDetectado}, pero esta materia corresponde al NRC ${this.materia().nrc}. No se permitirá la importación.`);
       }

@@ -28,8 +28,8 @@ export class NavbarComponent implements OnInit {
   roleLabel = computed(() => {
     const role = this.userRole().toLowerCase();
     if (role === 'admin' || role === 'administrador') return 'Administrador Global';
-    if (role === 'docente') return 'Docente FCC';
-    if (role === 'alumno') return 'Alumno FCC';
+    if (role === 'docente') return 'Docente';
+    if (role === 'alumno') return 'Alumno';
     return 'Usuario Institucional';
   });
 
