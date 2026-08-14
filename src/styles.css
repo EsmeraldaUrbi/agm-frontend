@@ -24,3 +24,22 @@ body {
 h1, h2, h3, h4, .brand-font { 
   font-family: 'Public Sans', sans-serif; 
 }
+
+/* Animación de la barra de carga global */
+.animate-loading-bar {
+  animation: loading-bar-progress 1.5s infinite linear;
+}
+
+@keyframes loading-bar-progress {
+  0% {
+    transform: translateX(-100%);
+    width: 30%;
+  }
+  50% {
+    width: 60%;
+  }
+  100% {
+    transform: translateX(330%);
+    width: 30%;
+  }
+}

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AgmButtonComponent, AgmInputComponent, AgmCardComponent } from '../../../shared/components/ui';
 import { PeriodosService, Periodo } from '../../../core/services/periodos.service';
+import { LoadingService } from '../../../core/services/loading.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -31,6 +32,7 @@ import Swal from 'sweetalert2';
 })
 export class PeriodosComponent implements OnInit {
   private periodosService = inject(PeriodosService);
+  protected loadingService = inject(LoadingService);
 
   periodosList = signal<Periodo[]>([]);
 

@@ -8,6 +8,7 @@ import { AlumnosService } from '../../../core/services/alumnos.service';
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { FinalActService } from '../../../core/services/final-act.service';
+import { LoadingService } from '../../../core/services/loading.service';
 import Swal from 'sweetalert2';
 
 interface Actividad {
@@ -32,6 +33,7 @@ interface Actividad {
 })
 export class ActividadesComponent {
   private finalActService = inject(FinalActService);
+  protected loadingService = inject(LoadingService);
   materia = signal<any>({
     materia_id: '',
     nrc: '',

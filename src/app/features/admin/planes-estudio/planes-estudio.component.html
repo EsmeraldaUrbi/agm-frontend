@@ -20,7 +20,7 @@
 
     <div *ngIf="!isLoading()" class="grid grid-cols-1 md:grid-cols-3 gap-6">
       
-      <div *ngIf="planes().length === 0" class="col-span-3 text-center py-12 text-outline">
+      <div *ngIf="!isLoading() && planes().length === 0" class="col-span-3 text-center py-12 text-outline">
         <span class="material-symbols-outlined text-4xl mb-3 opacity-50">menu_book</span>
         <p class="font-bold">No hay planes de estudio registrados.</p>
         <p class="text-xs mt-1">Crea uno nuevo para comenzar.</p>

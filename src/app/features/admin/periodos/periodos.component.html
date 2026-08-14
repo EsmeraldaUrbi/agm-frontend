@@ -80,7 +80,7 @@
     <h3 class="text-sm font-black text-primary font-headline uppercase tracking-wider">Historial y Planificación de Periodos</h3>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <tr *ngIf="otherPeriodos().length === 0" class="text-center text-outline py-8 block col-span-3">
+      <tr *ngIf="!loadingService.isLoading() && otherPeriodos().length === 0" class="text-center text-outline py-8 block col-span-3">
         <td class="text-center text-outline">
           No hay otros periodos académicos registrados.
         </td>

@@ -162,7 +162,7 @@
         </div>
       }
 
-      @if (actividadesFiltradas().length === 0) {
+      @if (!loadingService.isLoading() && actividadesFiltradas().length === 0) {
         <div class="col-span-full bg-white p-12 rounded-xl border border-[#c2c7ce] text-center text-[#72787e]">
           <span class="material-symbols-outlined text-5xl mb-3 block">event_busy</span>
           <p class="text-base font-bold text-[#003b5c]">No se encontraron actividades en esta categoría.</p>

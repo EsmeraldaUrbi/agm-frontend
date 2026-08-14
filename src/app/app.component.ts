@@ -1,12 +1,14 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { BRANDING } from './core/config/branding.config';
 import { AuthService } from './core/services/auth.service';
+import { LoadingService } from './core/services/loading.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, CommonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -15,6 +17,7 @@ export class AppComponent implements OnInit {
   private titleService = inject(Title);
   private authService = inject(AuthService);
   private router = inject(Router);
+  protected loadingService = inject(LoadingService);
 
   ngOnInit() {
     this.titleService.setTitle(`${BRANDING.shortName} - ${BRANDING.fullName}`);
