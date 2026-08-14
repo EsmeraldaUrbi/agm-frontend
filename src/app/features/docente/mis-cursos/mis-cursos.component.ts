@@ -11,6 +11,7 @@ import { CalificacionesService } from '../../../core/services/calificaciones.ser
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { FinalActService } from '../../../core/services/final-act.service';
+import Swal from 'sweetalert2';
 
 interface Curso {
   materia_id: string;
@@ -180,27 +181,55 @@ export class MisCursosComponent implements OnInit {
     return this.finalActService.isFinalActPrinted(curso?.materia_id);
   }
 
-  imprimirListaFinal(curso: any): void {
-    if (!curso?.materia_id) return;
-
-    if (curso.estado !== 'CERRADA') {
-      alert('Solo se puede imprimir la Lista Final cuando la materia ya está cerrada.');
+  imprimirListaFinal(curso: Curso) {
+    if (curso.estado !== 'CERRADA' && (curso as any).estatus !== 'CERRADA') {
+      Swal.fire({
+        title: 'Acción no permitida',
+        text: 'Solo se puede imprimir la Lista Final cuando la materia ya está cerrada.',
+        icon: 'info',
+        confirmButtonColor: '#003B5C',
+        confirmButtonText: 'Entendido'
+      });
       return;
     }
 
     if (this.actaFinalImpresa(curso)) {
-      alert('La Lista Final de esta materia ya fue marcada como impresa.');
+      Swal.fire({
+        title: 'Lista ya impresa',
+        text: 'La Lista Final de esta materia ya fue marcada como impresa.',
+        icon: 'info',
+        confirmButtonColor: '#003B5C',
+        confirmButtonText: 'Entendido'
+      });
       return;
     }
 
-    const confirmar = confirm(
-      '¿Deseas marcar la Lista Final como impresa? Después de esto ya no se permitirán cambios en ponderaciones, actividades ni calificaciones desde la interfaz.'
-    );
-
-    if (!confirmar) return;
-
-    this.finalActService.markFinalActPrinted(curso.materia_id);
-    alert('Lista Final marcada como impresa. Las modificaciones académicas quedaron bloqueadas desde la interfaz.');
+    Swal.fire({
+      title: '¿Marcar Lista como impresa?',
+      text: '¿Deseas marcar la Lista Final como impresa? Después de esto ya no se permitirán cambios en ponderaciones, actividades ni calificaciones desde la interfaz.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#003B5C',
+      cancelButtonColor: '#cbd5e1',
+      confirmButtonText: 'Sí, marcar como impresa',
+      cancelButtonText: 'Cancelar',
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'rounded-lg px-4 py-2 text-white font-bold',
+        cancelButton: 'rounded-lg px-4 py-2 text-slate-700 font-bold'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.finalActService.markFinalActPrinted(curso.materia_id);
+        Swal.fire({
+          title: '¡Acción Completada!',
+          text: 'Lista Final marcada como impresa. Las modificaciones académicas quedaron bloqueadas desde la interfaz.',
+          icon: 'success',
+          confirmButtonColor: '#003B5C',
+          confirmButtonText: 'Aceptar'
+        });
+      }
+    });
   }
 
   abrirModalCierre(curso: Curso) {

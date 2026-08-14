@@ -5,6 +5,7 @@ import { PlanesEstudioService, PlanEstudio } from '../../../core/services/planes
 import { MateriasService, MateriaCatalogo } from '../../../core/services/materias.service';
 import { PeriodosService, Periodo } from '../../../core/services/periodos.service';
 import { AgmButtonComponent, AgmCardComponent, AgmInputComponent } from '../../../shared/components/ui';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-planes-estudio',
@@ -161,18 +162,34 @@ export class PlanesEstudioComponent implements OnInit {
   }
 
   deactivatePlan(plan: PlanEstudio) {
-    if (confirm(`¿Estás seguro de que deseas desactivar el plan "${plan.nombre}"?`)) {
-      this.planesService.deactivatePlanEstudio(plan.plan_estudio_id).subscribe({
-        next: () => {
-          this.triggerToast('Plan de estudio desactivado', 'success');
-          this.cargarPlanes();
-        },
-        error: (err) => {
-          console.error(err);
-          this.triggerToast('Error al desactivar el plan', 'error');
-        }
-      });
-    }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: `¿Estás seguro de que deseas desactivar el plan "${plan.nombre}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#003B5C',
+      cancelButtonColor: '#cbd5e1',
+      confirmButtonText: 'Sí, desactivar',
+      cancelButtonText: 'Cancelar',
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'rounded-lg px-4 py-2 text-white font-bold',
+        cancelButton: 'rounded-lg px-4 py-2 text-slate-700 font-bold'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.planesService.deactivatePlanEstudio(plan.plan_estudio_id).subscribe({
+          next: () => {
+            this.triggerToast('Plan de estudio desactivado', 'success');
+            this.cargarPlanes();
+          },
+          error: (err) => {
+            console.error(err);
+            this.triggerToast('Error al desactivar el plan', 'error');
+          }
+        });
+      }
+    });
   }
 
   // === GESTIÓN DE ASIGNACIONES (MATERIAS) ===
@@ -258,20 +275,36 @@ export class PlanesEstudioComponent implements OnInit {
   }
 
   removerMateria(relacionId: string) {
-    if (confirm('¿Deseas quitar esta materia del plan de estudio?')) {
-      this.planesService.removerMateriaDePlan(relacionId).subscribe({
-        next: () => {
-          this.triggerToast('Materia removida del plan', 'success');
-          if (this.planSeleccionado()) {
-            this.cargarMateriasDelPlan(this.planSeleccionado()!.plan_estudio_id);
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¿Deseas quitar esta materia del plan de estudio?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#003B5C',
+      cancelButtonColor: '#cbd5e1',
+      confirmButtonText: 'Sí, remover',
+      cancelButtonText: 'Cancelar',
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'rounded-lg px-4 py-2 text-white font-bold',
+        cancelButton: 'rounded-lg px-4 py-2 text-slate-700 font-bold'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.planesService.removerMateriaDePlan(relacionId).subscribe({
+          next: () => {
+            this.triggerToast('Materia removida del plan', 'success');
+            if (this.planSeleccionado()) {
+              this.cargarMateriasDelPlan(this.planSeleccionado()!.plan_estudio_id);
+            }
+          },
+          error: (err) => {
+            console.error(err);
+            this.triggerToast('Error al remover materia', 'error');
           }
-        },
-        error: (err) => {
-          console.error(err);
-          this.triggerToast('Error al remover materia', 'error');
-        }
-      });
-    }
+        });
+      }
+    });
   }
 
   triggerToast(message: string, type: 'success' | 'error') {

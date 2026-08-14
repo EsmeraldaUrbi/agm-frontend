@@ -5,6 +5,7 @@ import { DocentesService, Docente } from '../../../core/services/docentes.servic
 import { AgmButtonComponent, AgmInputComponent, AgmCardComponent } from '../../../shared/components/ui';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import Swal from 'sweetalert2';
 
 interface User {
   id: string;
@@ -247,20 +248,36 @@ export class UsuariosComponent implements OnInit {
 
   // Desactivar docente (debido a falta de DELETE físico en el backend, desactivamos laboralmente)
   deleteUser(user: User) {
-    if (confirm(`¿Estás seguro de desactivar a ${user.name} del directorio escolar?`)) {
-      this.docentesService.updateDocente(user.id, {
-        estatus_laboral: false
-      }).subscribe({
-        next: () => {
-          this.triggerToast('Docente desactivado del sistema.');
-          this.cargarDocentes();
-        },
-        error: (err) => {
-          console.error(err);
-          this.triggerToast('Error al desactivar el docente.', 'error');
-        }
-      });
-    }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: `¿Estás seguro de desactivar a ${user.name} del directorio escolar?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#003B5C',
+      cancelButtonColor: '#cbd5e1',
+      confirmButtonText: 'Sí, desactivar',
+      cancelButtonText: 'Cancelar',
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'rounded-lg px-4 py-2 text-white font-bold',
+        cancelButton: 'rounded-lg px-4 py-2 text-slate-700 font-bold'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.docentesService.updateDocente(user.id, {
+          estatus_laboral: false
+        }).subscribe({
+          next: () => {
+            this.triggerToast('Docente desactivado del sistema.');
+            this.cargarDocentes();
+          },
+          error: (err) => {
+            console.error(err);
+            this.triggerToast('Error al desactivar el docente.', 'error');
+          }
+        });
+      }
+    });
   }
 
   triggerToast(message: string, type: 'success' | 'error' = 'success') {

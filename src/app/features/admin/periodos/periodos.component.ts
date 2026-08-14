@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AgmButtonComponent, AgmInputComponent, AgmCardComponent } from '../../../shared/components/ui';
 import { PeriodosService, Periodo } from '../../../core/services/periodos.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-periodos',
@@ -196,20 +197,36 @@ export class PeriodosComponent implements OnInit {
   // Desactivar periodo activo actual
   deactivatePeriodo(periodo: Periodo) {
     if (!periodo.periodo_id) return;
-    if (confirm(`¿Estás seguro de que deseas apagar (desactivar) el periodo ${periodo.nombre}? Todos los módulos dejarán de mostrarlo como el ciclo actual.`)) {
-      // Usamos el updatePeriodo normal para mandarlo a inactivo
-      this.periodosService.updatePeriodo(periodo.periodo_id, { activo: false }).subscribe({
-        next: () => {
-          this.triggerToast('El periodo ha sido desactivado exitosamente.', 'success');
-          this.cargarPeriodos();
-        },
-        error: (err) => {
-          console.error(err);
-          const errorMsg = err.error?.detail || err.error?.message || err.message || 'Error al desactivar el periodo.';
-          this.triggerToast(errorMsg, 'error');
-        }
-      });
-    }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: `¿Estás seguro de que deseas apagar (desactivar) el periodo ${periodo.nombre}? Todos los módulos dejarán de mostrarlo como el ciclo actual.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#003B5C',
+      cancelButtonColor: '#cbd5e1',
+      confirmButtonText: 'Sí, desactivar',
+      cancelButtonText: 'Cancelar',
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'rounded-lg px-4 py-2 text-white font-bold',
+        cancelButton: 'rounded-lg px-4 py-2 text-slate-700 font-bold'
+      }
+    }).then((result) => {
+      if (result.isConfirmed && periodo.periodo_id) {
+        // Usamos el updatePeriodo normal para mandarlo a inactivo
+        this.periodosService.updatePeriodo(periodo.periodo_id, { activo: false }).subscribe({
+          next: () => {
+            this.triggerToast('El periodo ha sido desactivado exitosamente.', 'success');
+            this.cargarPeriodos();
+          },
+          error: (err) => {
+            console.error(err);
+            const errorMsg = err.error?.detail || err.error?.message || err.message || 'Error al desactivar el periodo.';
+            this.triggerToast(errorMsg, 'error');
+          }
+        });
+      }
+    });
   }
 
   // Nota: La función deletePeriodo fue removida. 

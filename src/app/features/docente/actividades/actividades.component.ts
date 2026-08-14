@@ -8,6 +8,7 @@ import { AlumnosService } from '../../../core/services/alumnos.service';
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { FinalActService } from '../../../core/services/final-act.service';
+import Swal from 'sweetalert2';
 
 interface Actividad {
   id: string;
@@ -334,29 +335,43 @@ export class ActividadesComponent {
       return;
     }
 
-    const confirmar = confirm('¿Deseas eliminar esta actividad? Esta acción no se puede deshacer.');
-    if (!confirmar) return;
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¿Deseas eliminar esta actividad? Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#003B5C',
+      cancelButtonColor: '#cbd5e1',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'rounded-lg px-4 py-2 text-white font-bold',
+        cancelButton: 'rounded-lg px-4 py-2 text-slate-700 font-bold'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.errorOperacion.set('');
+        this.calificacionesService.deleteActividad(id).subscribe({
+          next: () => {
+            this.actividades.update(list => list.filter(a => a.id !== id));
+          },
+          error: (err) => {
+            console.error('Error al eliminar actividad:', err);
 
-    this.errorOperacion.set('');
+            const backendMessage =
+              err?.error?.detail ||
+              err?.error?.message ||
+              err?.error?.error ||
+              err?.message ||
+              '';
 
-    this.calificacionesService.deleteActividad(id).subscribe({
-      next: () => {
-        this.actividades.update(list => list.filter(a => a.id !== id));
-      },
-      error: (err) => {
-        console.error('Error al eliminar actividad:', err);
-
-        const backendMessage =
-          err?.error?.detail ||
-          err?.error?.message ||
-          err?.error?.error ||
-          err?.message ||
-          '';
-
-        this.errorOperacion.set(
-          String(backendMessage).trim() ||
-          'No se pudo eliminar la actividad. Es posible que ya tenga calificaciones registradas.'
-        );
+            this.errorOperacion.set(
+              String(backendMessage).trim() ||
+              'No se pudo eliminar la actividad. Es posible que ya tenga calificaciones registradas.'
+            );
+          }
+        });
       }
     });
   }
