@@ -9,6 +9,11 @@
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
+/* Evitar saltos de diseño cuando la barra de scroll aparece/desaparece */
+html {
+  scrollbar-gutter: stable;
+}
+
 /* Clases base del body */
 body { 
   font-family: 'Inter', sans-serif;
