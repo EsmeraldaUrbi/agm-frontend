@@ -6,6 +6,7 @@ import { AsistenciasService } from '../../../core/services/asistencias.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DocentesService } from '../../../core/services/docentes.service';
 import { MateriasService } from '../../../core/services/materias.service';
+import { PeriodosService } from '../../../core/services/periodos.service';
 import { AlumnosService, Alumno } from '../../../core/services/alumnos.service';
 import { Subject, timer, forkJoin, of } from 'rxjs';
 import { switchMap, takeUntil, catchError, filter } from 'rxjs/operators';
@@ -34,6 +35,7 @@ export class PaseListaComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private docentesService = inject(DocentesService);
   private materiasService = inject(MateriasService);
+  private periodosService = inject(PeriodosService);
   private alumnosService = inject(AlumnosService);
 
   private destroy$ = new Subject<void>();
@@ -91,14 +93,62 @@ export class PaseListaComponent implements OnInit, OnDestroy {
   }
 
   cargarCursos(docenteId: string) {
-    this.materiasService.getMateriasByDocente(docenteId).subscribe({
-      next: (res) => {
-        this.materias = res.items || [];
-        this.isLoading.set(false);
+    this.isLoading.set(true);
+
+    const obtenerPeriodoId = (valor: any): string => {
+      const id =
+        valor?.periodo_id ||
+        valor?.id_periodo ||
+        valor?.periodo?.periodo_id ||
+        valor?.periodo?.id ||
+        valor?.id;
+
+      return id ? String(id).trim() : '';
+    };
+
+    const normalizarMaterias = (res: any): any[] => {
+      if (Array.isArray(res)) return res;
+      if (Array.isArray(res?.items)) return res.items;
+      if (Array.isArray(res?.data)) return res.data;
+      if (Array.isArray(res?.results)) return res.results;
+      return [];
+    };
+
+    const cargarMaterias = (periodoActivoId: string) => {
+      this.materiasService.getMateriasByDocente(docenteId).subscribe({
+        next: (res: any) => {
+          const materias = normalizarMaterias(res);
+
+          this.materias = periodoActivoId
+            ? materias.filter((materia: any) => obtenerPeriodoId(materia) === periodoActivoId)
+            : materias;
+
+          const seleccionSigueDisponible = this.materias.some((materia: any) =>
+            String(materia?.materia_id || materia?.materia_ofertada_id || materia?.id || '') === String(this.materiaSeleccionada)
+          );
+
+          if (!seleccionSigueDisponible) {
+            this.materiaSeleccionada = '';
+          }
+
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          console.error('Error al cargar materias del docente:', err);
+          this.materias = [];
+          this.materiaSeleccionada = '';
+          this.isLoading.set(false);
+        }
+      });
+    };
+
+    this.periodosService.getPeriodoActivo().subscribe({
+      next: (periodoActivo: any) => {
+        cargarMaterias(obtenerPeriodoId(periodoActivo));
       },
       error: (err) => {
-        console.error('Error al cargar materias:', err);
-        this.isLoading.set(false);
+        console.error('Error al cargar periodo activo:', err);
+        cargarMaterias('');
       }
     });
   }
