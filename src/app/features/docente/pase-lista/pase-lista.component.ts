@@ -11,6 +11,7 @@ import { AlumnosService, Alumno } from '../../../core/services/alumnos.service';
 import { Subject, timer, forkJoin, of } from 'rxjs';
 import { switchMap, takeUntil, catchError, filter } from 'rxjs/operators';
 import jsQR from 'jsqr';
+import Swal from 'sweetalert2';
 
 interface AlumnoRegistrado {
   nombre: string;
@@ -202,14 +203,34 @@ export class PaseListaComponent implements OnInit, OnDestroy {
 
   reanudarSesion() {
     if (!this.idSesionInput || this.idSesionInput <= 0) {
-      alert("Ingrese un ID de sesión válido.");
+      Swal.fire({
+        title: 'ID Inválido',
+        text: 'Ingrese un ID de sesión válido.',
+        icon: 'warning',
+        confirmButtonColor: '#003B5C',
+        confirmButtonText: 'Entendido',
+        customClass: {
+          popup: 'rounded-2xl',
+          confirmButton: 'rounded-lg px-4 py-2 text-white font-bold'
+        }
+      });
       return;
     }
     
     this.asistenciasService.obtenerSesion(this.idSesionInput).subscribe({
       next: (sesion) => {
         if (sesion.estado_sesion !== 'ACTIVA') {
-          alert(`Esta sesión no está activa (Estado: ${sesion.estado_sesion}).`);
+          Swal.fire({
+            title: 'Sesión no activa',
+            text: `Esta sesión no está activa (Estado: ${sesion.estado_sesion}).`,
+            icon: 'info',
+            confirmButtonColor: '#003B5C',
+            confirmButtonText: 'Entendido',
+            customClass: {
+              popup: 'rounded-2xl',
+              confirmButton: 'rounded-lg px-4 py-2 text-white font-bold'
+            }
+          });
           return;
         }
         // Configurar la materia seleccionada para la UI
@@ -319,7 +340,17 @@ export class PaseListaComponent implements OnInit, OnDestroy {
         msg = error.error.detail.map((e: any) => e.msg).join(', ');
       }
     }
-    alert(msg);
+    Swal.fire({
+      title: 'Aviso de Sesión',
+      text: msg,
+      icon: 'error',
+      confirmButtonColor: '#003B5C',
+      confirmButtonText: 'Entendido',
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'rounded-lg px-4 py-2 text-white font-bold'
+      }
+    });
   }
 
   async iniciarCamara() {
@@ -409,13 +440,24 @@ export class PaseListaComponent implements OnInit, OnDestroy {
             msg = error.error.detail.map((e: any) => e.msg).join(', ');
           }
         }
-        alert(msg);
 
-        setTimeout(() => {
+        Swal.fire({
+          title: 'Aviso de Asistencia',
+          text: msg,
+          icon: 'warning',
+          confirmButtonColor: '#003B5C',
+          confirmButtonText: 'Continuar escaneo',
+          timer: 5000,
+          timerProgressBar: true,
+          customClass: {
+            popup: 'rounded-2xl',
+            confirmButton: 'rounded-lg px-4 py-2 text-white font-bold'
+          }
+        }).then(() => {
           this.lecturaBloqueada = false;
           this.escaneando.set(true);
           this.escanearFrame();
-        }, 1500);
+        });
       }
     });
   }
@@ -444,7 +486,17 @@ export class PaseListaComponent implements OnInit, OnDestroy {
         if (this.timerInterval) clearInterval(this.timerInterval);
         this.pollingActivo.set(false);
         this.detenerCamara();
-        alert('No se pudo cerrar la sesión en el servidor. Intente finalizarla nuevamente.');
+        Swal.fire({
+          title: 'Error al finalizar sesión',
+          text: 'No se pudo cerrar la sesión en el servidor. Intente finalizarla nuevamente.',
+          icon: 'error',
+          confirmButtonColor: '#003B5C',
+          confirmButtonText: 'Entendido',
+          customClass: {
+            popup: 'rounded-2xl',
+            confirmButton: 'rounded-lg px-4 py-2 text-white font-bold'
+          }
+        });
       }
     });
   }
