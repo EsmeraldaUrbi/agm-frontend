@@ -38,6 +38,7 @@ export class DashboardComponent implements OnInit {
   periodos: any[] = [];
   selectedPeriodoId = '';
   materiasFiltradas: any[] = [];
+  private materiasMS7: any[] = [];
 
   totalMateriasValue: number = 0;
   totalAlumnosValue: number = 0;
@@ -136,6 +137,34 @@ export class DashboardComponent implements OnInit {
     );
   }
 
+  private obtenerMateriaId(materia: any): string {
+    return String(
+      materia?.materia_ofertada_id ||
+      materia?.materia_id ||
+      materia?.id ||
+      ''
+    ).trim();
+  }
+
+  private obtenerPeriodoId(valor: any): string {
+    return String(
+      valor?.periodo_id ||
+      valor?.id_periodo ||
+      valor?.periodo?.periodo_id ||
+      valor?.periodo?.id ||
+      valor?.id ||
+      ''
+    ).trim();
+  }
+
+  private obtenerNrcMateria(materia: any): string {
+    return String(
+      materia?.nrc ||
+      materia?.nrc_materia ||
+      ''
+    ).trim();
+  }
+
   private obtenerIdentidadAlumno(alumno: any): string {
     return String(
       alumno?.alumno_id ||
@@ -157,34 +186,34 @@ export class DashboardComponent implements OnInit {
           next: (estadisticas: any) => {
             const periodos = estadisticas?.periodos || [];
 
-            let materiasMS7: any[] = [];
+            this.materiasMS7 = [];
 
             periodos.forEach((periodo: any) => {
               if (Array.isArray(periodo.materias)) {
-                materiasMS7 = [...materiasMS7, ...periodo.materias];
+                this.materiasMS7 = [
+                  ...this.materiasMS7,
+                  ...periodo.materias.map((materia: any) => ({
+                    ...materia,
+                    periodo_id: this.obtenerPeriodoId(materia) || this.obtenerPeriodoId(periodo)
+                  }))
+                ];
               }
             });
 
-            // Calcular asistencia promedio del docente usando MS7
-            const porcentajesAsistencia = materiasMS7
-              .map((materia: any) => Number(materia.porcentaje_asistencia ?? 0))
-              .filter((valor: number) => !Number.isNaN(valor));
-
-            if (porcentajesAsistencia.length > 0) {
-              const suma = porcentajesAsistencia.reduce((acc, valor) => acc + valor, 0);
-              this.asistenciaPromedioValue = Math.round(suma / porcentajesAsistencia.length);
-            } else {
-              this.asistenciaPromedioValue = 0;
-            }
-
             // Mantener cálculo de rendimiento por materia
             this.materias.forEach(m => {
-              const materiaId = m.materia_ofertada_id || m.materia_id || m.id;
+              const materiaId = this.obtenerMateriaId(m);
+              const nrc = this.obtenerNrcMateria(m);
 
-              const materiaMS7 = materiasMS7.find((x: any) =>
-                x.materia_id === materiaId ||
-                x.materia_ofertada_id === materiaId
-              );
+              const materiaMS7 = this.materiasMS7.find((x: any) => {
+                const idMS7 = this.obtenerMateriaId(x);
+                const nrcMS7 = this.obtenerNrcMateria(x);
+
+                return Boolean(
+                  (materiaId && idMS7 && idMS7 === materiaId) ||
+                  (nrc && nrcMS7 && nrcMS7 === nrc)
+                );
+              });
 
               m.rendimiento = materiaMS7 ? Number(materiaMS7.promedio_grupal || 0) : 0;
             });
@@ -204,6 +233,51 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  private actualizarAsistenciaPromedio(): void {
+    const materiasVisibles = this.materiasFiltradas || [];
+
+    if (materiasVisibles.length === 0) {
+      this.asistenciaPromedioValue = 0;
+      return;
+    }
+
+    const porcentajes = materiasVisibles
+      .map((materia: any) => {
+        const materiaId = this.obtenerMateriaId(materia);
+        const nrc = this.obtenerNrcMateria(materia);
+
+        const estadistica = this.materiasMS7.find((item: any) => {
+          const itemMateriaId = this.obtenerMateriaId(item);
+          const itemNrc = this.obtenerNrcMateria(item);
+          const itemPeriodoId = this.obtenerPeriodoId(item);
+
+          const coincideMateria = Boolean(
+            (materiaId && itemMateriaId && itemMateriaId === materiaId) ||
+            (nrc && itemNrc && itemNrc === nrc)
+          );
+
+          const coincidePeriodo = !this.selectedPeriodoId ||
+            !itemPeriodoId ||
+            itemPeriodoId === this.selectedPeriodoId;
+
+          return coincideMateria && coincidePeriodo;
+        });
+
+        return estadistica ? Number(estadistica.porcentaje_asistencia ?? 0) : null;
+      })
+      .filter((valor: number | null): valor is number =>
+        valor !== null && Number.isFinite(valor)
+      );
+
+    if (porcentajes.length === 0) {
+      this.asistenciaPromedioValue = 0;
+      return;
+    }
+
+    const suma = porcentajes.reduce((acc, valor) => acc + valor, 0);
+    this.asistenciaPromedioValue = Math.round(suma / porcentajes.length);
+  }
+
   onPeriodoChange() {
     this.filtrarMateriasPorPeriodo();
   }
@@ -216,6 +290,7 @@ export class DashboardComponent implements OnInit {
     }
 
     this.totalMateriasValue = this.materiasFiltradas.length;
+    this.actualizarAsistenciaPromedio();
 
     // Materias por cerrar del periodo filtrado
     this.materiasPorCerrarValue = this.materiasFiltradas.filter(m => 
