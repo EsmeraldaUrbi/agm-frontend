@@ -44,6 +44,13 @@ export class DocentesService {
     );
   }
 
+  // POST /api/v1/docentes
+  createDocente(payload: Partial<Docente>): Observable<Docente> {
+    return this.apiClient.post<any>(`${this.apiUrl}/`, payload).pipe(
+      map(res => normalizeDocente(unwrapApiResponse(res)))
+    );
+  }
+
   // POST /api/v1/importar/docentes
   importarDocentes(file: File): Observable<any> {
     const formData = new FormData();

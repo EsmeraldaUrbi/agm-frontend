@@ -221,10 +221,26 @@ export class UsuariosComponent implements OnInit {
       });
     } else {
       // Operación de Creación
-      // El backend MS-3 no expone creación individual (solo importación masiva)
-      // Mostramos aviso formal
-      this.triggerToast('La creación individual no está disponible. Use "Importar Docentes" (Excel) en su lugar.', 'error');
-      this.showModal.set(false);
+      const payload: Partial<Docente> = {
+        nombre_completo: this.userName,
+        correo: this.userEmail,
+        cubiculo: this.userCubiculo,
+        estatus_laboral: this.userStatus === 'active'
+      };
+
+      this.docentesService.createDocente(payload).subscribe({
+        next: () => {
+          this.triggerToast('¡Docente creado exitosamente!');
+          this.cargarDocentes();
+          this.showModal.set(false);
+        },
+        error: (err) => {
+          console.error(err);
+          // Verificar si el error es de conflicto (correo duplicado) u otro tipo
+          const errorMessage = err.error?.detail || 'Error al crear el docente en el backend.';
+          this.triggerToast(errorMessage, 'error');
+        }
+      });
     }
   }
 

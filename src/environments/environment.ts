@@ -1,10 +1,10 @@
 export const environment = {
-  production: true,
-  msAuthUrl: 'https://api-gateway-production-0647.up.railway.app/api',
-  msCatalogosUrl: 'https://api-gateway-production-0647.up.railway.app/api/v1',
-  msUsuariosUrl: 'https://api-gateway-production-0647.up.railway.app/api/alumnos',
-  msCalificacionesUrl: 'https://api-gateway-production-0647.up.railway.app/api/calificaciones',
-  msAsistenciasUrl: 'https://api-gateway-production-0647.up.railway.app/api/asistencias',
-  msNotificacionesUrl: 'https://api-gateway-production-0647.up.railway.app/api/notificaciones',
-  msReportesUrl: 'https://api-gateway-production-0647.up.railway.app/api/reportes'
+  production: false,
+  msAuthUrl: 'http://localhost:8001',
+  msCatalogosUrl: 'http://localhost:8002/api/v1',
+  msUsuariosUrl: 'http://localhost:8003/api/v1',
+  msCalificacionesUrl: 'http://localhost:8004/api/v1',
+  msAsistenciasUrl: 'http://localhost:8005',
+  msNotificacionesUrl: 'http://localhost:8006/api/v1/notificaciones',
+  msReportesUrl: 'http://localhost:8007/api/v1'
 };
